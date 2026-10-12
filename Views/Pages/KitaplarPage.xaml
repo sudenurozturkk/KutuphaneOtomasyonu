@@ -1,0 +1,350 @@
+<Page x:Class="KutuphaneOtomasyonu.Views.Pages.KitaplarPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      Background="#080C18">
+
+    <Grid Margin="28,24,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Başlık ve Butonlar -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="40" Height="40" CornerRadius="12" Margin="0,0,12,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#2563EB" Offset="0"/>
+                            <GradientStop Color="#7C3AED" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <materialDesign:PackIcon Kind="BookOpenPageVariant" Width="22" Height="22"
+                                             Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Kitap Kataloğu &amp; Envanter" FontSize="22" FontWeight="Bold"
+                                   Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        <Border CornerRadius="8" Padding="10,3" Margin="12,0,0,0" Background="#1E293B" VerticalAlignment="Center">
+                            <TextBlock x:Name="txtKitapSayisi" Text="30 kitap" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" FontFamily="Segoe UI"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Kütüphanedeki tüm basılı ve dijital eserleri yönetin, arayın ve ödünç verin."
+                               FontSize="12" Foreground="#94A3B8" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="📤 CSV Dışa Aktar" Height="40" Padding="14,0" Margin="0,0,10,0"
+                        materialDesign:ButtonAssist.CornerRadius="10"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        BorderBrush="#334155" Foreground="#CBD5E1" FontFamily="Segoe UI"
+                        Click="BtnExport_Click"/>
+
+                <Button x:Name="btnKitapEkle" Height="40" Padding="18,0"
+                        materialDesign:ButtonAssist.CornerRadius="10"
+                        FontFamily="Segoe UI" FontSize="13" FontWeight="Bold"
+                        Click="BtnKitapEkle_Click">
+                    <Button.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#2563EB" Offset="0"/>
+                            <GradientStop Color="#7C3AED" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Button.Background>
+                    <Button.Foreground>
+                        <SolidColorBrush Color="White"/>
+                    </Button.Foreground>
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="Yeni Kitap Ekle" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Filtreler Paneli -->
+        <Border Grid.Row="1" CornerRadius="14" Padding="16,14" Margin="0,0,0,18"
+                Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Arama Kutusu -->
+                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,12,0" Height="42">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="Magnify" Width="20" Height="20" Foreground="#64748B"
+                                                 VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" x:Name="txtArama"
+                                 materialDesign:HintAssist.Hint="Kitap adı, yazar, ISBN veya raf konumu ara..."
+                                 materialDesign:HintAssist.IsFloating="False"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                                 BorderThickness="0" Background="Transparent"
+                                 Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                                 VerticalAlignment="Center" TextChanged="TxtArama_TextChanged"/>
+                    </Grid>
+                </Border>
+
+                <!-- Kategori Filtresi -->
+                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,12,0" Height="42">
+                    <ComboBox x:Name="cbKategori"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed"/>
+                </Border>
+
+                <!-- Dil Filtresi -->
+                <Border Grid.Column="2" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,12,0" Height="42">
+                    <ComboBox x:Name="cbDil"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                        <ComboBoxItem Content="Tüm Diller" IsSelected="True"/>
+                        <ComboBoxItem Content="Türkçe"/>
+                        <ComboBoxItem Content="İngilizce"/>
+                    </ComboBox>
+                </Border>
+
+                <!-- Durum Filtresi -->
+                <Border Grid.Column="3" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,12,0" Height="42">
+                    <ComboBox x:Name="cbDurum"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                        <ComboBoxItem Content="Tüm Durumlar" IsSelected="True"/>
+                        <ComboBoxItem Content="Mevcut"/>
+                        <ComboBoxItem Content="Tükendi"/>
+                    </ComboBox>
+                </Border>
+
+                <!-- Filtre Temizle -->
+                <Button Grid.Column="4" Content="Filtreleri Sıfırla" Height="42"
+                        materialDesign:ButtonAssist.CornerRadius="10"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        BorderBrush="#334155" Foreground="#94A3B8" FontFamily="Segoe UI"
+                        Padding="14,0" Click="BtnTemizle_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Kitap Listesi DataGrid -->
+        <Border Grid.Row="2" CornerRadius="14" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <DataGrid x:Name="dgKitaplar" Grid.Row="0"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="Column"
+                          CanUserAddRows="False"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="#1E293B"
+                          RowBackground="Transparent"
+                          AlternatingRowBackground="#0B1324"
+                          Foreground="White"
+                          FontFamily="Segoe UI"
+                          SelectionChanged="DgKitaplar_SelectionChanged"
+                          MouseDoubleClick="DgKitaplar_MouseDoubleClick"
+                          RowHeight="58">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#162033"/>
+                            <Setter Property="Foreground" Value="#94A3B8"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontFamily" Value="Segoe UI"/>
+                            <Setter Property="Padding" Value="14,12"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#1E293B"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#1E3A5F"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#13233C"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.Columns>
+                        <!-- ID -->
+                        <DataGridTextColumn Header="#" Binding="{Binding Id}" Width="45">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="#64748B"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- KİTAP ADI & DETAYLARI -->
+                        <DataGridTemplateColumn Header="KİTAP ADI &amp; YAYINEVİ" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                        <Border Width="34" Height="42" CornerRadius="6" Margin="0,0,12,0" Background="#1E293B" BorderBrush="#334155" BorderThickness="1">
+                                            <materialDesign:PackIcon Kind="Book" Width="18" Height="18" Foreground="#38BDF8"
+                                                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Baslik}" FontWeight="Bold" FontSize="13" Foreground="White"
+                                                       TextTrimming="CharacterEllipsis" MaxWidth="360"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                <TextBlock Text="ISBN: " FontSize="11" Foreground="#64748B"/>
+                                                <TextBlock Text="{Binding ISBN}" FontSize="11" Foreground="#94A3B8" Margin="0,0,10,0"/>
+                                                <TextBlock Text="• " FontSize="11" Foreground="#64748B"/>
+                                                <TextBlock Text="{Binding Yayinevi}" FontSize="11" Foreground="#94A3B8" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- YAZAR -->
+                        <DataGridTextColumn Header="YAZAR" Binding="{Binding Yazar}" Width="160">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="#CBD5E1"/>
+                                    <Setter Property="Margin" Value="8,0"/>
+                                    <Setter Property="FontSize" Value="13"/>
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- KATEGORİ -->
+                        <DataGridTemplateColumn Header="KATEGORİ" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="8" Background="#1E293B" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0">
+                                        <TextBlock Text="{Binding Kategori}" FontSize="11" FontWeight="SemiBold" Foreground="#38BDF8"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- RAF KONUMU -->
+                        <DataGridTemplateColumn Header="RAF" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="6" Background="#1E1B4B" Padding="8,3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0">
+                                        <TextBlock Text="{Binding RafKonumu}" FontSize="11" FontWeight="Bold" Foreground="#A78BFA"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- YIL -->
+                        <DataGridTextColumn Header="YIL" Binding="{Binding YayinYili}" Width="65">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="#94A3B8"/>
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- DURUM / STOK -->
+                        <DataGridTemplateColumn Header="STOK DURUMU" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="8" Background="#064E3B" Padding="10,4" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Width="6" Height="6" Fill="#34D399" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding DurumMetni}" FontSize="11" FontWeight="Bold" Foreground="#34D399"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- PUAN -->
+                        <DataGridTemplateColumn Header="DEĞERLENDİRME" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                                        <materialDesign:PackIcon Kind="Star" Width="15" Height="15" Foreground="#F59E0B" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="{Binding Puan, StringFormat={}{0:F1}}" FontSize="12" FontWeight="Bold" Foreground="#FBBF24" VerticalAlignment="Center"/>
+                                        <TextBlock Text=" / 5" FontSize="11" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- İŞLEMLER -->
+                        <DataGridTemplateColumn Header="İŞLEMLER" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0">
+                                        <Button ToolTip="Kitap Detayı" Width="30" Height="30" Margin="0,0,4,0"
+                                                Style="{StaticResource MaterialDesignIconButton}"
+                                                Tag="{Binding Id}" Click="BtnKitapDetay_Click">
+                                            <materialDesign:PackIcon Kind="Eye" Width="16" Height="16" Foreground="#38BDF8"/>
+                                        </Button>
+                                        <Button ToolTip="Düzenle" Width="30" Height="30" Margin="0,0,4,0"
+                                                Style="{StaticResource MaterialDesignIconButton}"
+                                                Tag="{Binding Id}" Click="BtnKitapDuzenle_Click">
+                                            <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16" Foreground="#FBBF24"/>
+                                        </Button>
+                                        <Button ToolTip="Sil" Width="30" Height="30"
+                                                Style="{StaticResource MaterialDesignIconButton}"
+                                                Tag="{Binding Id}" Click="BtnKitapSil_Click">
+                                            <materialDesign:PackIcon Kind="TrashCanOutline" Width="16" Height="16" Foreground="#F87171"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Yükleniyor Göstergesi -->
+                <ProgressBar x:Name="pbKitaplar" Height="4" VerticalAlignment="Top"
+                             IsIndeterminate="True" Visibility="Collapsed" Foreground="#38BDF8"/>
+            </Grid>
+        </Border>
+
+        <!-- Alt Durum Çubuğu -->
+        <Border Grid.Row="3" Margin="0,12,0,0">
+            <Grid>
+                <TextBlock x:Name="txtSecilenKitap" Text="Detaylı bilgi için satıra çift tıklayın."
+                           FontSize="12" Foreground="#94A3B8" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Veri Durumu: Güncel • SQLite ORM Bağlantısı Aktif" FontSize="11" Foreground="#64748B" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

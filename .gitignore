@@ -1,0 +1,29 @@
+## .NET & Visual Studio
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+## Veritabanı ve Log Dosyaları
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.log
+startup.log
+test_result.txt
+
+## Test ve Geçici Dosyalar
+TestResults/
+[Tt]emp/
+[Tt]mp/
+
+## OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

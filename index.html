@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Kütüphane Yönetim Sistemi | Enterprise Mimari</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Mermaid.js for Live UML Diagrams in Architecture Inspector -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">🏛️</div>
+        <div class="logo-text">
+          <h1>Kütüphane 360</h1>
+          <p>Yazılım Tasarım Mimarisi</p>
+        </div>
+      </div>
+
+      <!-- ROLE & USER SWITCHER -->
+      <div class="role-badge-container">
+        <div class="role-badge-label">
+          <span>Aktif Profil & Rol</span>
+          <span id="role-badge-pill" class="badge" style="background: var(--primary-light); color: var(--primary);">Öğrenci</span>
+        </div>
+        <select id="user-role-selector" class="role-select">
+          <option value="1">Ahmet Yılmaz (Lisans Öğrencisi)</option>
+          <option value="2">Zeynep Kaya (Y. Lisans Öğrencisi)</option>
+          <option value="3">Canan Demir (Doktora Öğrencisi)</option>
+          <option value="4">Doç. Dr. Mehmet Demir (Akademisyen)</option>
+          <option value="5">Ayşe Yurt (Kütüphane Görevlisi)</option>
+        </select>
+      </div>
+
+      <!-- NAVIGATION MENU -->
+      <nav class="nav-menu">
+        <div class="nav-section-title">Kullanıcı Portalı</div>
+        <a class="nav-item active" data-view="dashboard">
+          <span class="nav-item-icon">📊</span>
+          <span>Genel Bakış (Dashboard)</span>
+        </a>
+        <a class="nav-item" data-view="catalog">
+          <span class="nav-item-icon">📚</span>
+          <span>Katalog & Akıllı Arama</span>
+        </a>
+        <a class="nav-item" data-view="borrows">
+          <span class="nav-item-icon">🔄</span>
+          <span>Ödünçlerim & İşlemler</span>
+          <span id="nav-borrow-count" class="badge" style="background: var(--info-bg); color: var(--info);">0</span>
+        </a>
+        <a class="nav-item" data-view="desks">
+          <span class="nav-item-icon">🪑</span>
+          <span>2D Salon & Masa Rezervasyonu</span>
+        </a>
+        <a class="nav-item" data-view="wallet">
+          <span class="nav-item-icon">💳</span>
+          <span>Kartım & Ceza/Cüzdan</span>
+          <span id="nav-debt-count" class="badge" style="background: var(--danger-bg); color: var(--danger); display: none;">0 TL</span>
+        </a>
+        <a class="nav-item" data-view="ereader">
+          <span class="nav-item-icon">📖</span>
+          <span>E-Kitap Okuyucu (Simülatör)</span>
+        </a>
+
+        <div class="nav-section-title">Yönetim & Operasyon</div>
+        <a class="nav-item" data-view="librarian">
+          <span class="nav-item-icon">🏢</span>
+          <span>Hızlı Barkod Bankosu</span>
+        </a>
+        <a class="nav-item" data-view="analytics">
+          <span class="nav-item-icon">📈</span>
+          <span>Yönetici Analitiği & Rapor</span>
+        </a>
+
+        <div class="nav-section-title">Lab Ödevi & Teori</div>
+        <a class="nav-item" data-view="architecture" style="color: var(--secondary);">
+          <span class="nav-item-icon">⚡</span>
+          <span>Canlı Mimari & UML Müfettişi</span>
+        </a>
+      </nav>
+
+      <!-- SIDEBAR FOOTER (USER INFO) -->
+      <div class="sidebar-footer">
+        <div id="user-avatar" class="user-avatar">AY</div>
+        <div class="user-info">
+          <div id="user-display-name" class="user-name">Ahmet Yılmaz</div>
+          <div id="user-display-sub" class="user-sub">Bilgisayar Müh. (Lisans)</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEW WRAPPER -->
+    <main class="main-wrapper">
+      <!-- TOP NAVIGATION BAR -->
+      <header class="topbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="global-search-input" class="search-input" placeholder="Kitap adı, yazar, ISBN veya raf konumu ara...">
+        </div>
+
+        <div class="topbar-actions">
+          <button id="theme-toggle-btn" class="action-btn" title="Tema Değiştir (Koyu / Açık)">
+            🌓
+          </button>
+          <button id="reset-db-btn" class="action-btn" title="Veritabanını Fabrika Ayarlarına Sıfırla" style="color: var(--warning);">
+            🔄
+          </button>
+          <div class="action-btn" id="notif-btn" title="Bildirimler">
+            🔔
+            <span id="notif-dot" class="badge-dot" style="display: none;"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT BODY -->
+      <div class="content-body">
+        
+        <!-- 1. VIEW: DASHBOARD -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Hoş Geldiniz, <span id="dash-greeting-name">Ahmet</span> 👋</h2>
+              <p class="page-subtitle">Üniversite Kütüphanesi durum özetiniz, ödünçleriniz ve size özel önerilen kaynaklar.</p>
+            </div>
+            <div>
+              <button class="btn btn-primary" id="btn-quick-catalog">📚 Kataloğu Keşfet</button>
+            </div>
+          </div>
+
+          <!-- KPI Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <p>Aktif Ödünç Kitaplar</p>
+                <h3 id="stat-active-borrows">0</h3>
+                <span id="stat-limit-text" class="stat-trend">Kota: 4 Kitap</span>
+              </div>
+              <div class="stat-icon-wrapper">📖</div>
+            </div>
+
+            <div class="stat-card amber">
+              <div class="stat-info">
+                <p>Geciken / Yaklaşan Teslim</p>
+                <h3 id="stat-overdue-count">0</h3>
+                <span class="stat-trend negative" id="stat-overdue-alert">Tüm teslimler zamanında</span>
+              </div>
+              <div class="stat-icon-wrapper">⏳</div>
+            </div>
+
+            <div class="stat-card rose">
+              <div class="stat-info">
+                <p>Gecikme Borcu</p>
+                <h3 id="stat-fine-debt">0.00 TL</h3>
+                <span class="stat-trend" id="stat-debt-status">Borcunuz bulunmamaktadır</span>
+              </div>
+              <div class="stat-icon-wrapper">💸</div>
+            </div>
+
+            <div class="stat-card green">
+              <div class="stat-info">
+                <p>Cüzdan Bakiyesi</p>
+                <h3 id="stat-wallet-balance">0.00 TL</h3>
+                <span class="stat-trend positive" style="cursor: pointer;" id="btn-open-topup">+ Bakiye Yükle</span>
+              </div>
+              <div class="stat-icon-wrapper">👛</div>
+            </div>
+          </div>
+
+          <!-- Active Borrow Summary Table -->
+          <div class="data-table-container" style="margin-bottom: 32px;">
+            <div class="table-header-bar">
+              <h3 style="font-size: 15px; font-weight: 700;">📌 Üzerinizdeki Aktif Kitaplar</h3>
+              <button class="btn btn-secondary btn-sm" id="btn-goto-borrows">Tümünü Yönet ➔</button>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Materyal Adı</th>
+                  <th>Alış Tarihi</th>
+                  <th>Son Teslim</th>
+                  <th>Kalan Gün</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="dash-borrows-tbody">
+                <!-- JS ile dolacak -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Recommended For You Section -->
+          <div class="page-header" style="margin-bottom: 16px;">
+            <div>
+              <h3 style="font-size: 18px; font-weight: 700;">💡 İlginizi Çekebilecek Kaynaklar (Öneri Motoru)</h3>
+              <p class="page-subtitle">Ödünç alma geçmişinize ve bölümünüze göre ilişkisel algoritma ile seçilmiştir.</p>
+            </div>
+          </div>
+          <div class="books-grid" id="dash-recommendations-grid">
+            <!-- JS ile dolacak -->
+          </div>
+        </section>
+
+        <!-- 2. VIEW: CATALOG & SEARCH -->
+        <section id="view-catalog" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Kütüphane Materyal Kataloğu</h2>
+              <p class="page-subtitle">Kitap, E-Kitap, Dergi ve Akademik Tez koleksiyonunda arama yapın ve anında ödünç alın.</p>
+            </div>
+            <div>
+              <button class="btn btn-primary" id="btn-open-add-material">➕ Yeni Materyal Ekle (Fabrika)</button>
+            </div>
+          </div>
+
+          <!-- Filter Pill Bar -->
+          <div class="catalog-filter-bar">
+            <div class="filter-group" id="catalog-category-filters">
+              <button class="filter-btn active" data-filter="ALL">Tümü (Hepsi)</button>
+              <button class="filter-btn" data-filter="Yazılım Mimarisi">Yazılım Mimarisi</button>
+              <button class="filter-btn" data-filter="Yazılım Mühendisliği">Yazılım Mühendisliği</button>
+              <button class="filter-btn" data-filter="Algoritmalar">Algoritmalar</button>
+              <button class="filter-btn" data-filter="İşletim Sistemleri">İşletim Sistemleri</button>
+              <button class="filter-btn" data-filter="Yapay Zeka">Yapay Zeka</button>
+              <button class="filter-btn" data-filter="E-Kitap">E-Kitaplar</button>
+              <button class="filter-btn" data-filter="Akademik Tez">Tezler</button>
+            </div>
+            <div>
+              <label style="font-size: 13px; color: var(--text-muted); cursor: pointer;">
+                <input type="checkbox" id="filter-only-available"> Sadece Stokta Olanlar
+              </label>
+            </div>
+          </div>
+
+          <div class="books-grid" id="catalog-books-grid">
+            <!-- JS ile dinamik oluşturulacak -->
+          </div>
+        </section>
+
+        <!-- 3. VIEW: BORROWS & TRANSACTIONS -->
+        <section id="view-borrows" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Ödünç Alma Geçmişi & Aktif İşlemler</h2>
+              <p class="page-subtitle">Kitaplarınızın teslim tarihlerini takip edin, süresini uzatın veya iade edin.</p>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <div class="table-header-bar">
+              <h3 style="font-size: 15px; font-weight: 700;">Tüm Ödünç Hareketleri</h3>
+              <span id="active-borrows-count-pill" class="status-pill active">0 Aktif Ödünç</span>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>İşlem #</th>
+                  <th>Materyal Başlığı</th>
+                  <th>Kategori</th>
+                  <th>Ödünç Tarihi</th>
+                  <th>Son Teslim</th>
+                  <th>Uzatma</th>
+                  <th>Durum</th>
+                  <th>İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="borrows-table-tbody">
+                <!-- JS ile dolacak -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 4. VIEW: 2D STUDY ROOM & DESK RESERVATION -->
+        <section id="view-desks" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">2D İnteraktif Kütüphane Salon & Masa Rezervasyonu</h2>
+              <p class="page-subtitle">Sessiz çalışma salonlarında prizli bireysel masa veya grup çalışma odası seçiniz.</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <select id="desk-timeslot-select" class="form-control" style="width: 180px;">
+                <option value="09:00 - 12:00">09:00 - 12:00 (Sabah)</option>
+                <option value="13:00 - 16:00" selected>13:00 - 16:00 (Öğleden Sonra)</option>
+                <option value="17:00 - 20:00">17:00 - 20:00 (Akşam)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="floor-plan-container">
+            <div class="floor-legend">
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--success);"></div>
+                <span>Boş / Müsait</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--danger);"></div>
+                <span>Dolu / Rezerve</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: var(--primary);"></div>
+                <span>Seçilen Masa</span>
+              </div>
+            </div>
+
+            <h4 style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">Bireysel Sessiz Çalışma Alanı (Salon A - Kat 1)</h4>
+            <div class="desks-grid" id="floor-desks-grid">
+              <!-- JS ile üretilecek -->
+            </div>
+
+            <h4 style="font-size: 14px; color: var(--text-muted); margin: 24px 0 12px;">Grup Çalışma Odaları (Projeksiyon & Akıllı Tahtalı)</h4>
+            <div class="desks-grid" id="floor-rooms-grid">
+              <!-- JS ile üretilecek -->
+            </div>
+
+            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span id="selected-desk-label" style="font-size: 14px; font-weight: 600; color: var(--secondary);">Lütfen yukarıdan bir masa seçiniz</span>
+              </div>
+              <button class="btn btn-primary" id="btn-confirm-desk-booking" disabled>Masayı Rezerve Et</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. VIEW: DIGITAL CARD & FINES/WALLET -->
+        <section id="view-wallet" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Dijital Kütüphane Kimliği & Sanal Cüzdan</h2>
+              <p class="page-subtitle">Kütüphane barkodunuz, gecikme cezası ödemeleri ve bakiye hareketleri.</p>
+            </div>
+            <div>
+              <button class="btn btn-success" id="btn-open-wallet-topup">💳 Cüzdana Bakiye Yükle</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
+            <!-- Digital ID Card (Visual) -->
+            <div style="background: linear-gradient(135deg, #1e1b4b, #312e81); border: 1px solid var(--border-accent); border-radius: var(--radius-xl); padding: 24px; color: white; box-shadow: var(--shadow-lg); position: relative;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                <div>
+                  <h3 style="font-size: 16px; font-weight: 800; letter-spacing: 1px;">ÜNİVERSİTE KÜTÜPHANESİ</h3>
+                  <p style="font-size: 11px; opacity: 0.8;">AKILLI KART SİSTEMİ</p>
+                </div>
+                <div style="font-size: 28px;">🏛️</div>
+              </div>
+              <div style="margin-bottom: 20px;">
+                <div style="font-size: 12px; opacity: 0.7;">Kart Sahibi</div>
+                <div id="card-user-name" style="font-size: 18px; font-weight: 700;">Ahmet Yılmaz</div>
+                <div id="card-user-role" style="font-size: 12px; opacity: 0.9; color: var(--secondary);">Öğrenci No: 2024105021</div>
+              </div>
+              <!-- Barcode Graphic Simulation -->
+              <div style="background: white; padding: 10px 14px; border-radius: 6px; text-align: center; color: black;">
+                <div style="font-family: 'Fira Code', monospace; font-size: 26px; letter-spacing: 5px; font-weight: 900; line-height: 1;">
+                  ||||| | |||| || ||| |||||
+                </div>
+                <div id="card-barcode-text" style="font-family: 'Fira Code', monospace; font-size: 12px; font-weight: 600; margin-top: 4px;">USR-1-8492</div>
+              </div>
+            </div>
+
+            <!-- Wallet Overview -->
+            <div class="stat-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <p>Kullanılabilir Cüzdan Bakiyesi</p>
+                <h3 id="wallet-balance-big" style="color: var(--success); font-size: 36px; margin: 10px 0;">0.00 TL</h3>
+                <p style="font-size: 13px; color: var(--text-muted);">Gecikme cezalarını sanal cüzdanınızdan tek tıkla online ödeyebilirsiniz.</p>
+              </div>
+              <div style="padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 13px; color: var(--text-dim);">Aktif Ceza Borcu:</span>
+                <span id="wallet-debt-big" style="font-size: 16px; font-weight: 700; color: var(--danger);">0.00 TL</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fines Table -->
+          <div class="data-table-container">
+            <div class="table-header-bar">
+              <h3 style="font-size: 15px; font-weight: 700;">Geçmiş & Aktif Ceza Kayıtları</h3>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ceza #</th>
+                  <th>İşlem ID</th>
+                  <th>Geciken Gün</th>
+                  <th>Tutar</th>
+                  <th>Oluşma Tarihi</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="fines-table-tbody">
+                <!-- JS ile dolacak -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 6. VIEW: E-BOOK READER SIMULATION -->
+        <section id="view-ereader" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Dijital E-Kitap Okuma Odası</h2>
+              <p class="page-subtitle">Tarayıcı içi dijital materyal okuma deneyimi (gece modu, font boyutlandırma).</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-font-dec">A-</button>
+              <button class="btn btn-secondary btn-sm" id="btn-font-inc">A+</button>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 36px; max-width: 850px; margin: 0 auto; box-shadow: var(--shadow-lg);" id="ereader-body">
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 24px;">
+              <span class="status-pill active" style="margin-bottom: 8px;">E-Kitap Önizleme</span>
+              <h2 id="ereader-book-title" style="font-size: 22px; font-weight: 700;">Building Microservices: Designing Fine-Grained Systems</h2>
+              <p id="ereader-book-author" style="font-size: 14px; color: var(--text-muted);">Sam Newman | O'Reilly Media</p>
+            </div>
+            <div id="ereader-content-text" style="font-size: 15px; line-height: 1.8; color: var(--text-main);">
+              <h3 style="margin-bottom: 12px; color: var(--secondary);">Bölüm 1: Mikroservis Mimarilerine Giriş</h3>
+              <p style="margin-bottom: 16px;">
+                Mikroservisler, tek bir iş alanını modelleyen, bağımsız olarak konuşlandırılabilen küçük hizmetlerdir. Birbirleriyle ağ tabanlı mesajlar veya REST API protokolleri üzerinden iletişim kurarlar. Bu mimari yaklaşım, ekiplerin birbirine bağımlı olmadan özerk çalışabilmesine imkan tanır.
+              </p>
+              <h4 style="margin: 20px 0 10px; color: var(--primary);">Clean Architecture ve Gevşek Bağlılık</h4>
+              <p style="margin-bottom: 16px;">
+                Yazılım tasarım mimarisi dersinde öğrendiğimiz gibi, tek sorumluluk prensibi (Single Responsibility Principle) ve bağımlılıkların tersine çevrilmesi (Dependency Inversion), dayanıklı servislerin temel taşıdır. Sistemin bir parçasındaki hata diğer bileşenleri felç etmemelidir.
+              </p>
+              <p>
+                Kütüphane sistemimizde uyguladığımız gibi, etki alanı varlıkları (Domain Entities) iş mantığından ve sunum katmanından izole edildiğinde, sistem gelecekteki değişikliklere karşı dirençli hale gelir.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. VIEW: LIBRARIAN FAST BARCODE COUNTER -->
+        <section id="view-librarian" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Kütüphane Görevlisi Hızlı Barkod Bankosu</h2>
+              <p class="page-subtitle">Öğrenci kimlik kartı ve kitap barkodunu taratarak saniyeler içinde ödünç/iade işlemi gerçekleştirin.</p>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
+            <!-- Fast Borrow Scanner -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px;">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--primary);">📤 Hızlı Ödünç Verme Masası</h3>
+              <div class="form-group">
+                <label class="form-label">Öğrenci / Kullanıcı Seç veya Barkod:</label>
+                <select id="barcode-user-select" class="form-control">
+                  <!-- JS ile dolacak -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Materyal Seç veya ISBN:</label>
+                <select id="barcode-material-select" class="form-control">
+                  <!-- JS ile dolacak -->
+                </select>
+              </div>
+              <button class="btn btn-primary btn-block" id="btn-barcode-borrow">⚡ Ödünç İşlemini Onayla & Çıktı Ver</button>
+            </div>
+
+            <!-- Fast Return Scanner -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px;">
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--success);">📥 Hızlı Kitap İade Masası</h3>
+              <div class="form-group">
+                <label class="form-label">İade Alınacak Aktif Ödünç İşlemi:</label>
+                <select id="barcode-return-select" class="form-control">
+                  <!-- JS ile dolacak -->
+                </select>
+              </div>
+              <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 16px;">
+                İade alındığında kitap stoğu otomatik artırılır. Gecikme varsa ceza hesaplanır; kitap başkası tarafından rezerve edilmişse sıradaki okuyucuya Observer bildirimi gönderilir.
+              </p>
+              <button class="btn btn-success btn-block" id="btn-barcode-return">✅ İadeyi Kaydet & Raflara Gönder</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. VIEW: ADMIN ANALYTICS & REPORTS -->
+        <section id="view-analytics" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Kütüphane Analitiği & Yönetici Raporları</h2>
+              <p class="page-subtitle">Sistem metrikleri, gecikme oranları, tahsil edilen cezalar ve stok dağılımı.</p>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <p>Toplam Başlık Sayısı</p>
+                <h3 id="admin-kpi-titles">0</h3>
+                <span class="stat-trend positive">Katalog Genişliği</span>
+              </div>
+              <div class="stat-icon-wrapper">📚</div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-info">
+                <p>Fiziksel Kopya Stoğu</p>
+                <h3 id="admin-kpi-copies">0</h3>
+                <span class="stat-trend">Rafta & Ödünçte</span>
+              </div>
+              <div class="stat-icon-wrapper">📦</div>
+            </div>
+            <div class="stat-card rose">
+              <div class="stat-info">
+                <p>Gecikmiş İadeler (Alarm)</p>
+                <h3 id="admin-kpi-overdue">0</h3>
+                <span class="stat-trend negative">Takip Gerekiyor</span>
+              </div>
+              <div class="stat-icon-wrapper">⚠️</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-info">
+                <p>Tahsil Edilen Ceza</p>
+                <h3 id="admin-kpi-fines">0.00 TL</h3>
+                <span class="stat-trend positive">Kütüphane Geliri</span>
+              </div>
+              <div class="stat-icon-wrapper">💰</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. VIEW: ARCHITECTURE & UML INSPECTOR (LAB ÖDEVİ HOCASININ EN SEVECEĞİ BÖLÜM) -->
+        <section id="view-architecture" class="view-section">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">🏛️ Yazılım Tasarım Mimarisi & Canlı UML Müfettişi</h2>
+              <p class="page-subtitle">Lab ödevinde tahtada istenen Class Diagram, Object Diagram, Paket Mimarisi ve Tasarım Desenleri kanıtları.</p>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;" id="arch-subtabs">
+            <button class="filter-btn active" data-tab="arch-class">1. Class Diagram (UML)</button>
+            <button class="filter-btn" data-tab="arch-object">2. Object Diagram (Somut Nesneler)</button>
+            <button class="filter-btn" data-tab="arch-package">3. Package Diagram (4 Katman)</button>
+            <button class="filter-btn" data-tab="arch-deploy">4. Deployment Diagram</button>
+            <button class="filter-btn" data-tab="arch-patterns">5. GoF Desenleri Kanıtı</button>
+          </div>
+
+          <!-- Subtab 1: Class Diagram -->
+          <div id="tab-arch-class" class="arch-tab-content">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Sınıf Şeması (Class Diagram) - İlişkiler ve Çokluklar</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+              Kullanici ve Materyal hiyerarşisi, polimorfizm, kompozisyon (`RafKonumu`) ve çokluklar (`1` - `0..*`).
+            </p>
+            <div class="diagram-box">
+              <pre class="mermaid">
+classDiagram
+    class Kullanici {
+        <<abstract>>
+        -int id
+        -String adSoyad
+        -String eposta
+        -String rol
+        +getMaxBorrowLimit()* int
+        +getBorrowDurationDays()* int
+    }
+    class Ogrenci {
+        -String ogrenciNo
+        -String degreeLevel
+        +getMaxBorrowLimit() int
+    }
+    class Akademisyen {
+        -String title
+        -String faculty
+        +getMaxBorrowLimit() int
+    }
+    class Kutuphaneci {
+        -String employeeId
+    }
+    Kullanici <|-- Ogrenci
+    Kullanici <|-- Akademisyen
+    Kullanici <|-- Kutuphaneci
+
+    class Materyal {
+        <<abstract>>
+        -int id
+        -String isbn
+        -String title
+        -int totalStock
+        -int availableStock
+        +decrementStock() bool
+        +incrementStock() void
+    }
+    class Kitap {
+        -int pageCount
+        -RafKonumu shelfLocation
+    }
+    class EKitap {
+        -double fileSizeMB
+        -String format
+    }
+    class Dergi {
+        -int issueNumber
+    }
+    class Tez {
+        -String advisor
+    }
+    Materyal <|-- Kitap
+    Materyal <|-- EKitap
+    Materyal <|-- Dergi
+    Materyal <|-- Tez
+
+    class RafKonumu {
+        -String building
+        -int floor
+        -String aisle
+        -String shelfNo
+    }
+    Kitap *-- RafKonumu : barındırır (1..1)
+
+    class OduncIslemi {
+        -int id
+        -Date borrowDate
+        -Date dueDate
+        -String status
+        +renew() void
+        +returnBook() void
+    }
+    class Rezervasyon {
+        -int id
+        -Date requestDate
+        -String status
+    }
+    class CezaKaydi {
+        -int id
+        -double amount
+        -int overdueDays
+        -bool isPaid
+    }
+
+    Kullanici "1" --> "0..*" OduncIslemi : gerçekleştirir
+    Materyal "1" --> "0..*" OduncIslemi : konu olur
+    Kullanici "1" --> "0..*" Rezervasyon : sıraya girer
+    OduncIslemi "1" --> "0..1" CezaKaydi : doğurur
+              </pre>
+            </div>
+          </div>
+
+          <!-- Subtab 2: Object Diagram -->
+          <div id="tab-arch-object" class="arch-tab-content" style="display: none;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Object Diagram (Somut Nesne Durumu)</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+              Lab gereksiniminde istenen: "Bir öğrencinin ödünç aldığı kitaba ait Object Diagram".
+            </p>
+            <div class="diagram-box">
+              <pre class="mermaid">
+classDiagram
+    class ahmetOgrenci {
+        id = 1
+        adSoyad = "Ahmet Yılmaz"
+        ogrenciNo = "2024105021"
+        degreeLevel = "Lisans"
+        walletBalance = 65.0 TL
+    }
+    class cleanCodeKitap {
+        id = 101
+        isbn = "978-0132350884"
+        title = "Clean Code"
+        totalStock = 4
+        availableStock = 3
+    }
+    class rafA3 {
+        building = "Merkez Kütüphane"
+        floor = 2
+        aisle = "C-4"
+        shelfNo = "12"
+    }
+    class islem1001 {
+        id = 1001
+        borrowDate = "2026-10-07"
+        dueDate = "2026-10-22"
+        status = "ACTIVE"
+        renewalCount = 0
+    }
+
+    ahmetOgrenci ..> islem1001 : ödünç alan
+    islem1001 ..> cleanCodeKitap : ödünç alınan
+    cleanCodeKitap *..> rafA3 : fiziksel raf
+              </pre>
+            </div>
+          </div>
+
+          <!-- Subtab 3: Package Diagram -->
+          <div id="tab-arch-package" class="arch-tab-content" style="display: none;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Mantıksal Paket Şeması (Clean Architecture 4-Katman)</h3>
+            <div class="diagram-box">
+              <pre class="mermaid">
+flowchart TD
+    subgraph PresentationLayer ["Sunum Katmanı (ui)"]
+        UI1["Öğrenci & Akademisyen Portalı"]
+        UI2["Görevli Barkod Masası"]
+        UI3["2D Kütüphane Salon Planı"]
+        UI4["Canlı UML Müfettişi"]
+    end
+
+    subgraph ServiceLayer ["İş Mantığı Katmanı (services)"]
+        S1["LibraryService (Ödünç / İade)"]
+        S2["FineContext (Ceza Strateji Motoru)"]
+        S3["MaterialSubject (Rezervasyon Takipçisi)"]
+        S4["RecommendationEngine"]
+    end
+
+    subgraph DomainLayer ["Varlık & Model Katmanı (core)"]
+        D1["User, Student, Academician, Librarian"]
+        D2["Material, Book, EBook, Journal, Thesis"]
+        D3["BorrowTransaction, Reservation, FineRecord"]
+    end
+
+    subgraph PersistenceLayer ["Veri Katmanı (data)"]
+        P1["DatabaseContext (Singleton Pattern)"]
+        P2["LocalStorage Engine"]
+    end
+
+    PresentationLayer --> ServiceLayer
+    ServiceLayer --> DomainLayer
+    ServiceLayer --> PersistenceLayer
+    PersistenceLayer --> DomainLayer
+              </pre>
+            </div>
+          </div>
+
+          <!-- Subtab 4: Deployment Diagram -->
+          <div id="tab-arch-deploy" class="arch-tab-content" style="display: none;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Dağıtım Şeması (Deployment Diagram)</h3>
+            <div class="diagram-box">
+              <pre class="mermaid">
+flowchart LR
+    subgraph ClientNode ["Kullanıcı İstemcisi"]
+        Browser["Modern Web Tarayıcı (Chrome / Edge)
+        - Single Page Application
+        - Responsive HTML5 / CSS3 / ES6
+        - LocalStorage & IndexedDB"]
+    end
+
+    subgraph WebServerNode ["Web & API Sunucusu"]
+        WebGateway["Web & Reverse Proxy
+        - Port: 443 (HTTPS)
+        - TLS 1.3 Encryption"]
+        APIServices["Uygulama İş Servisleri
+        - REST API Gateway
+        - GoF Strateji & Gözlemci Motorları"]
+        WebGateway --> APIServices
+    end
+
+    subgraph DataNode ["Veritabanı Katmanı"]
+        RDBMS["İlişkisel Veritabanı
+        - Tablolar: Users, Materials, Loans
+        - Indexler: ISBN, Barcode, UserID"]
+    end
+
+    Browser -- "HTTPS / JSON REST" --> WebGateway
+    APIServices -- "TCP / Connection Pool" --> RDBMS
+              </pre>
+            </div>
+          </div>
+
+          <!-- Subtab 5: Design Patterns Proof -->
+          <div id="tab-arch-patterns" class="arch-tab-content" style="display: none;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Sistemde Çalışan GoF Tasarım Desenleri ve Kod Kanıtları</h3>
+            
+            <div style="display: grid; gap: 16px; margin-top: 16px;">
+              <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <h4 style="color: var(--primary);">1. Strategy Pattern (Ceza Hesaplama Stratejisi)</h4>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0;">
+                  Öğrenciler için günlük 5 TL, Akademisyenler için 2 TL, Kütüphane personeli için 0 TL ceza stratejisi çalışma anında (runtime) dinamik seçilir.
+                </p>
+                <div class="code-pre">const fineContext = new FineContext(user.role === "Akademisyen" ? new AcademicianFineStrategy() : new StudentFineStrategy());
+const fineAmount = fineContext.executeCalculation(overdueDays);</div>
+              </div>
+
+              <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <h4 style="color: var(--secondary);">2. Observer Pattern (Rezervasyon Bildirim Motoru)</h4>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0;">
+                  Kitap iade edildiğinde (`returnMaterial`), `MaterialSubject.notify()` çağrılır ve sıradaki kullanıcı `UserNotificationObserver` üzerinden otomatik bildirim alır.
+                </p>
+                <div class="code-pre">this.materialSubject.attach(material.id, observer);
+// İade gerçekleştiğinde:
+this.materialSubject.notify(material.id, material);</div>
+              </div>
+
+              <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <h4 style="color: var(--warning);">3. Factory Method Pattern (Materyal Üretim Fabrikası)</h4>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0;">
+                  Yeni bir materyal girildiğinde `MaterialFactory.createMaterial(type, data)` çağrılarak `Book`, `EBook`, `Journal` veya `Thesis` nesneleri polimorfik üretilir.
+                </p>
+              </div>
+
+              <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <h4 style="color: var(--success);">4. Singleton Pattern (Veritabanı Yöneticisi)</h4>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0;">
+                  Tüm sistemde tek bir merkezi `DatabaseContext.getInstance()` nesnesi çalışır ve veri bütünlüğünü garanti eder.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. Book Details & Action Modal -->
+  <div class="modal-overlay" id="modal-book-detail">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="m-book-title">Kitap Detayı</h3>
+        <button class="modal-close" data-close="modal-book-detail">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+          <div style="width: 100px; height: 130px; background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 40px; flex-shrink: 0;" id="m-book-cover">
+            📖
+          </div>
+          <div>
+            <span class="status-pill active" id="m-book-category">Yazılım</span>
+            <h4 style="font-size: 18px; font-weight: 700; margin: 6px 0 2px;" id="m-book-heading">Clean Code</h4>
+            <p style="font-size: 13px; color: var(--text-muted);" id="m-book-author">Robert C. Martin</p>
+            <p style="font-size: 12px; color: var(--text-dim); margin-top: 4px;" id="m-book-meta">2008 | Prentice Hall | 464 Sayfa</p>
+          </div>
+        </div>
+        <div style="background: var(--bg-tertiary); padding: 14px; border-radius: 8px; margin-bottom: 18px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--warning); margin-bottom: 4px;">📍 Fiziksel Kütüphane Raf Konumu</div>
+          <div style="font-size: 13px;" id="m-book-shelf">Merkez Kütüphane | Kat 2 | Koridor C-4 | Raf #12</div>
+        </div>
+        <div style="margin-bottom: 18px;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">Özet Açıklama:</div>
+          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;" id="m-book-summary"></p>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border-color);">
+          <span style="font-size: 13px;">Stok Durumu:</span>
+          <span id="m-book-stock-badge" class="book-badge-stock available">3 / 4 Adet Mevcut</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-book-detail">Kapat</button>
+        <button class="btn btn-primary" id="btn-modal-action-borrow">⚡ Ödünç Al</button>
+        <button class="btn btn-danger" id="btn-modal-action-reserve" style="display: none;">⏳ Sıraya Gir (Rezerve Et)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Add New Material Modal (Factory Pattern) -->
+  <div class="modal-overlay" id="modal-add-material">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">➕ Yeni Materyal Ekle (MaterialFactory)</h3>
+        <button class="modal-close" data-close="modal-add-material">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-material">
+          <div class="form-group">
+            <label class="form-label">Materyal Türü (Factory Method):</label>
+            <select class="form-control" id="new-mat-type">
+              <option value="BOOK">Basılı Kitap</option>
+              <option value="EBOOK">E-Kitap (Dijital)</option>
+              <option value="JOURNAL">Süreli Yayın / Dergi</option>
+              <option value="THESIS">Akademik Tez</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Başlık / Eser Adı:</label>
+            <input type="text" class="form-control" id="new-mat-title" placeholder="Örn: Dağıtık Sistemler Mimarisi" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Yazar / Araştırmacı:</label>
+            <input type="text" class="form-control" id="new-mat-author" placeholder="Örn: Dr. John Doe" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">ISBN / Tanımlayıcı:</label>
+              <input type="text" class="form-control" id="new-mat-isbn" placeholder="978-..." required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Yayın Yılı:</label>
+              <input type="number" class="form-control" id="new-mat-year" value="2026">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Kategori:</label>
+              <input type="text" class="form-control" id="new-mat-cat" placeholder="Yazılım Mimarisi" value="Yazılım Mimarisi">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Toplam Stok Kopya:</label>
+              <input type="number" class="form-control" id="new-mat-stock" value="3" min="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Özet / Açıklama:</label>
+            <textarea class="form-control" id="new-mat-summary" rows="3" placeholder="Kitap hakkında açıklama..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-add-material">İptal</button>
+        <button class="btn btn-primary" id="btn-submit-add-material">Kataloğa Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Topup Wallet Modal -->
+  <div class="modal-overlay" id="modal-topup-wallet">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">💳 Cüzdana Bakiye Yükle</h3>
+        <button class="modal-close" data-close="modal-topup-wallet">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Sanal POS simülasyonu ile kütüphane hesabınıza bakiye yükleyerek gecikme cezalarını anında ödeyebilirsiniz.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Yüklenecek Tutar (TL):</label>
+          <input type="number" id="topup-amount-input" class="form-control" value="50" min="5" step="5">
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 18px;">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('topup-amount-input').value = 25;">25 TL</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('topup-amount-input').value = 50;">50 TL</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('topup-amount-input').value = 100;">100 TL</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('topup-amount-input').value = 200;">200 TL</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modal-topup-wallet">İptal</button>
+        <button class="btn btn-success" id="btn-confirm-topup">Yüklemeyi Onayla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- APP ENTRY SCRIPT -->
+  <script type="module" src="src/ui/app.js"></script>
+</body>
+</html>

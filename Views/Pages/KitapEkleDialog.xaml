@@ -1,0 +1,109 @@
+<Window x:Class="KutuphaneOtomasyonu.Views.Pages.KitapEkleDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Kitap Ekle / Düzenle" Height="680" Width="550"
+        WindowStartupLocation="CenterOwner" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent"
+        MouseLeftButtonDown="Window_MouseDown">
+    <Border Background="#0F172A" CornerRadius="16" BorderBrush="#334155" BorderThickness="1" Padding="24">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Grid Margin="0,0,0,20">
+                    <TextBlock x:Name="txtDialogBaslik" Text="📚 Kitap Ekle" FontSize="18"
+                               FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"
+                               VerticalAlignment="Center"/>
+                    <Button Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32"
+                            HorizontalAlignment="Right" Foreground="#94A3B8" Click="BtnKapat_Click">
+                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18"/>
+                    </Button>
+                </Grid>
+
+                <TextBlock Text="Kitap Başlığı *" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                <TextBox x:Name="txtBaslik" Height="40" Foreground="White"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"/>
+
+                <TextBlock Text="Yazar *" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                <TextBox x:Name="txtYazar" Height="40" Foreground="White"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"/>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="ISBN *" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtISBN" Height="40" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="Yayın Yılı" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtYayinYili" Height="40" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="Kategori *" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtKategori" Height="40" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="Yayınevi" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtYayinevi" Height="40" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                        <TextBlock Text="Sayfa Sayısı" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtSayfaSayisi" Height="40" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="3,0,3,0">
+                        <TextBlock Text="Toplam Adet *" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtToplamAdet" Height="40" Foreground="White" Text="1"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Margin="6,0,0,0">
+                        <TextBlock Text="Raf Konumu" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtRafKonumu" Height="40" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="Açıklama" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                <TextBox x:Name="txtAciklama" Height="80" Foreground="White" TextWrapping="Wrap"
+                         AcceptsReturn="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,20"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="İptal" Width="100" Height="40" Margin="0,0,12,0"
+                            Foreground="#94A3B8" Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Click="BtnKapat_Click"/>
+                    <Button Content="Kaydet" Width="120" Height="40" Foreground="White"
+                            FontWeight="SemiBold" materialDesign:ButtonAssist.CornerRadius="10"
+                            Click="BtnKaydet_Click">
+                        <Button.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#3B82F6" Offset="0"/>
+                                <GradientStop Color="#8B5CF6" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Button.Background>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</Window>

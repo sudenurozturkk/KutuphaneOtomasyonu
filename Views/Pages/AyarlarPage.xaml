@@ -1,0 +1,347 @@
+<Page x:Class="KutuphaneOtomasyonu.Views.Pages.AyarlarPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      Background="#080C18">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+
+            <!-- Başlık -->
+            <Grid Margin="0,0,0,28">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Sistem" FontSize="26" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text=" Ayarları" FontSize="26" FontWeight="Light" Foreground="#8B5CF6" FontFamily="Segoe UI"/>
+                    </StackPanel>
+                    <TextBlock Text="Kütüphane sistem parametrelerini, politikaları ve yönetici tercihlerini yapılandırın."
+                               FontSize="13" Foreground="#475569" FontFamily="Segoe UI" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border Background="#0F1A30" CornerRadius="10" Padding="12,8" BorderBrush="#1E3A5F" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="#10B981" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Tüm değişiklikler otomatik kaydedilir" FontSize="11" Foreground="#475569"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- İki Kolon Layout -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Sol Kolon: Kütüphane Genel Bilgileri -->
+                <Border Grid.Row="0" Grid.Column="0" CornerRadius="16" Padding="24" Margin="0,0,12,16">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Border Width="36" Height="36" CornerRadius="10" Margin="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#2563EB" Offset="0"/>
+                                        <GradientStop Color="#1D4ED8" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="LibraryShelves" Width="18" Height="18"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                            <TextBlock Text="Kurum Bilgileri" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Kütüphane Adı" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                        <TextBox x:Name="txtKutuphaneAdi" Height="42" Foreground="White" Margin="0,0,0,14"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="Kütüphane adını girin"/>
+
+                        <TextBlock Text="E-Posta Adresi" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                        <TextBox x:Name="txtEmail" Height="42" Foreground="White" Margin="0,0,0,14"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="ornek@kutuphane.edu.tr"/>
+
+                        <TextBlock Text="Telefon Numarası" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                        <TextBox x:Name="txtTelefon" Height="42" Foreground="White" Margin="0,0,0,14"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="+90 212 000 00 00"/>
+
+                        <TextBlock Text="Fiziksel Adres" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                        <TextBox x:Name="txtAdres" Height="42" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="Kütüphane adresi"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sağ Kolon: Ödünç Politikaları -->
+                <Border Grid.Row="0" Grid.Column="1" CornerRadius="16" Padding="24" Margin="12,0,0,16">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Border Width="36" Height="36" CornerRadius="10" Margin="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#7C3AED" Offset="0"/>
+                                        <GradientStop Color="#6D28D9" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="BookClock" Width="18" Height="18"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                            <TextBlock Text="Ödünç &amp; Ceza Politikaları" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="Maks. Ödünç Süresi (Gün)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                                <TextBox x:Name="txtMaxSure" Height="42" Foreground="White"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         materialDesign:HintAssist.Hint="14"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="Maks. Ödünç Adedi (Kitap)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                                <TextBox x:Name="txtMaxAdet" Height="42" Foreground="White"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         materialDesign:HintAssist.Hint="3"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="Günlük Gecikme Cezası (₺)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                                <TextBox x:Name="txtGunlukCeza" Height="42" Foreground="White"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         materialDesign:HintAssist.Hint="5.00"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="Maks. Uzatma Sayısı" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                                <TextBox x:Name="txtMaxUzatma" Height="42" Foreground="White"
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                         materialDesign:HintAssist.Hint="2"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Uzatma Süresi (Gün)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
+                        <TextBox x:Name="txtUzatmaSuresi" Height="42" Foreground="White"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="7"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Bildirim Ayarları -->
+                <Border Grid.Row="1" Grid.Column="0" CornerRadius="16" Padding="24" Margin="0,0,12,16">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Border Width="36" Height="36" CornerRadius="10" Margin="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#059669" Offset="0"/>
+                                        <GradientStop Color="#047857" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="Bell" Width="18" Height="18"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                            <TextBlock Text="Bildirim Ayarları" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Toggle Switches -->
+                        <Border Background="#060A14" CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Gecikme Uyarıları" FontSize="13" Foreground="White" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="İade tarihi yaklaştığında üye bildir" FontSize="11" Foreground="#475569" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <ToggleButton x:Name="togGecikmeUyari" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                              IsChecked="True" Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Background="#060A14" CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Stok Azalma Uyarısı" FontSize="13" Foreground="White" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Kitap stoğu kritik seviyeye gelince uyar" FontSize="11" Foreground="#475569" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <ToggleButton x:Name="togStokUyari" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                              IsChecked="True" Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Background="#060A14" CornerRadius="10" Padding="14,10">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="Yeni Üye Bildirimi" FontSize="13" Foreground="White" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Yeni üye kaydedildiğinde bildirim al" FontSize="11" Foreground="#475569" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <ToggleButton x:Name="togYeniUye" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                              IsChecked="False" Style="{StaticResource MaterialDesignSwitchToggleButton}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sistem ve Veri Yönetimi -->
+                <Border Grid.Row="1" Grid.Column="1" CornerRadius="16" Padding="24" Margin="12,0,0,16">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Border Width="36" Height="36" CornerRadius="10" Margin="0,0,12,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#D97706" Offset="0"/>
+                                        <GradientStop Color="#B45309" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="DatabaseCog" Width="18" Height="18"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                            <TextBlock Text="Veri Yönetimi" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Button Height="44" Margin="0,0,0,10"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                BorderBrush="#3B82F6" Foreground="#3B82F6"
+                                materialDesign:ButtonAssist.CornerRadius="10"
+                                Click="BtnVeritabaniYedek_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="DatabaseExport" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Veritabanı Yedeği Al" VerticalAlignment="Center" FontFamily="Segoe UI"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Height="44" Margin="0,0,0,10"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                BorderBrush="#10B981" Foreground="#10B981"
+                                materialDesign:ButtonAssist.CornerRadius="10"
+                                Click="BtnDataExport_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FileExport" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Tüm Veriyi Dışa Aktar" VerticalAlignment="Center" FontFamily="Segoe UI"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Height="44"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                BorderBrush="#EF4444" Foreground="#EF4444"
+                                materialDesign:ButtonAssist.CornerRadius="10"
+                                Click="BtnVeritabaniSifirla_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="DatabaseRefresh" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Demo Verisi ile Sıfırla" VerticalAlignment="Center" FontFamily="Segoe UI"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sistem Bilgileri (Full Width) -->
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" CornerRadius="16" Padding="24" Margin="0,0,0,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <materialDesign:PackIcon Kind="InformationOutline" Width="18" Height="18" Foreground="#3B82F6" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Sistem Bilgileri" FontSize="15" FontWeight="SemiBold"
+                                           Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <UniformGrid Columns="4">
+                                <StackPanel Margin="0,0,16,0">
+                                    <TextBlock Text="Uygulama Versiyonu" FontSize="11" Foreground="#475569" Margin="0,0,0,4"/>
+                                    <TextBlock Text="v3.0 Enterprise" FontSize="13" FontWeight="Bold" Foreground="#3B82F6"/>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,16,0">
+                                    <TextBlock Text=".NET Sürümü" FontSize="11" Foreground="#475569" Margin="0,0,0,4"/>
+                                    <TextBlock Text=".NET 8.0 WPF" FontSize="13" FontWeight="Bold" Foreground="#10B981"/>
+                                </StackPanel>
+                                <StackPanel Margin="0,0,16,0">
+                                    <TextBlock Text="Veritabanı" FontSize="11" Foreground="#475569" Margin="0,0,0,4"/>
+                                    <TextBlock Text="SQLite (EF Core 8)" FontSize="13" FontWeight="Bold" Foreground="#8B5CF6"/>
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Son Güncelleme" FontSize="11" Foreground="#475569" Margin="0,0,0,4"/>
+                                    <TextBlock x:Name="txtSonGuncelleme" Text="" FontSize="13" FontWeight="Bold" Foreground="#F59E0B"/>
+                                </StackPanel>
+                            </UniformGrid>
+                        </StackPanel>
+
+                        <!-- Kaydet Butonu -->
+                        <Button Grid.Column="1" Height="48" Width="180" VerticalAlignment="Bottom"
+                                materialDesign:ButtonAssist.CornerRadius="12"
+                                Click="BtnKaydet_Click">
+                            <Button.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#7C3AED" Offset="0"/>
+                                    <GradientStop Color="#2563EB" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18" Foreground="White" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Ayarları Kaydet" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

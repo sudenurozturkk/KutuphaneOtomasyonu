@@ -1,0 +1,349 @@
+<Window x:Class="KutuphaneOtomasyonu.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Kütüphane Yönetim Sistemi"
+        Height="850" Width="1380"
+        MinHeight="700" MinWidth="1100"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <Window.Resources>
+        <!-- Modern Navigasyon Butonu Stili -->
+        <Style x:Key="ModernNavBtn" TargetType="Button">
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#94A3B8"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="8" Padding="12,0" Background="{TemplateBinding Background}"
+                                BorderBrush="Transparent" BorderThickness="0">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#162033"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="16" ClipToBounds="True" BorderBrush="#1E293B" BorderThickness="1">
+        <Border.Background>
+            <SolidColorBrush Color="#080C18"/>
+        </Border.Background>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- SOL SIDEBAR MENÜ -->
+            <Border Grid.Column="0" x:Name="Sidebar" Background="#0A0F1E" BorderBrush="#1E293B" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 1. Üst Kısım: Logo ve Kullanıcı Kartı -->
+                    <Border Grid.Row="0" Padding="16,14,16,10" MouseLeftButtonDown="TitleBar_MouseDown">
+                        <StackPanel>
+                            <!-- Logo Başlığı -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Width="38" Height="38" CornerRadius="10" Margin="0,0,10,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#2563EB" Offset="0"/>
+                                            <GradientStop Color="#7C3AED" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#2563EB" BlurRadius="14" ShadowDepth="0" Opacity="0.6"/>
+                                    </Border.Effect>
+                                    <TextBlock Text="📚" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="KütüphaneApp" FontSize="15" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                                    <TextBlock Text="Enterprise v3.0 Suite" FontSize="10.5" Foreground="#38BDF8" FontFamily="Segoe UI" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Kullanıcı Profil Kartı -->
+                            <Border Padding="10,8" CornerRadius="10" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!-- Avatar Harfi -->
+                                    <Border Grid.Column="0" Width="30" Height="30" CornerRadius="8" Margin="0,0,9,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#06B6D4" Offset="0"/>
+                                                <GradientStop Color="#2563EB" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <TextBlock x:Name="txtAvatarHarf" Text="A" FontSize="14" FontWeight="Bold"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <!-- Kullanıcı İsmi ve Rol -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock x:Name="txtKullaniciAdi" Text="Ahmet Yıldız" FontSize="12"
+                                                   FontWeight="SemiBold" Foreground="White" FontFamily="Segoe UI"/>
+                                        <TextBlock x:Name="txtKullaniciRol" Text="Sistem Yöneticisi" FontSize="10.5"
+                                                   Foreground="#94A3B8" FontFamily="Segoe UI"/>
+                                    </StackPanel>
+                                    <!-- Durum Noktası -->
+                                    <Ellipse Grid.Column="2" Width="7" Height="7" Fill="#10B981" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Ayraç Çizgisi -->
+                    <Border Grid.Row="0" Height="1" Background="#1E293B" VerticalAlignment="Bottom" Margin="12,0"/>
+
+                    <!-- 2. Menü Listesi (Dikey Kaydırma) -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,4,0,4">
+                        <StackPanel x:Name="NavMenu" Margin="10,0">
+
+                            <!-- BÖLÜM 1: YÖNETİM -->
+                            <TextBlock Text="YÖNETİM" FontSize="9.5" FontWeight="Bold" Foreground="#64748B"
+                                       Margin="10,8,0,3" FontFamily="Segoe UI"/>
+
+                            <!-- Dashboard -->
+                            <Button x:Name="btnDashboard" Tag="Dashboard" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="ViewDashboard" Width="18" Height="18" Foreground="#38BDF8"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Genel Bakış" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Kitap Kataloğu -->
+                            <Button x:Name="btnKitaplar" Tag="Kitaplar" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="BookOpenPageVariant" Width="18" Height="18" Foreground="#60A5FA"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Kitap Kataloğu" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Ödünç İşlemleri -->
+                            <Button x:Name="btnOduncler" Tag="Oduncler" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="SwapHorizontal" Width="18" Height="18" Foreground="#34D399"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Ödünç &amp; İade" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Üye Yönetimi -->
+                            <Button x:Name="btnUyeler" Tag="Uyeler" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="AccountGroup" Width="18" Height="18" Foreground="#A78BFA"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Üye Yönetimi" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- BÖLÜM 2: OPERASYON -->
+                            <TextBlock Text="OPERASYON" FontSize="9.5" FontWeight="Bold" Foreground="#64748B"
+                                       Margin="10,10,0,3" FontFamily="Segoe UI"/>
+
+                            <!-- Salon Haritası -->
+                            <Button x:Name="btnSalonRezervasyon" Tag="SalonRezervasyon" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="DeskLamp" Width="18" Height="18" Foreground="#F472B6"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Salon Haritası &amp; Masalar" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Rezervasyonlar -->
+                            <Button x:Name="btnRezervasyonlar" Tag="Rezervasyonlar" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="CalendarClock" Width="18" Height="18" Foreground="#FB923C"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Rezervasyon Kuyruğu" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Barkod Banko -->
+                            <Button x:Name="btnBarkodBanko" Tag="BarkodBanko" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="Barcode" Width="18" Height="18" Foreground="#E879F9"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                        <TextBlock Text="Hızlı Barkod Bankosu" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="5" Padding="5,1.5" Background="#701A75">
+                                        <TextBlock Text="HIZLI" FontSize="8.5" FontWeight="Bold" Foreground="#F472B6"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
+
+                            <!-- BÖLÜM 3: SERVİS & MİMARİ -->
+                            <TextBlock Text="SERVİS &amp; MİMARİ" FontSize="9.5" FontWeight="Bold" Foreground="#64748B"
+                                       Margin="10,10,0,3" FontFamily="Segoe UI"/>
+
+                            <!-- Dijital Cüzdan -->
+                            <Button x:Name="btnCuzdan" Tag="Cuzdan" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="Wallet" Width="18" Height="18" Foreground="#FBBF24"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Akıllı Cüzdan &amp; Kart" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- E-Kitap Okuyucu -->
+                            <Button x:Name="btnEKitap" Tag="EKitap" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="BookOpenBlankVariant" Width="18" Height="18" Foreground="#2DD4BF"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                        <TextBlock Text="E-Kitap Okuyucu" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="5" Padding="5,1.5" Background="#115E59">
+                                        <TextBlock Text="E-OKU" FontSize="8.5" FontWeight="Bold" Foreground="#2DD4BF"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
+
+                            <!-- Raporlar -->
+                            <Button x:Name="btnRaporlar" Tag="Raporlar" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="ChartBar" Width="18" Height="18" Foreground="#818CF8"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Raporlar &amp; Analitik" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Ayarlar -->
+                            <Button x:Name="btnAyarlar" Tag="Ayarlar" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="Cog" Width="18" Height="18" Foreground="#94A3B8"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Sistem Parametreleri" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Mimari ve UML -->
+                            <Button x:Name="btnMimari" Tag="Mimari" Style="{StaticResource ModernNavBtn}" Click="NavButton_Click">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="ChartBubble" Width="18" Height="18" Foreground="#C084FC"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                        <TextBlock Text="Canlı Mimari &amp; UML" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="5" Padding="5,1.5" Background="#4C1D95">
+                                        <TextBlock Text="LAB" FontSize="8.5" FontWeight="Bold" Foreground="#C084FC"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- 3. Alt Kısım: Sistem Durumu & Çıkış -->
+                    <Border Grid.Row="2" Padding="14,12" Background="#060A14" BorderBrush="#1E293B" BorderThickness="0,1,0,0">
+                        <StackPanel>
+                            <!-- Saat ve Bağlantı -->
+                            <Grid Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Ellipse Width="7" Height="7" Fill="#10B981" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="SQLite: Bağlı" FontSize="11" Foreground="#34D399" FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <TextBlock x:Name="txtStatusSaat" Text="Sistem: Aktif" FontSize="11" Foreground="#94A3B8"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <!-- Güvenli Çıkış Butonu -->
+                            <Button Tag="Cikis" Height="36" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    BorderBrush="#EF4444" Foreground="#EF4444"
+                                    materialDesign:ButtonAssist.CornerRadius="8"
+                                    Click="NavButton_Click">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="Logout" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Oturumu Kapat" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- SAĞ İÇERİK ALANI -->
+            <Grid Grid.Column="1" Background="#080C18">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Başlık ve Pencere Kontrolleri -->
+                <Border Grid.Row="0" Padding="28,0,20,0" Background="#0A0F1E" BorderBrush="#1E293B" BorderThickness="0,0,0,1"
+                        MouseLeftButtonDown="TitleBar_MouseDown">
+                    <Grid>
+                        <!-- Sol: Sayfa Başlığı ve İkon -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <materialDesign:PackIcon x:Name="iconSayfa" Kind="ViewDashboard" Width="22" Height="22"
+                                                     Foreground="#38BDF8" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock x:Name="txtSayfaBasligi" Text="Genel Bakış (Dashboard)"
+                                       FontSize="18" FontWeight="Bold"
+                                       Foreground="White" FontFamily="Segoe UI"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Sağ: Canlı Saat ve Pencere Kontrolleri -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <!-- Saat -->
+                            <Border Background="#0F172A" CornerRadius="8" Padding="12,6" Margin="0,0,16,0" BorderBrush="#1E293B" BorderThickness="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ClockOutline" Width="14" Height="14" Foreground="#38BDF8" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock x:Name="txtSaatGoster" Text="12:00:00" FontSize="12" FontWeight="Bold" Foreground="#E2E8F0" FontFamily="Consolas"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Küçült -->
+                            <Button Style="{StaticResource MaterialDesignIconButton}" Width="36" Height="36"
+                                    Foreground="#94A3B8" Click="MinimizeButton_Click" ToolTip="Küçült">
+                                <materialDesign:PackIcon Kind="WindowMinimize" Width="16" Height="16"/>
+                            </Button>
+
+                            <!-- Büyüt / Normal -->
+                            <Button Style="{StaticResource MaterialDesignIconButton}" Width="36" Height="36"
+                                    Foreground="#94A3B8" Click="MaximizeButton_Click" ToolTip="Ekranı Kapla">
+                                <materialDesign:PackIcon Kind="WindowMaximize" Width="16" Height="16"/>
+                            </Button>
+
+                            <!-- Kapat -->
+                            <Button Style="{StaticResource MaterialDesignIconButton}" Width="36" Height="36"
+                                    Foreground="#EF4444" Click="CloseButton_Click" ToolTip="Kapat">
+                                <materialDesign:PackIcon Kind="Close" Width="18" Height="18"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Sayfa Çerçevesi (Frame) -->
+                <Frame x:Name="MainFrame" Grid.Row="1" NavigationUIVisibility="Hidden"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

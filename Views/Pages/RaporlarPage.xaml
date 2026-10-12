@@ -1,0 +1,639 @@
+<Page x:Class="KutuphaneOtomasyonu.Views.Pages.RaporlarPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      Background="#080C18">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="28,24,28,24">
+
+            <!-- Başlık -->
+            <Grid Margin="0,0,0,28">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Raporlar" FontSize="26" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text=" &amp; Analitik" FontSize="26" FontWeight="Light" Foreground="#3B82F6" FontFamily="Segoe UI"/>
+                    </StackPanel>
+                    <TextBlock Text="Kütüphane performansını, kullanım trendlerini ve detaylı istatistikleri inceleyin."
+                               FontSize="13" Foreground="#475569" FontFamily="Segoe UI" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="btnExportExcel" Height="38" Padding="14,0" Margin="0,0,8,0"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            BorderBrush="#10B981" Foreground="#10B981"
+                            materialDesign:ButtonAssist.CornerRadius="10"
+                            Click="BtnExportExcel_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="MicrosoftExcel" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="Excel'e Aktar" FontFamily="Segoe UI" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="btnYenile" Height="38" Padding="14,0"
+                            materialDesign:ButtonAssist.CornerRadius="10"
+                            Click="BtnYenile_Click">
+                        <Button.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#2563EB" Offset="0"/>
+                                <GradientStop Color="#7C3AED" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Button.Background>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="White"/>
+                            <TextBlock Text="Yenile" FontFamily="Segoe UI" FontSize="13" Foreground="White"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- KPI Kartları (Üst Satır) -->
+            <UniformGrid Columns="4" Margin="0,0,0,24">
+                <!-- Toplam İşlem -->
+                <Border Margin="0,0,10,0" CornerRadius="16" Padding="20">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="40" Height="40" CornerRadius="10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#2563EB" Offset="0"/>
+                                        <GradientStop Color="#1D4ED8" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="SwapHorizontal" Width="20" Height="20"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="txtToplamIslem" Text="0" FontSize="34" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Bu Ay Toplam İşlem" FontSize="12" Foreground="#475569" FontFamily="Segoe UI"/>
+                        <TextBlock x:Name="txtIslemAlt" Text="" FontSize="11" Foreground="#3B82F6" FontFamily="Segoe UI" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Aktif Üye -->
+                <Border Margin="5,0" CornerRadius="16" Padding="20">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="40" Height="40" CornerRadius="10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#059669" Offset="0"/>
+                                        <GradientStop Color="#047857" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="AccountCheck" Width="20" Height="20"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="txtAktifUye" Text="0" FontSize="34" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Aktif Üye (Ödünç Alan)" FontSize="12" Foreground="#475569" FontFamily="Segoe UI"/>
+                        <TextBlock x:Name="txtAktifUyeAlt" Text="" FontSize="11" Foreground="#10B981" FontFamily="Segoe UI" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Koleksiyon Büyüme -->
+                <Border Margin="5,0" CornerRadius="16" Padding="20">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="40" Height="40" CornerRadius="10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#7C3AED" Offset="0"/>
+                                        <GradientStop Color="#6D28D9" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="BookPlus" Width="20" Height="20"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="txtKoleksiyonBuyume" Text="0" FontSize="34" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Bu Ay Eklenen Kitap" FontSize="12" Foreground="#475569" FontFamily="Segoe UI"/>
+                        <TextBlock x:Name="txtKoleksiyonAlt" Text="" FontSize="11" Foreground="#8B5CF6" FontFamily="Segoe UI" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tahsilat -->
+                <Border Margin="10,0,0,0" CornerRadius="16" Padding="20">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="40" Height="40" CornerRadius="10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#D97706" Offset="0"/>
+                                        <GradientStop Color="#B45309" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <materialDesign:PackIcon Kind="CurrencyTry" Width="20" Height="20"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock x:Name="txtTahsilat" Text="₺0" FontSize="34" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Gecikme Cezası Tahsilatı" FontSize="12" Foreground="#475569" FontFamily="Segoe UI"/>
+                        <TextBlock x:Name="txtTahsilatAlt" Text="" FontSize="11" Foreground="#F59E0B" FontFamily="Segoe UI" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- Orta Alan: Grafik + Kategori Analizi -->
+            <Grid Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="300"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ödünç Aktivite Grafiği -->
+                <Border Grid.Column="0" Margin="0,0,14,0" CornerRadius="16" Padding="24">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <Grid Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="Aylık Ödünç Aktivitesi" FontSize="15" FontWeight="SemiBold"
+                                           Foreground="White" FontFamily="Segoe UI"/>
+                                <TextBlock Text="Son 6 aylık ödünç ve iade sayısı karşılaştırması"
+                                           FontSize="12" Foreground="#475569" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Border Width="10" Height="10" CornerRadius="5" Background="#3B82F6" Margin="0,0,4,0"/>
+                                <TextBlock Text="Ödünç" FontSize="11" Foreground="#475569" Margin="0,0,12,0"/>
+                                <Border Width="10" Height="10" CornerRadius="5" Background="#10B981" Margin="0,0,4,0"/>
+                                <TextBlock Text="İade" FontSize="11" Foreground="#475569"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Bar Grafiği -->
+                        <Grid Height="200">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Y ekseni etiketleri -->
+                            <StackPanel Grid.Column="0" Margin="0,0,8,24" VerticalAlignment="Stretch">
+                                <TextBlock Text="50" FontSize="10" Foreground="#334155" HorizontalAlignment="Right" Margin="0,0,0,28"/>
+                                <TextBlock Text="40" FontSize="10" Foreground="#334155" HorizontalAlignment="Right" Margin="0,0,0,28"/>
+                                <TextBlock Text="30" FontSize="10" Foreground="#334155" HorizontalAlignment="Right" Margin="0,0,0,28"/>
+                                <TextBlock Text="20" FontSize="10" Foreground="#334155" HorizontalAlignment="Right" Margin="0,0,0,28"/>
+                                <TextBlock Text="10" FontSize="10" Foreground="#334155" HorizontalAlignment="Right"/>
+                            </StackPanel>
+
+                            <!-- Grafik alan -->
+                            <Grid Grid.Column="1" x:Name="grafGrafik">
+                                <!-- Yatay gridlines -->
+                                <StackPanel VerticalAlignment="Stretch" Margin="0,0,0,24">
+                                    <Border Height="1" Background="#0F1A30" Margin="0,0,0,35"/>
+                                    <Border Height="1" Background="#0F1A30" Margin="0,0,0,35"/>
+                                    <Border Height="1" Background="#0F1A30" Margin="0,0,0,35"/>
+                                    <Border Height="1" Background="#0F1A30" Margin="0,0,0,35"/>
+                                    <Border Height="1" Background="#0F1A30"/>
+                                </StackPanel>
+
+                                <!-- Bar Grupları -->
+                                <UniformGrid Columns="6" Margin="4,0,4,0" VerticalAlignment="Bottom">
+                                    <!-- Mayıs -->
+                                    <StackPanel HorizontalAlignment="Center" Margin="4,0">
+                                        <Grid VerticalAlignment="Bottom" Height="176">
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <Border Height="120" CornerRadius="4,4,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#3B82F6" Offset="0"/>
+                                                            <GradientStop Color="#1D4ED8" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                                <Border Height="88" CornerRadius="4,4,0,0" Margin="4,0,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#10B981" Offset="0"/>
+                                                            <GradientStop Color="#059669" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="May" FontSize="10" Foreground="#475569" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <!-- Haziran -->
+                                    <StackPanel HorizontalAlignment="Center" Margin="4,0">
+                                        <Grid VerticalAlignment="Bottom" Height="176">
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <Border Height="140" CornerRadius="4,4,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#3B82F6" Offset="0"/>
+                                                            <GradientStop Color="#1D4ED8" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                                <Border Height="112" CornerRadius="4,4,0,0" Margin="4,0,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#10B981" Offset="0"/>
+                                                            <GradientStop Color="#059669" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Haz" FontSize="10" Foreground="#475569" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <!-- Temmuz -->
+                                    <StackPanel HorizontalAlignment="Center" Margin="4,0">
+                                        <Grid VerticalAlignment="Bottom" Height="176">
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <Border Height="96" CornerRadius="4,4,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#3B82F6" Offset="0"/>
+                                                            <GradientStop Color="#1D4ED8" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                                <Border Height="72" CornerRadius="4,4,0,0" Margin="4,0,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#10B981" Offset="0"/>
+                                                            <GradientStop Color="#059669" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Tem" FontSize="10" Foreground="#475569" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <!-- Ağustos -->
+                                    <StackPanel HorizontalAlignment="Center" Margin="4,0">
+                                        <Grid VerticalAlignment="Bottom" Height="176">
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <Border Height="108" CornerRadius="4,4,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#3B82F6" Offset="0"/>
+                                                            <GradientStop Color="#1D4ED8" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                                <Border Height="84" CornerRadius="4,4,0,0" Margin="4,0,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#10B981" Offset="0"/>
+                                                            <GradientStop Color="#059669" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Ağu" FontSize="10" Foreground="#475569" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <!-- Eylül -->
+                                    <StackPanel HorizontalAlignment="Center" Margin="4,0">
+                                        <Grid VerticalAlignment="Bottom" Height="176">
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <Border Height="152" CornerRadius="4,4,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#3B82F6" Offset="0"/>
+                                                            <GradientStop Color="#1D4ED8" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                                <Border Height="128" CornerRadius="4,4,0,0" Margin="4,0,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#10B981" Offset="0"/>
+                                                            <GradientStop Color="#059669" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Eyl" FontSize="10" Foreground="#475569" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                    <!-- Ekim (Bu Ay) -->
+                                    <StackPanel HorizontalAlignment="Center" Margin="4,0">
+                                        <Grid VerticalAlignment="Bottom" Height="176">
+                                            <StackPanel VerticalAlignment="Bottom">
+                                                <Border x:Name="barEkimOdunc" Height="80" CornerRadius="4,4,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#60A5FA" Offset="0"/>
+                                                            <GradientStop Color="#3B82F6" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <Border.Effect>
+                                                        <DropShadowEffect Color="#3B82F6" BlurRadius="8" ShadowDepth="0" Opacity="0.6"/>
+                                                    </Border.Effect>
+                                                </Border>
+                                                <Border x:Name="barEkimIade" Height="56" CornerRadius="4,4,0,0" Margin="4,0,0,0">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                            <GradientStop Color="#34D399" Offset="0"/>
+                                                            <GradientStop Color="#10B981" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <Border.Effect>
+                                                        <DropShadowEffect Color="#10B981" BlurRadius="8" ShadowDepth="0" Opacity="0.6"/>
+                                                    </Border.Effect>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="Eki ●" FontSize="10" Foreground="#3B82F6" HorizontalAlignment="Center" Margin="0,4,0,0" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </UniformGrid>
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Kategori Analizi -->
+                <Border Grid.Column="1" CornerRadius="16" Padding="24">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <TextBlock Text="Kategori Dağılımı" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="White" FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                        <TextBlock Text="En çok ödünç alınan kategoriler" FontSize="11" Foreground="#475569" FontFamily="Segoe UI" Margin="0,0,0,20"/>
+
+                        <!-- Kategori Listesi -->
+                        <StackPanel x:Name="pnlKategoriGrafik">
+                            <!-- Bilim -->
+                            <StackPanel Margin="0,0,0,14">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Bilim &amp; Teknoloji" FontSize="12" Foreground="#CBD5E1"/>
+                                    <TextBlock Text="38%" FontSize="12" Foreground="#3B82F6" HorizontalAlignment="Right" FontWeight="Bold"/>
+                                </Grid>
+                                <Border Height="7" CornerRadius="4" Background="#1E293B">
+                                    <Border.Child>
+                                        <Border HorizontalAlignment="Left" Width="NaN" CornerRadius="4">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                    <GradientStop Color="#3B82F6" Offset="0"/>
+                                                    <GradientStop Color="#60A5FA" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                        </Border>
+                                    </Border.Child>
+                                </Border>
+                                <ProgressBar Value="38" Maximum="100" Height="7" Margin="-4,-7,0,0"
+                                             Foreground="#3B82F6" Background="Transparent" BorderThickness="0"/>
+                            </StackPanel>
+                            <!-- Edebiyat -->
+                            <StackPanel Margin="0,0,0,14">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Edebiyat &amp; Roman" FontSize="12" Foreground="#CBD5E1"/>
+                                    <TextBlock Text="25%" FontSize="12" Foreground="#8B5CF6" HorizontalAlignment="Right" FontWeight="Bold"/>
+                                </Grid>
+                                <ProgressBar Value="25" Maximum="100" Height="7"
+                                             Foreground="#8B5CF6" Background="#1E293B" BorderThickness="0"/>
+                            </StackPanel>
+                            <!-- Tarih -->
+                            <StackPanel Margin="0,0,0,14">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Tarih &amp; Coğrafya" FontSize="12" Foreground="#CBD5E1"/>
+                                    <TextBlock Text="18%" FontSize="12" Foreground="#10B981" HorizontalAlignment="Right" FontWeight="Bold"/>
+                                </Grid>
+                                <ProgressBar Value="18" Maximum="100" Height="7"
+                                             Foreground="#10B981" Background="#1E293B" BorderThickness="0"/>
+                            </StackPanel>
+                            <!-- Felsefe -->
+                            <StackPanel Margin="0,0,0,14">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Felsefe &amp; Psikoloji" FontSize="12" Foreground="#CBD5E1"/>
+                                    <TextBlock Text="12%" FontSize="12" Foreground="#F59E0B" HorizontalAlignment="Right" FontWeight="Bold"/>
+                                </Grid>
+                                <ProgressBar Value="12" Maximum="100" Height="7"
+                                             Foreground="#F59E0B" Background="#1E293B" BorderThickness="0"/>
+                            </StackPanel>
+                            <!-- Diğer -->
+                            <StackPanel>
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Diğer Kategoriler" FontSize="12" Foreground="#CBD5E1"/>
+                                    <TextBlock Text="7%" FontSize="12" Foreground="#EF4444" HorizontalAlignment="Right" FontWeight="Bold"/>
+                                </Grid>
+                                <ProgressBar Value="7" Maximum="100" Height="7"
+                                             Foreground="#EF4444" Background="#1E293B" BorderThickness="0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Alt satır: İstatistik Kartları + Popüler Kitaplar -->
+            <Grid Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Kitap İstatistikleri -->
+                <Border Grid.Column="0" Margin="0,0,10,0" CornerRadius="16" Padding="22">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <materialDesign:PackIcon Kind="BookMultiple" Width="18" Height="18" Foreground="#3B82F6" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Kitap İstatistikleri" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock x:Name="txtKitapIstat" Text="Yükleniyor..." FontSize="13"
+                                   Foreground="#94A3B8" FontFamily="Segoe UI" TextWrapping="Wrap" LineHeight="22"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Ödünç İstatistikleri -->
+                <Border Grid.Column="1" Margin="5,0" CornerRadius="16" Padding="22">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <materialDesign:PackIcon Kind="SwapHorizontal" Width="18" Height="18" Foreground="#10B981" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Ödünç İstatistikleri" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock x:Name="txtOduncIstat" Text="Yükleniyor..." FontSize="13"
+                                   Foreground="#94A3B8" FontFamily="Segoe UI" TextWrapping="Wrap" LineHeight="22"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Üye İstatistikleri -->
+                <Border Grid.Column="2" Margin="10,0,0,0" CornerRadius="16" Padding="22">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0F1A30" Offset="0"/>
+                            <GradientStop Color="#132040" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                    <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <materialDesign:PackIcon Kind="AccountGroup" Width="18" Height="18" Foreground="#8B5CF6" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Üye İstatistikleri" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock x:Name="txtUyeIstat" Text="Yükleniyor..." FontSize="13"
+                                   Foreground="#94A3B8" FontFamily="Segoe UI" TextWrapping="Wrap" LineHeight="22"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Popüler Kitaplar Tablosu -->
+            <Border CornerRadius="16" Padding="24">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#0F1A30" Offset="0"/>
+                        <GradientStop Color="#132040" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.BorderBrush><SolidColorBrush Color="#1E3A5F"/></Border.BorderBrush>
+                <Border.BorderThickness>1</Border.BorderThickness>
+                <StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="En Çok Ödünç Alınan Kitaplar" FontSize="15" FontWeight="SemiBold"
+                                       Foreground="White" FontFamily="Segoe UI"/>
+                            <TextBlock Text="Koleksiyondaki en popüler eserlerin performans raporu"
+                                       FontSize="11" Foreground="#475569" FontFamily="Segoe UI" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <materialDesign:PackIcon Kind="Trophy" Width="22" Height="22" Foreground="#F59E0B"
+                                                 HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <DataGrid x:Name="dgPopuler" AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserAddRows="False" Background="Transparent" BorderThickness="0"
+                              GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#0F1A30"
+                              RowBackground="Transparent" AlternatingRowBackground="#060A14"
+                              Foreground="White" FontFamily="Segoe UI" RowHeight="52" MaxHeight="400">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                                <Setter Property="Background" Value="#060A14"/>
+                                <Setter Property="Foreground" Value="#334155"/>
+                                <Setter Property="Padding" Value="14,12"/>
+                                <Setter Property="FontSize" Value="11"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="#" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="28" Height="28" CornerRadius="14" HorizontalAlignment="Center">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#1E293B" Offset="0"/>
+                                                    <GradientStop Color="#0F172A" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding Sira}" FontSize="12" FontWeight="Bold"
+                                                       Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="KİTAP ADI" Binding="{Binding Baslik}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="14,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="YAZAR" Binding="{Binding Yazar}" Width="180">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#94A3B8"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="KATEGORİ" Binding="{Binding Kategori}" Width="140">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#3B82F6"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="ÖDÜNÇ SAYISI" Binding="{Binding GoruntulemeSayisi}" Width="130">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#10B981"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="PUAN" Binding="{Binding PuanGoster}" Width="160">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#F59E0B"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,48 @@
+<Window x:Class="KutuphaneOtomasyonu.Views.Pages.IadeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Kitap İade Al" Height="400" Width="460"
+        WindowStartupLocation="CenterOwner" WindowStyle="None"
+        AllowsTransparency="True" Background="Transparent"
+        MouseLeftButtonDown="Window_MouseDown">
+    <Border Background="#0F172A" CornerRadius="16" BorderBrush="#334155" BorderThickness="1" Padding="24">
+        <StackPanel>
+            <Grid Margin="0,0,0,20">
+                <TextBlock Text="📥 Kitap İade Al" FontSize="18" FontWeight="Bold"
+                           Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                <Button Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32"
+                        HorizontalAlignment="Right" Foreground="#94A3B8" Click="BtnKapat_Click">
+                    <materialDesign:PackIcon Kind="Close" Width="18" Height="18"/>
+                </Button>
+            </Grid>
+
+            <TextBlock x:Name="txtOduncBilgi" Text="Ödünç Bilgisi Yükleniyor..."
+                       Foreground="#3B82F6" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,16"/>
+
+            <TextBlock Text="Kitabın Teslim Durumu *" Foreground="#94A3B8" Margin="0,0,0,4"/>
+            <ComboBox x:Name="cbKitapDurumu" Height="42" Foreground="White"
+                      Style="{StaticResource MaterialDesignOutlinedComboBox}" Margin="0,0,0,16"/>
+
+            <TextBlock Text="İade Notları (Opsiyonel)" Foreground="#94A3B8" Margin="0,0,0,4"/>
+            <TextBox x:Name="txtNotlar" Height="60" Foreground="White" TextWrapping="Wrap"
+                     AcceptsReturn="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,24,0"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Content="İptal" Width="100" Height="40" Margin="0,0,12,0"
+                        Foreground="#94A3B8" Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="BtnKapat_Click"/>
+                <Button Content="İadeyi Onayla" Width="130" Height="40" Foreground="White"
+                        FontWeight="SemiBold" materialDesign:ButtonAssist.CornerRadius="10"
+                        Click="BtnOnayla_Click">
+                    <Button.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#10B981" Offset="0"/>
+                            <GradientStop Color="#059669" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Button.Background>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
