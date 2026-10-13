@@ -23,6 +23,8 @@ namespace KutuphaneOtomasyonu.Data
         public DbSet<Kullanici> Kullanicilar { get; set; }
         public DbSet<SistemAyarlari> SistemAyarlari { get; set; }
         public DbSet<AktiviteLog> AktiviteLoglar { get; set; }
+        public DbSet<AkademikYayin> AkademikYayinlar { get; set; }
+        public DbSet<MateryalTransfer> MateryalTransferler { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

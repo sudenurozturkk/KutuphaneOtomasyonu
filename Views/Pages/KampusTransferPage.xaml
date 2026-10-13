@@ -1,0 +1,172 @@
+<Page x:Class="KutuphaneOtomasyonu.Views.Pages.KampusTransferPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      Background="#080C18">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Başlık -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="44" Height="44" CornerRadius="12" Margin="0,0,12,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0D9488" Offset="0"/>
+                            <GradientStop Color="#14B8A6" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <materialDesign:PackIcon Kind="TruckDelivery" Width="22" Height="22" Foreground="White"
+                                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Kampüsler Arası Transfer (ILL)" FontSize="20" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <Border Margin="10,0,0,0" CornerRadius="6" Padding="8,2" Background="#134E4A" VerticalAlignment="Center">
+                            <TextBlock Text="INTER-LIBRARY LOAN (ILL)" FontSize="9.5" FontWeight="Bold" Foreground="#2DD4BF"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Merkez, Mühendislik, Tıp ve Sosyal Bilimler kütüphaneleri arası iç kurye ve transfer lojistiği"
+                               FontSize="12" Foreground="#94A3B8" Margin="0,3,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="🔄 Yenile" Style="{StaticResource MaterialDesignOutlinedButton}"
+                        BorderBrush="#334155" Foreground="#94A3B8" Height="36" Padding="12,0" Margin="0,0,8,0"
+                        materialDesign:ButtonAssist.CornerRadius="8" Click="BtnYenile_Click"/>
+                <Button Content="📦 Yeni ILL Transfer Talebi" Height="36" Padding="14,0"
+                        materialDesign:ButtonAssist.CornerRadius="8"
+                        FontFamily="Segoe UI" FontSize="12.5" FontWeight="SemiBold"
+                        Click="BtnYeniTransfer_Click">
+                    <Button.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#0D9488" Offset="0"/>
+                            <GradientStop Color="#06B6D4" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Button.Background>
+                    <Button.Foreground><SolidColorBrush Color="White"/></Button.Foreground>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- 4 Kampüs Şube Durum Kartı -->
+        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,16">
+            <Border Margin="0,0,8,0" Background="#0F172A" CornerRadius="12" BorderBrush="#1E293B" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="🏛️ Merkez Kütüphane" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Koleksiyon: 18.400 Eser" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,6"/>
+                    <TextBlock Text="Aktif Kurye: 2 Gelen, 1 Giden" FontSize="10.5" Foreground="#34D399"/>
+                </StackPanel>
+            </Border>
+            <Border Margin="4,0" Background="#0F172A" CornerRadius="12" BorderBrush="#1E293B" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="⚙️ Mühendislik İhtisas" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Koleksiyon: 9.200 Eser" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,6"/>
+                    <TextBlock Text="Aktif Kurye: 1 Gelen" FontSize="10.5" Foreground="#38BDF8"/>
+                </StackPanel>
+            </Border>
+            <Border Margin="4,0" Background="#0F172A" CornerRadius="12" BorderBrush="#1E293B" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="🩺 Tıp &amp; Sağlık Bilimleri" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Koleksiyon: 6.800 Eser" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,6"/>
+                    <TextBlock Text="Aktif Kurye: 0 Bekleyen" FontSize="10.5" Foreground="#A78BFA"/>
+                </StackPanel>
+            </Border>
+            <Border Margin="8,0,0,0" Background="#0F172A" CornerRadius="12" BorderBrush="#1E293B" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock Text="⚖️ Sosyal Bilimler" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Koleksiyon: 7.500 Eser" FontSize="11" Foreground="#94A3B8" Margin="0,2,0,6"/>
+                    <TextBlock Text="Aktif Kurye: 1 Giden" FontSize="10.5" Foreground="#F59E0B"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- Kurye Transfer Tablosu -->
+        <Border Grid.Row="2" CornerRadius="12" ClipToBounds="True" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1">
+            <DataGrid x:Name="dgTransferler"
+                      AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                      Background="Transparent" BorderThickness="0"
+                      GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1E293B"
+                      RowBackground="Transparent" AlternatingRowBackground="#0A0F1E"
+                      Foreground="White" FontFamily="Segoe UI" RowHeight="56">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                        <Setter Property="Background" Value="#060A14"/>
+                        <Setter Property="Foreground" Value="#64748B"/>
+                        <Setter Property="Padding" Value="14,12"/>
+                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="TAKİP KODU" Binding="{Binding KuryeTakipKodu}" Width="160">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Foreground" Value="#2DD4BF"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="MATERYAL / KİTAP" Binding="{Binding Kitap.Baslik}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn Header="TALEP EDEN ÜYE" Binding="{Binding TalepEdenUye.TamAd}" Width="180">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#94A3B8"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <DataGridTemplateColumn Header="GÜZERGAH" Width="240">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding KaynakKampus}" Foreground="#94A3B8" FontSize="11.5"/>
+                                    <TextBlock Text=" ➔ " Foreground="#2DD4BF" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding HedefKampus}" Foreground="White" FontWeight="SemiBold" FontSize="11.5"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="DURUM" Width="140">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="6" Padding="8,3" Background="#162033" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Durum}" FontSize="11" FontWeight="Bold" Foreground="#38BDF8"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="TAHMİNİ TESLİM" Binding="{Binding TahminiVarisTarihi, StringFormat=dd.MM.yyyy HH:mm}" Width="150">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#64748B"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Page>

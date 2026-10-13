@@ -25,6 +25,8 @@ namespace KutuphaneOtomasyonu.Data
             SeedUyeler(context);
             SeedOduncler(context);
             SeedRezervasyonlar(context);
+            SeedAkademikYayinlar(context);
+            SeedMateryalTransferler(context);
         }
 
         private static void SeedSistemAyarlari(KutuphaneDbContext context)
@@ -299,9 +301,138 @@ namespace KutuphaneOtomasyonu.Data
             context.SaveChanges();
         }
 
+        private static void SeedAkademikYayinlar(KutuphaneDbContext context)
+        {
+            if (context.AkademikYayinlar.Any()) return;
+
+            var yayinlar = new List<AkademikYayin>
+            {
+                new AkademikYayin
+                {
+                    Baslik = "Distributed Consensus in Cloud-Native Autonomous Agent Architectures",
+                    Yazar = "Dr. Elena Rostova",
+                    Danisman = "Prof. Dr. Michael Vance",
+                    Tur = YayinTuru.DoktoraTezi,
+                    Universite = "MIT & Global Research Consortium",
+                    EnstituFakulte = "Computer Science and AI Laboratory (CSAIL)",
+                    AnabilimDali = "Distributed Systems",
+                    Yil = 2024,
+                    DOI = "10.1145/3544548.3581234",
+                    AnahtarKelimeler = "Raft, Paxos, Microservices, Edge Computing, LLM Agents",
+                    Ozet = "This doctoral dissertation investigates multi-leader decentralized consensus protocols optimized for low-latency agentic swarms in hybrid edge-cloud topologies.",
+                    MevcutKampus = KampusLokasyonu.MuhendislikKutuphanesi,
+                    AlintiSayisi = 48,
+                    IndirmeSayisi = 1240,
+                    Dil = "English",
+                    DosyaBoyutu = "8.4 MB (PDF)"
+                },
+                new AkademikYayin
+                {
+                    Baslik = "Büyük Dil Modellerinde Hallüsinasyon Azaltımı için Semantik Graph RAG Mimarileri",
+                    Yazar = "Yük. Müh. Burak Candan",
+                    Danisman = "Prof. Dr. Ayşe Şener",
+                    Tur = YayinTuru.YuksekLisansTezi,
+                    Universite = "İstanbul Teknik Üniversitesi",
+                    EnstituFakulte = "Bilişim Enstitüsü",
+                    AnabilimDali = "Yapay Zeka ve Veri Mühendisliği",
+                    Yil = 2025,
+                    DOI = "10.1016/j.knosys.2025.109822",
+                    AnahtarKelimeler = "Graph RAG, Bilgi Çizgeleri, Hallüsinasyon, Vektör Veritabanı, Doğal Dil İşleme",
+                    Ozet = "Bu tez, kurumsal kütüphane ve akademik arşivlerde karmaşık sorgulamalar esnasında dil modellerinin ürettiği uydurma bilgileri en aza indiren bilgi grafiği tabanlı yeni bir hibrit RAG mimarisi önermektedir.",
+                    MevcutKampus = KampusLokasyonu.MerkezKutuphane,
+                    AlintiSayisi = 26,
+                    IndirmeSayisi = 890,
+                    Dil = "Türkçe",
+                    DosyaBoyutu = "6.1 MB (PDF)"
+                },
+                new AkademikYayin
+                {
+                    Baslik = "Quantum Annealing for NP-Hard Combinatorial Library Logistics",
+                    Yazar = "Sarah Jenkins, Robert H. Chen",
+                    Danisman = "Prof. Kenneth Clarke",
+                    Tur = YayinTuru.HakemliMakale,
+                    Universite = "Oxford University Press",
+                    EnstituFakulte = "Department of Physics & Computation",
+                    AnabilimDali = "Quantum Informatics",
+                    Yil = 2024,
+                    DOI = "10.1103/PhysRevLett.132.080401",
+                    AnahtarKelimeler = "Quantum Computing, D-Wave, Traveling Salesman, Inter-library Loan Routing",
+                    Ozet = "Published in IEEE Transactions on Quantum Engineering. Addresses campus-wide autonomous physical book transit optimization using Adiabatic Quantum Computing.",
+                    MevcutKampus = KampusLokasyonu.MerkezKutuphane,
+                    AlintiSayisi = 112,
+                    IndirmeSayisi = 3450,
+                    Dil = "English",
+                    DosyaBoyutu = "3.2 MB (PDF)"
+                },
+                new AkademikYayin
+                {
+                    Baslik = "CRISPR-Cas9 Hedefli Genom Düzenlemesinde Biyo-Informatik Algoritmalar",
+                    Yazar = "Dr. Deniz Aksoy",
+                    Danisman = "Prof. Dr. Hakan Erdem",
+                    Tur = YayinTuru.DoktoraTezi,
+                    Universite = "Hacettepe Üniversitesi",
+                    EnstituFakulte = "Sağlık Bilimleri Enstitüsü",
+                    AnabilimDali = "Tıbbi Biyoloji ve Genetik",
+                    Yil = 2023,
+                    DOI = "10.1038/s41587-023-01890-w",
+                    AnahtarKelimeler = "CRISPR, Genom Düzenleme, Derin Öğrenme, Off-target Tahmini",
+                    Ozet = "Tıp fakültesi merkez laboratuvarlarında hedef dışı mutasyonları %99.4 doğrulukla önceden tespit eden konvolüsyonel derin öğrenme mimarisinin klinik validasyonu.",
+                    MevcutKampus = KampusLokasyonu.TipSaglikKutuphanesi,
+                    AlintiSayisi = 94,
+                    IndirmeSayisi = 2100,
+                    Dil = "Türkçe",
+                    DosyaBoyutu = "14.2 MB (PDF)"
+                },
+                new AkademikYayin
+                {
+                    Baslik = "Hukuki Yapay Zeka Sistemlerinde Telif Hakları ve Veri Madenciliği İstisnaları",
+                    Yazar = "Av. Zeynep Bilgehan",
+                    Danisman = "Prof. Dr. Mehmet Fevzi",
+                    Tur = YayinTuru.YuksekLisansTezi,
+                    Universite = "Ankara Üniversitesi",
+                    EnstituFakulte = "Sosyal Bilimler Enstitüsü",
+                    AnabilimDali = "Bilişim ve Fikri Mülkiyet Hukuku",
+                    Yil = 2025,
+                    DOI = "10.5555/jur.2025.4412",
+                    AnahtarKelimeler = "Fikri Mülkiyet, Telif, Generative AI, Veri Madenciliği, Dijital Kütüphaneler",
+                    Ozet = "Avrupa Birliği Yapay Zeka Yasası (EU AI Act) ve Türk Hukuku kapsamında akademik kütüphanelerin yapay zeka eğitim veri setlerine erişim serbestisi ve lisans modelleri.",
+                    MevcutKampus = KampusLokasyonu.SosyalBilimlerKutuphanesi,
+                    AlintiSayisi = 18,
+                    IndirmeSayisi = 640,
+                    Dil = "Türkçe",
+                    DosyaBoyutu = "4.8 MB (PDF)"
+                }
+            };
+
+            context.AkademikYayinlar.AddRange(yayinlar);
+            context.SaveChanges();
+        }
+
+        private static void SeedMateryalTransferler(KutuphaneDbContext context)
+        {
+            if (context.MateryalTransferler.Any()) return;
+
+            var uye = context.Uyeler.FirstOrDefault();
+            var kitap = context.Kitaplar.FirstOrDefault();
+            if (uye == null || kitap == null) return;
+
+            context.MateryalTransferler.Add(new MateryalTransfer
+            {
+                KitapId = kitap.Id,
+                TalepEdenUyeId = uye.Id,
+                KaynakKampus = KampusLokasyonu.MuhendislikKutuphanesi,
+                HedefKampus = KampusLokasyonu.MerkezKutuphane,
+                TalepTarihi = DateTime.Now.AddHours(-6),
+                TahminiVarisTarihi = DateTime.Now.AddHours(18),
+                Durum = TransferDurumu.Kuryede,
+                KuryeTakipKodu = "ILL-2026-TR-8842"
+            });
+
+            context.SaveChanges();
+        }
+
         private static string BCryptHash(string password)
         {
-            // Basit hash - production'da gerçek BCrypt kullanılmalı
             return Convert.ToBase64String(
                 System.Security.Cryptography.SHA256.HashData(
                     System.Text.Encoding.UTF8.GetBytes(password + "KutuphaneOtomasyonu_Salt_2024")

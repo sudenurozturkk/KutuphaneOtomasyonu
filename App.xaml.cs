@@ -43,7 +43,7 @@ namespace KutuphaneOtomasyonu
                     var testResult = SmokeTester.RunSmokeTestAsync().GetAwaiter().GetResult();
                     var testFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_result.txt");
                     File.WriteAllText(testFile, testResult);
-                    Shutdown();
+                    Environment.Exit(0);
                     return;
                 }
 

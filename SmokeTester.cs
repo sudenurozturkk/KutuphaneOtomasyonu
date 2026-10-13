@@ -83,6 +83,12 @@ namespace KutuphaneOtomasyonu
                 var p12 = new Views.Pages.MimariUmlPage();
                 results.AppendLine("[PASS] 12. MimariUmlPage basariyla olusturuldu.");
 
+                var p13 = new Views.Pages.AkademikHubPage();
+                results.AppendLine("[PASS] 13. AkademikHubPage basariyla olusturuldu.");
+
+                var p14 = new Views.Pages.KampusTransferPage();
+                results.AppendLine("[PASS] 14. KampusTransferPage basariyla olusturuldu.");
+
                 // 6. 6 Dialog Penceresinin Olusturulmasi
                 results.AppendLine("--- 6 DIYALOG PENCERESININ TESTI ---");
                 var kitap = kitaplar[0];
@@ -107,7 +113,7 @@ namespace KutuphaneOtomasyonu
                 var d6 = new Views.Pages.UyeDetayDialog(uye.Id);
                 results.AppendLine("[PASS] 6. UyeDetayDialog basariyla olusturuldu.");
 
-                // 7. MainWindow ve 12 Navigasyonun Calismasi
+                // 7. MainWindow ve 14 Navigasyonun Calismasi
                 results.AppendLine("--- MAINWINDOW VE MENÜ NAVİGASYONLARI TESTI ---");
                 var mainWindow = new Views.MainWindow();
                 results.AppendLine("[PASS] MainWindow basariyla olusturuldu.");
@@ -115,7 +121,8 @@ namespace KutuphaneOtomasyonu
                 string[] menuTags = {
                     "Dashboard", "Kitaplar", "Oduncler", "Uyeler",
                     "SalonRezervasyon", "Rezervasyonlar", "BarkodBanko",
-                    "Cuzdan", "EKitap", "Raporlar", "Ayarlar", "Mimari"
+                    "Cuzdan", "EKitap", "Raporlar", "Ayarlar",
+                    "Akademik", "KampusTransfer", "Mimari"
                 };
 
                 foreach (var tag in menuTags)
@@ -124,7 +131,7 @@ namespace KutuphaneOtomasyonu
                     results.AppendLine($"[PASS] Menu navigasyonu: '{tag}' basariyla gecis yapti.");
                 }
 
-                results.AppendLine("=== TEBRIKLER! 12 SAYFA + 6 DIYALOG + TUM NAVIGASYONLAR %100 BASARILI ===");
+                results.AppendLine("=== TEBRIKLER! 14 SAYFA + 6 DIYALOG + TUM NAVIGASYONLAR %100 BASARILI ===");
             }
             catch (Exception ex)
             {

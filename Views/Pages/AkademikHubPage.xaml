@@ -1,0 +1,272 @@
+<Page x:Class="KutuphaneOtomasyonu.Views.Pages.AkademikHubPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      Background="#080C18">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Üst Başlık & Prestij Rozeti -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="44" Height="44" CornerRadius="12" Margin="0,0,12,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0284C7" Offset="0"/>
+                            <GradientStop Color="#06B6D4" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <materialDesign:PackIcon Kind="School" Width="22" Height="22" Foreground="White"
+                                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Akademik Araştırma &amp; Tez Havuzu" FontSize="20" FontWeight="Bold" Foreground="White" FontFamily="Segoe UI"/>
+                        <Border Margin="10,0,0,0" CornerRadius="6" Padding="8,2" Background="#0C4A6E" VerticalAlignment="Center">
+                            <TextBlock Text="GLOBAL CONSORTIUM / IRIS" FontSize="9.5" FontWeight="Bold" Foreground="#38BDF8"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Doktora/Y.Lisans Tezleri, Hakemli Makaleler, DOI İndeksleri &amp; Otomatik Citation (APA, MLA, BibTeX)"
+                               FontSize="12" Foreground="#94A3B8" Margin="0,3,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Content="🔄 Yenile" Style="{StaticResource MaterialDesignOutlinedButton}"
+                        BorderBrush="#334155" Foreground="#94A3B8" Height="36" Padding="12,0" Margin="0,0,8,0"
+                        materialDesign:ButtonAssist.CornerRadius="8" Click="BtnYenile_Click"/>
+                <Button Content="➕ Yeni Tez / Makale Yükle" Height="36" Padding="14,0"
+                        materialDesign:ButtonAssist.CornerRadius="8"
+                        FontFamily="Segoe UI" FontSize="12.5" FontWeight="SemiBold"
+                        Click="BtnYeniYayin_Click">
+                    <Button.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#0284C7" Offset="0"/>
+                            <GradientStop Color="#2563EB" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Button.Background>
+                    <Button.Foreground><SolidColorBrush Color="White"/></Button.Foreground>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Arama ve Filtreleme Şeridi -->
+        <Border Grid.Row="1" Background="#0F172A" CornerRadius="12" BorderBrush="#1E293B" BorderThickness="1"
+                Padding="16,12" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="340"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="200"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Arama Kutusu -->
+                <TextBox Grid.Column="0" x:Name="txtArama" Height="40"
+                         materialDesign:HintAssist.Hint="🔍 Başlık, yazar, danışman, DOI veya anahtar kelime..."
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Foreground="White" FontFamily="Segoe UI" Margin="0,0,10,0"
+                         TextChanged="TxtArama_TextChanged"/>
+
+                <!-- Yayın Türü -->
+                <ComboBox Grid.Column="1" x:Name="cbYayinTuru" Height="40"
+                          materialDesign:HintAssist.Hint="Yayın Türü"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Foreground="White" FontFamily="Segoe UI" Margin="0,0,10,0"
+                          SelectionChanged="CbFiltre_Changed">
+                    <ComboBoxItem Content="Tüm Türler" IsSelected="True"/>
+                    <ComboBoxItem Content="Doktora Tezi"/>
+                    <ComboBoxItem Content="Yüksek Lisans Tezi"/>
+                    <ComboBoxItem Content="Hakemli Makale"/>
+                </ComboBox>
+
+                <!-- Kampüs Lokasyonu -->
+                <ComboBox Grid.Column="2" x:Name="cbKampus" Height="40"
+                          materialDesign:HintAssist.Hint="Bulunduğu Kampüs"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Foreground="White" FontFamily="Segoe UI" Margin="0,0,10,0"
+                          SelectionChanged="CbFiltre_Changed">
+                    <ComboBoxItem Content="Tüm Kampüsler" IsSelected="True"/>
+                    <ComboBoxItem Content="Merkez Kütüphane"/>
+                    <ComboBoxItem Content="Mühendislik Kütüphanesi"/>
+                    <ComboBoxItem Content="Tıp Sağlık Kütüphanesi"/>
+                    <ComboBoxItem Content="Sosyal Bilimler Kütüphanesi"/>
+                </ComboBox>
+
+                <!-- İstatistik Özeti -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border Background="#1E293B" CornerRadius="8" Padding="10,6">
+                        <TextBlock x:Name="txtSonucSayisi" Text="5 Akademik Eser" FontSize="12" FontWeight="SemiBold" Foreground="#38BDF8"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- İçerik Alanı: Sol Liste + Sağ Citation/Detay Paneli -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="380"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Akademik Eserler Tablosu -->
+            <Border Grid.Column="0" CornerRadius="12" ClipToBounds="True" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" Margin="0,0,16,0">
+                <DataGrid x:Name="dgAkademik"
+                          AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                          Background="Transparent" BorderThickness="0"
+                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#1E293B"
+                          RowBackground="Transparent" AlternatingRowBackground="#0A0F1E"
+                          Foreground="White" FontFamily="Segoe UI" RowHeight="64"
+                          SelectionChanged="DgAkademik_SelectionChanged">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                            <Setter Property="Background" Value="#060A14"/>
+                            <Setter Property="Foreground" Value="#64748B"/>
+                            <Setter Property="Padding" Value="14,12"/>
+                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="TÜR &amp; BAŞLIK" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center" Margin="8,0">
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
+                                            <Border CornerRadius="4" Padding="6,1.5" Background="#1E293B" Margin="0,0,6,0">
+                                                <TextBlock Text="{Binding Tur}" FontSize="9.5" FontWeight="Bold" Foreground="#38BDF8"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding Yil}" FontSize="11" Foreground="#64748B"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Baslik}" FontSize="13" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Yazar}" FontSize="11" Foreground="#94A3B8"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="ÜNİVERSİTE / ENSTİTÜ" Binding="{Binding Universite}" Width="190">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="#94A3B8"/>
+                                    <Setter Property="FontSize" Value="11.5"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTemplateColumn Header="KAMPÜS KONUMU" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="6" Padding="6,3" Background="#162033" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding MevcutKampus}" FontSize="10.5" Foreground="#60A5FA"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTemplateColumn Header="METRİKLER" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding AlintiSayisi, StringFormat='⭐ {0} Atıf'}" FontSize="11" Foreground="#FBBF24" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding IndirmeSayisi, StringFormat='⬇️ {0} İndirme'}" FontSize="10" Foreground="#94A3B8"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- Sağ Panel: Seçili Yayın, Citation & DOI Paneli -->
+            <Border Grid.Column="1" Background="#0F172A" CornerRadius="12" BorderBrush="#1E293B" BorderThickness="1" Padding="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="pnlDetay">
+                        <TextBlock Text="🎓 Yayın İnceleme &amp; Atıf Motoru" FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,0,0,14"/>
+
+                        <TextBlock x:Name="txtSeciliBaslik" Text="Listeden bir akademik eser seçin" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="White" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                        <TextBlock x:Name="txtSeciliYazar" Text="Yazar &amp; Danışman Bilgisi" FontSize="12" Foreground="#38BDF8" Margin="0,0,0,12"/>
+
+                        <!-- DOI Rozeti -->
+                        <Border Background="#162033" CornerRadius="8" Padding="10,6" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="LinkVariant" Width="14" Height="14" Foreground="#38BDF8" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock x:Name="txtSeciliDOI" Text="DOI: 10.1145/..." FontSize="11" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Özet (Abstract) -->
+                        <TextBlock Text="ÖZET (ABSTRACT)" FontSize="10" FontWeight="Bold" Foreground="#64748B" Margin="0,4,0,4"/>
+                        <TextBlock x:Name="txtSeciliOzet" Text="Özet metni burada görünecektir." FontSize="11.5" Foreground="#CBD5E1"
+                                   TextWrapping="Wrap" Margin="0,0,0,16" MaxHeight="110"/>
+
+                        <!-- Tek Tıkla Citation Butonları -->
+                        <TextBlock Text="OTOMATİK ALINTI / CITATION GENERATOR" FontSize="10" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,8"/>
+
+                        <!-- APA 7 -->
+                        <Button Height="36" Margin="0,0,0,8" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                BorderBrush="#334155" Foreground="White" Click="BtnKopyalaApa_Click" HorizontalContentAlignment="Stretch">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <materialDesign:PackIcon Kind="FormatQuoteClose" Width="14" Height="14" Foreground="#38BDF8" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="APA 7th Edition Kopyala" FontSize="11.5" FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <TextBlock Text="📋 Kopyala" FontSize="10.5" Foreground="#64748B" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- MLA 9 -->
+                        <Button Height="36" Margin="0,0,0,8" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                BorderBrush="#334155" Foreground="White" Click="BtnKopyalaMla_Click" HorizontalContentAlignment="Stretch">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <materialDesign:PackIcon Kind="FormatQuoteClose" Width="14" Height="14" Foreground="#A78BFA" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="MLA 9th Edition Kopyala" FontSize="11.5" FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <TextBlock Text="📋 Kopyala" FontSize="10.5" Foreground="#64748B" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- BibTeX LaTeX -->
+                        <Button Height="36" Margin="0,0,0,14" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                BorderBrush="#334155" Foreground="White" Click="BtnKopyalaBibTex_Click" HorizontalContentAlignment="Stretch">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <materialDesign:PackIcon Kind="CodeBraces" Width="14" Height="14" Foreground="#34D399" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="BibTeX (LaTeX) Kodu Al" FontSize="11.5" FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <TextBlock Text="📋 Kopyala" FontSize="10.5" Foreground="#64748B" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- Aksiyon Butonları: Tam Metin İndir & Kampüs Transferi -->
+                        <Button Height="40" Margin="0,0,0,8" materialDesign:ButtonAssist.CornerRadius="8"
+                                Background="#0284C7" Foreground="White" FontWeight="Bold" FontSize="12.5" Click="BtnTamMetinIndir_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FilePdfBox" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Tam Metin PDF İndir (Open Access)" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Height="36" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                BorderBrush="#F59E0B" Foreground="#F59E0B" materialDesign:ButtonAssist.CornerRadius="8"
+                                Click="BtnBaskaKampustenIste_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="TruckDelivery" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="Fiziksel Kopyayı Kampüsüme İste (ILL)" FontSize="11.5" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

@@ -69,6 +69,8 @@ namespace KutuphaneOtomasyonu.Views
                 "EKitap" => btnEKitap,
                 "Raporlar" => btnRaporlar,
                 "Ayarlar" => btnAyarlar,
+                "Akademik" => btnAkademik,
+                "KampusTransfer" => btnKampusTransfer,
                 "Mimari" => btnMimari,
                 _ => null
             };
@@ -84,6 +86,19 @@ namespace KutuphaneOtomasyonu.Views
                 if (tag != "Cikis")
                     SetActiveNavButton(btn);
             }
+        }
+
+        private void BtnDilDegistir_Click(object sender, RoutedEventArgs e)
+        {
+            var yeniDil = LocalizationService.Instance.AktifDil == "TR" ? "EN" : "TR";
+            LocalizationService.Instance.DilDegistir(yeniDil);
+            txtMevcutDilBayrak.Text = yeniDil == "EN" ? "🇬🇧 EN / TR" : "🇹🇷 TR / EN";
+
+            MessageBox.Show(
+                yeniDil == "EN"
+                    ? "🌐 Interface language switched to English (Global University Consortium)."
+                    : "🌐 Arayüz dili Türkçe olarak güncellendi.",
+                "Language / Dil", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void NavigateTo(string sayfa)
@@ -147,6 +162,16 @@ namespace KutuphaneOtomasyonu.Views
                     baslik = "Sistem Ayarları";
                     iconKind = "Cog";
                     MainFrame.Navigate(new AyarlarPage());
+                    break;
+                case "Akademik":
+                    baslik = "Akademik Tez & Makale Havuzu (IRIS)";
+                    iconKind = "School";
+                    MainFrame.Navigate(new AkademikHubPage());
+                    break;
+                case "KampusTransfer":
+                    baslik = "Kampüsler Arası Transfer (ILL)";
+                    iconKind = "TruckDelivery";
+                    MainFrame.Navigate(new KampusTransferPage());
                     break;
                 case "Mimari":
                     baslik = "Canlı Mimari & UML Müfettişi";
