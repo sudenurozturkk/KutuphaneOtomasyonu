@@ -32,33 +32,72 @@
             </Button>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="0,0,0,16">
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="txtArama" Width="300"
-                         materialDesign:HintAssist.Hint="🔍  Ad, soyad, öğrenci no ara..."
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         Foreground="White" FontFamily="Segoe UI" Height="44"
-                         TextChanged="TxtArama_TextChanged"/>
-                <ComboBox x:Name="cbTip" materialDesign:HintAssist.Hint="Tip"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          Width="140" Foreground="White" FontFamily="Segoe UI"
-                          SelectionChanged="CbFiltre_Changed">
-                    <ComboBoxItem Content="Tümü"/>
-                    <ComboBoxItem Content="Öğrenci"/>
-                    <ComboBoxItem Content="Akademisyen"/>
-                    <ComboBoxItem Content="Personel"/>
-                </ComboBox>
-                <ComboBox x:Name="cbDurum" materialDesign:HintAssist.Hint="Durum"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          Width="140" Foreground="White" FontFamily="Segoe UI"
-                          SelectionChanged="CbFiltre_Changed">
-                    <ComboBoxItem Content="Tümü"/>
-                    <ComboBoxItem Content="Aktif"/>
-                    <ComboBoxItem Content="Pasif"/>
-                    <ComboBoxItem Content="Askıda"/>
-                </ComboBox>
-            </StackPanel>
-        </Grid>
+        <!-- Filtreler Paneli -->
+        <Border Grid.Row="1" CornerRadius="12" Padding="14,12" Margin="0,0,0,16"
+                Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="160"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Arama Kutusu -->
+                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,10,0" Height="40">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Foreground="#64748B"
+                                                 VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" x:Name="txtArama"
+                                 materialDesign:HintAssist.Hint="Ad, soyad veya öğrenci no ara..."
+                                 materialDesign:HintAssist.IsFloating="False"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                                 BorderThickness="0" Background="Transparent"
+                                 Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                                 VerticalAlignment="Center" TextChanged="TxtArama_TextChanged"/>
+                    </Grid>
+                </Border>
+
+                <!-- Tip Filtresi -->
+                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
+                    <ComboBox x:Name="cbTip"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                        <ComboBoxItem Content="Tüm Tipler" IsSelected="True"/>
+                        <ComboBoxItem Content="Öğrenci"/>
+                        <ComboBoxItem Content="Akademisyen"/>
+                        <ComboBoxItem Content="Personel"/>
+                    </ComboBox>
+                </Border>
+
+                <!-- Durum Filtresi -->
+                <Border Grid.Column="2" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
+                    <ComboBox x:Name="cbDurum"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                        <ComboBoxItem Content="Tüm Durumlar" IsSelected="True"/>
+                        <ComboBoxItem Content="Aktif"/>
+                        <ComboBoxItem Content="Pasif"/>
+                        <ComboBoxItem Content="Askıda"/>
+                    </ComboBox>
+                </Border>
+
+                <!-- Sıfırla -->
+                <Button Grid.Column="3" Content="Sıfırla" Height="40"
+                        materialDesign:ButtonAssist.CornerRadius="10"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        BorderBrush="#334155" Foreground="#94A3B8" FontFamily="Segoe UI"
+                        Padding="14,0" Click="BtnTemizle_Click"/>
+            </Grid>
+        </Border>
 
         <Border Grid.Row="2" CornerRadius="12" ClipToBounds="True">
             <Border.Background>

@@ -52,13 +52,19 @@ namespace KutuphaneOtomasyonu.Views.Pages
                     u.Email.ToLower().Contains(arama) ||
                     u.OgrenciNo.Contains(arama));
 
-            if (tip == "Öğrenci") filtered = filtered.Where(u => u.UyeTipi == UyeTipi.Ogrenci);
-            else if (tip == "Akademisyen") filtered = filtered.Where(u => u.UyeTipi == UyeTipi.Akademisyen);
-            else if (tip == "Personel") filtered = filtered.Where(u => u.UyeTipi == UyeTipi.Personel);
+            if (tip is not null and not "Tüm Tipler")
+            {
+                if (tip == "Öğrenci")    filtered = filtered.Where(u => u.UyeTipi == UyeTipi.Ogrenci);
+                else if (tip == "Akademisyen") filtered = filtered.Where(u => u.UyeTipi == UyeTipi.Akademisyen);
+                else if (tip == "Personel") filtered = filtered.Where(u => u.UyeTipi == UyeTipi.Personel);
+            }
 
-            if (durum == "Aktif") filtered = filtered.Where(u => u.Durumu == UyeDurumu.Aktif);
-            else if (durum == "Pasif") filtered = filtered.Where(u => u.Durumu == UyeDurumu.Pasif);
-            else if (durum == "Askıda") filtered = filtered.Where(u => u.Durumu == UyeDurumu.Askida);
+            if (durum is not null and not "Tüm Durumlar")
+            {
+                if (durum == "Aktif")   filtered = filtered.Where(u => u.Durumu == UyeDurumu.Aktif);
+                else if (durum == "Pasif")  filtered = filtered.Where(u => u.Durumu == UyeDurumu.Pasif);
+                else if (durum == "Askıda") filtered = filtered.Where(u => u.Durumu == UyeDurumu.Askida);
+            }
 
             var result = filtered.ToList();
             dgUyeler.ItemsSource = result;
@@ -67,6 +73,13 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private void TxtArama_TextChanged(object sender, TextChangedEventArgs e) => Filtrele();
         private void CbFiltre_Changed(object sender, SelectionChangedEventArgs e) => Filtrele();
+
+        private void BtnTemizle_Click(object sender, RoutedEventArgs e)
+        {
+            txtArama.Clear();
+            cbTip.SelectedIndex = 0;
+            cbDurum.SelectedIndex = 0;
+        }
 
         private void BtnUyeEkle_Click(object sender, RoutedEventArgs e)
         {

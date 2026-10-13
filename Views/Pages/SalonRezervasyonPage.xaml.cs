@@ -3,220 +3,501 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace KutuphaneOtomasyonu.Views.Pages
 {
+    // ─── Veri Modelleri ───────────────────────────────────────────────────────
+
     public class MasaModel
     {
         public string Kod { get; set; } = "";
-        public string Bolum { get; set; } = "";
-        public string Durum { get; set; } = "Boş"; // Boş, Dolu, Rezerve
+        public string Bolge { get; set; } = "";        // "Sessiz", "Bireysel", "Grup", "Premium"
+        public string Durum { get; set; } = "Boş";    // Boş | Dolu | Rezerve
         public string Kapasite { get; set; } = "1 Kişilik";
         public string Ozellikler { get; set; } = "";
+        public string Kat { get; set; } = "Kat 1 · Kuzey Kanat";
         public string? RezerveEden { get; set; }
+        public string? RezerveZamanAraligi { get; set; }
     }
+
+    public class AktifRezervasyonVM
+    {
+        public string Kod { get; set; } = "";
+        public string Kisi { get; set; } = "";
+        public string Zaman { get; set; } = "";
+        public string Sure { get; set; } = "";
+    }
+
+    // ─── Sayfa ────────────────────────────────────────────────────────────────
 
     public partial class SalonRezervasyonPage : Page
     {
         private List<MasaModel> _masalar = new();
         private MasaModel? _secilenMasa;
         private Button? _secilenBtn;
+        private string _aktifSlot = "09:00 – 11:00";
+
+        private readonly DispatcherTimer _saatTimer = new()
+        {
+            Interval = TimeSpan.FromSeconds(30)
+        };
 
         public SalonRezervasyonPage()
         {
             InitializeComponent();
             MasalariOlustur();
-            ArayuzuDoldur();
+            KatPlaniniCiz();
+            AktifRezervasyonlariGuncelle();
+            SaatiGuncelle();
+
+            _saatTimer.Tick += (_, _) => SaatiGuncelle();
+            _saatTimer.Start();
         }
+
+        // ── Veri Başlangıcı ──────────────────────────────────────────────────
 
         private void MasalariOlustur()
         {
             _masalar.Clear();
 
-            // Sessiz Alan (D-101 .. D-108)
+            // 🤫 Sessiz Çalışma (D-101 … D-108)
+            var sessizDurumlar = new[] { "Boş","Dolu","Boş","Boş","Rezerve","Boş","Boş","Boş" };
+            var sessizKisiler   = new[] { null,"Zeynep Kaya",null,null,"Canan Demir",null,null,null };
             for (int i = 1; i <= 8; i++)
             {
-                var durum = i switch { 2 => "Dolu", 5 => "Rezerve", _ => "Boş" };
                 _masalar.Add(new MasaModel
                 {
-                    Kod = $"D-10{i}",
-                    Bolum = "Sessiz Çalışma Alanı",
-                    Durum = durum,
+                    Kod = $"D-{100 + i}",
+                    Bolge = "Sessiz",
+                    Durum = sessizDurumlar[i - 1],
                     Kapasite = "1 Kişilik",
-                    Ozellikler = "⚡ 220V Priz • 🪟 Pencere Kenarı • 📶 5GHz Wi-Fi",
-                    RezerveEden = durum == "Dolu" ? "Zeynep Kaya" : (durum == "Rezerve" ? "Canan Demir" : null)
+                    Ozellikler = "⚡ 220V Priz  •  📶 5GHz Wi-Fi  •  🪟 Pencere Kenarı  •  💡 LED Masa Lambası",
+                    Kat = "Kat 1 · Kuzey Kanat",
+                    RezerveEden = sessizKisiler[i - 1],
+                    RezerveZamanAraligi = sessizDurumlar[i - 1] != "Boş" ? _aktifSlot : null
                 });
             }
 
-            // Bireysel Alan (B-201 .. B-208)
+            // 💻 Bireysel PC Masaları (B-201 … B-208)
+            var bireyselDurumlar = new[] { "Dolu","Boş","Dolu","Boş","Boş","Boş","Rezerve","Boş" };
+            var bireyselKisiler  = new[] { "Emre Şahin",null,"Fatma Arslan",null,null,null,"Mert Öztürk",null };
             for (int i = 1; i <= 8; i++)
             {
-                var durum = i switch { 1 => "Dolu", 3 => "Dolu", 7 => "Rezerve", _ => "Boş" };
                 _masalar.Add(new MasaModel
                 {
-                    Kod = $"B-20{i}",
-                    Bolum = "Bireysel Çalışma Alanı",
-                    Durum = durum,
+                    Kod = $"B-{200 + i}",
+                    Bolge = "Bireysel",
+                    Durum = bireyselDurumlar[i - 1],
                     Kapasite = "1 Kişilik",
-                    Ozellikler = "⚡ 220V Priz • 🖥️ Harici Monitör • 🔌 Ethernet",
-                    RezerveEden = durum != "Boş" ? "Öğrenci Kaydı" : null
+                    Ozellikler = "⚡ 220V  •  🖥️ 24\" Harici Monitör  •  🔌 Gigabit Ethernet  •  🎧 Kulaklık Soketi",
+                    Kat = "Kat 1 · Güney Kanat",
+                    RezerveEden = bireyselKisiler[i - 1],
+                    RezerveZamanAraligi = bireyselDurumlar[i - 1] != "Boş" ? _aktifSlot : null
                 });
             }
 
-            // Grup Alan (G-301 .. G-304)
+            // 👥 Grup Odaları (G-301 … G-304)
+            var grupDurumlar = new[] { "Boş","Dolu","Boş","Boş" };
+            var grupKisiler  = new[] { null,"Yazılım Tasarım Grubu (6 kişi)",null,null };
             for (int i = 1; i <= 4; i++)
             {
-                var durum = i == 2 ? "Dolu" : "Boş";
                 _masalar.Add(new MasaModel
                 {
-                    Kod = $"G-30{i}",
-                    Bolum = "Grup Çalışma Odası",
-                    Durum = durum,
+                    Kod = $"G-{300 + i}",
+                    Bolge = "Grup",
+                    Durum = grupDurumlar[i - 1],
                     Kapasite = "6 Kişilik",
-                    Ozellikler = "📽️ 4K Projeksiyon • 📋 Manyetik Beyaz Tahta • 🔊 Ses Yalıtımlı",
-                    RezerveEden = durum == "Dolu" ? "Yazılım Tasarım Çalışma Grubu" : null
+                    Ozellikler = "📽️ 4K Projeksiyon  •  📋 Manyetik Akıllı Tahta  •  🔊 Ses Yalıtımı  •  🌐 Konferans Ağı",
+                    Kat = "Kat 2 · Batı Kanat",
+                    RezerveEden = grupKisiler[i - 1],
+                    RezerveZamanAraligi = grupDurumlar[i - 1] != "Boş" ? _aktifSlot : null
+                });
+            }
+
+            // 🏆 Premium Araştırma Kabinleri (P-401 … P-404)
+            var premiumDurumlar = new[] { "Dolu","Boş","Rezerve","Boş" };
+            var premiumKisiler  = new[] { "Prof. Dr. Ayşe Şener","", "Arş. Gör. Burak Candan","" };
+            for (int i = 1; i <= 4; i++)
+            {
+                _masalar.Add(new MasaModel
+                {
+                    Kod = $"P-{400 + i}",
+                    Bolge = "Premium",
+                    Durum = premiumDurumlar[i - 1],
+                    Kapasite = "1 Kişilik (Kabin)",
+                    Ozellikler = "🔇 Fonoabsorban Panel  •  ⚡ 220V + USB-C 140W  •  🖥️ 27\" 4K Ekran  •  📶 Özel 6GHz Wi-Fi 6E",
+                    Kat = "Kat 2 · Doğu Kanat",
+                    RezerveEden = premiumDurumlar[i - 1] != "Boş" ? premiumKisiler[i - 1] : null,
+                    RezerveZamanAraligi = premiumDurumlar[i - 1] != "Boş" ? _aktifSlot : null
                 });
             }
         }
 
-        private void ArayuzuDoldur()
-        {
-            pnlSessizAlan.Children.Clear();
-            pnlBireyselAlan.Children.Clear();
-            pnlGrupAlan.Children.Clear();
+        // ── Kat Planı Çizimi ─────────────────────────────────────────────────
 
-            int bosSayisi = _masalar.Count(m => m.Durum == "Boş");
-            txtSalonDurum.Text = $"Kat 1 - Ana Çalışma Salonu ({bosSayisi}/{_masalar.Count} Masa Müsait)";
+        private void KatPlaniniCiz()
+        {
+            gridSessiz.Children.Clear();
+            gridBireysel.Children.Clear();
+            pnlGrup.Children.Clear();
+            pnlPremium.Children.Clear();
+
+            int bosS = 0, bosB = 0, bosG = 0, bosP = 0;
 
             foreach (var masa in _masalar)
             {
-                var btn = MasaButonuUret(masa);
-                if (masa.Bolum.StartsWith("Sessiz"))
-                    pnlSessizAlan.Children.Add(btn);
-                else if (masa.Bolum.StartsWith("Bireysel"))
-                    pnlBireyselAlan.Children.Add(btn);
-                else
-                    pnlGrupAlan.Children.Add(btn);
+                var btn = MasaButonuOlustur(masa);
+
+                switch (masa.Bolge)
+                {
+                    case "Sessiz":
+                        gridSessiz.Children.Add(btn);
+                        if (masa.Durum == "Boş") bosS++;
+                        break;
+                    case "Bireysel":
+                        gridBireysel.Children.Add(btn);
+                        if (masa.Durum == "Boş") bosB++;
+                        break;
+                    case "Grup":
+                        pnlGrup.Children.Add(btn);
+                        if (masa.Durum == "Boş") bosG++;
+                        break;
+                    case "Premium":
+                        pnlPremium.Children.Add(btn);
+                        if (masa.Durum == "Boş") bosP++;
+                        break;
+                }
             }
 
-            // Varsayılan ilk boş masayı seç
+            // Sayaç metinlerini güncelle
+            txtSessizSayac.Text    = $"{bosS}/8 boş";
+            txtBireyselSayac.Text  = $"{bosB}/8 boş";
+            txtGrupSayac.Text      = $"{bosG}/4 boş";
+            txtPremiumSayac.Text   = $"{bosP}/4 boş";
+
+            int toplamBos  = _masalar.Count(m => m.Durum == "Boş");
+            int toplamMasa = _masalar.Count;
+            txtSalonDurum.Text = $"{toplamBos} / {toplamMasa} Masa Müsait";
+
+            double doluOran = Math.Round((double)(toplamMasa - toplamBos) / toplamMasa * 100);
+            txtDolulukOran.Text = $"Doluluk: %{doluOran:0}";
+
+            // Varsayılan seçim: ilk boş masa
             var ilkBos = _masalar.FirstOrDefault(m => m.Durum == "Boş") ?? _masalar[0];
             MasaSec(ilkBos, null);
         }
 
-        private Button MasaButonuUret(MasaModel masa)
+        private Button MasaButonuOlustur(MasaModel masa)
         {
-            var btn = new Button
+            bool grupMu    = masa.Bolge == "Grup";
+            bool premiumMu = masa.Bolge == "Premium";
+
+            // İkon
+            string ikon = masa.Bolge switch
             {
-                Width = masa.Kapasite.StartsWith("6") ? 130 : 96,
-                Height = 72,
-                Margin = new Thickness(0, 0, 12, 12),
-                Tag = masa,
-                Cursor = System.Windows.Input.Cursors.Hand,
-                BorderThickness = new Thickness(1.5)
+                "Sessiz"   => "🤫",
+                "Bireysel" => "💻",
+                "Grup"     => "👥",
+                "Premium"  => "🏆",
+                _          => "📌"
             };
 
-            var borderBrush = masa.Durum switch
+            // Durum rengi
+            string renk = masa.Durum switch
             {
-                "Boş" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981")),
-                "Dolu" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444")),
-                "Rezerve" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F59E0B")),
-                _ => Brushes.Gray
+                "Boş"    => "#10B981",
+                "Dolu"   => "#EF4444",
+                "Rezerve"=> "#F59E0B",
+                _        => "#94A3B8"
             };
 
-            var bgBrush = masa.Durum switch
+            // İçerik paneli
+            var sp = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center };
+
+            // Kabin ikonu
+            var tbIkon = new TextBlock
             {
-                "Boş" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#064E3B")),
-                "Dolu" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#450A0A")),
-                "Rezerve" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#451A03")),
-                _ => Brushes.DarkSlateGray
+                Text = ikon,
+                FontSize = grupMu ? 18 : premiumMu ? 16 : 13,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 2)
             };
 
-            btn.BorderBrush = borderBrush;
-            btn.Background = bgBrush;
-
-            var sp = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
             var tbKod = new TextBlock
             {
                 Text = masa.Kod,
-                FontSize = 15,
+                FontSize = grupMu ? 14 : 13,
                 FontWeight = FontWeights.Bold,
                 Foreground = Brushes.White,
                 HorizontalAlignment = HorizontalAlignment.Center
             };
+
+            // Kişi sayısı badge (grup için)
+            var tbKap = grupMu || premiumMu
+                ? new TextBlock
+                {
+                    Text = grupMu ? "6 kişilik" : "Kabin",
+                    FontSize = 10,
+                    Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#94A3B8")),
+                    HorizontalAlignment = HorizontalAlignment.Center
+                }
+                : null;
+
             var tbDurum = new TextBlock
             {
-                Text = masa.Durum,
-                FontSize = 11,
-                Foreground = borderBrush,
+                Text = masa.Durum.ToUpper(),
+                FontSize = 10,
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(renk)),
                 FontWeight = FontWeights.SemiBold,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 4, 0, 0)
+                Margin = new Thickness(0, 2, 0, 0)
             };
 
+            sp.Children.Add(tbIkon);
             sp.Children.Add(tbKod);
+            if (tbKap != null) sp.Children.Add(tbKap);
             sp.Children.Add(tbDurum);
-            btn.Content = sp;
+
+            // Buton genişlikleri
+            int genislik  = grupMu ? 155 : premiumMu ? 125 : 88;
+            int yukseklik = grupMu ? 95  : premiumMu ? 90  : 82;
+
+            // Arkaplan ve kenarlık
+            var borderColor = (Color)ColorConverter.ConvertFromString(renk);
+            var bgColor = masa.Durum switch
+            {
+                "Boş"    => Color.FromRgb(4, 47, 46),
+                "Dolu"   => Color.FromRgb(69, 10, 10),
+                "Rezerve"=> Color.FromRgb(69, 26, 3),
+                _        => Color.FromRgb(30, 41, 59)
+            };
+
+            var btn = new Button
+            {
+                Width   = genislik,
+                Height  = yukseklik,
+                Margin  = new Thickness(0, 0, 10, 10),
+                Tag     = masa,
+                Cursor  = Cursors.Hand,
+                Content = sp,
+                BorderThickness = new Thickness(1.5),
+                BorderBrush = new SolidColorBrush(borderColor),
+                Background  = new SolidColorBrush(bgColor),
+                Template    = BuildButtonTemplate(new CornerRadius(10))
+            };
 
             btn.Click += (s, e) => MasaSec(masa, btn);
             return btn;
         }
 
+        // Yuvarlak kenarlıklı buton şablonu (ControlTemplate)
+        private static ControlTemplate BuildButtonTemplate(CornerRadius radius)
+        {
+            var template = new ControlTemplate(typeof(Button));
+            var borderFactory = new FrameworkElementFactory(typeof(Border));
+            borderFactory.SetBinding(Border.BackgroundProperty, new System.Windows.Data.Binding("Background") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+            borderFactory.SetBinding(Border.BorderBrushProperty, new System.Windows.Data.Binding("BorderBrush") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+            borderFactory.SetBinding(Border.BorderThicknessProperty, new System.Windows.Data.Binding("BorderThickness") { RelativeSource = new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.TemplatedParent) });
+            borderFactory.SetValue(Border.CornerRadiusProperty, radius);
+            var cpFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            cpFactory.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            cpFactory.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+            borderFactory.AppendChild(cpFactory);
+            template.VisualTree = borderFactory;
+            return template;
+        }
+
+        // ── Masa Seçimi ──────────────────────────────────────────────────────
+
         private void MasaSec(MasaModel masa, Button? btn)
         {
-            _secilenMasa = masa;
-            _secilenBtn = btn;
-
-            txtMasaKodu.Text = masa.Kod;
-            txtMasaBolum.Text = $"Bölüm: {masa.Bolum}";
-            txtMasaKapasite.Text = $"Kapasite: {masa.Kapasite}";
-            txtMasaOzellikler.Text = masa.Ozellikler;
-
-            txtMasaDurumBadge.Text = masa.Durum.ToUpper();
-            bdMasaDurum.Background = masa.Durum switch
+            // Önceki seçimi sıfırla
+            if (_secilenBtn != null)
             {
-                "Boş" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#10B981")),
-                "Dolu" => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EF4444")),
-                _ => new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F59E0B"))
-            };
+                var oncekiMasa = _secilenBtn.Tag as MasaModel;
+                if (oncekiMasa != null) _secilenBtn = null;
+            }
 
-            btnRezerveEt.IsEnabled = (masa.Durum == "Boş");
-            btnIptalEt.IsEnabled = (masa.Durum != "Boş");
+            _secilenMasa = masa;
+            _secilenBtn  = btn;
+
+            // Sağ Panel güncelle
+            txtMasaKodu.Text    = masa.Kod;
+            txtMasaBolum.Text   = masa.Bolge switch
+            {
+                "Sessiz"   => "🤫  Sessiz Çalışma Bölgesi",
+                "Bireysel" => "💻  Bireysel Bilgisayar Masaları",
+                "Grup"     => "👥  Grup Çalışma Odası",
+                "Premium"  => "🏆  Premium Araştırma Kabini",
+                _          => masa.Bolge
+            };
+            txtKapasite.Text    = masa.Kapasite;
+            txtKat.Text         = masa.Kat;
+            txtOzellikler.Text  = masa.Ozellikler;
+
+            // Durum badge
+            (string badgeText, string bgHex, string fgHex) = masa.Durum switch
+            {
+                "Boş"    => ("✅  MÜSAIT", "#064E3B", "#34D399"),
+                "Dolu"   => ("🔴  DOLU",   "#450A0A", "#FCA5A5"),
+                "Rezerve"=> ("🟡  REZERVE","#451A03", "#FCD34D"),
+                _        => ("❓ BILINMIYOR","#1E293B","#94A3B8")
+            };
+            txtDurumBadge.Text = badgeText;
+            bdDurumBadge.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(bgHex));
+            txtDurumBadge.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(fgHex));
+
+            // Rezerve eden
+            if (!string.IsNullOrWhiteSpace(masa.RezerveEden))
+            {
+                bdRezerveEden.Visibility = Visibility.Visible;
+                txtRezerveEden.Text = $"{masa.RezerveEden}  •  {masa.RezerveZamanAraligi}";
+            }
+            else
+            {
+                bdRezerveEden.Visibility = Visibility.Collapsed;
+            }
+
+            // Buton durumları
+            btnRezerveEt.IsEnabled = masa.Durum == "Boş";
+            btnIptalEt.IsEnabled   = masa.Durum != "Boş";
+
+            // Seçili butonun görünümünü vurgula (arka plan mavi border)
+            if (btn != null)
+            {
+                btn.BorderBrush     = new SolidColorBrush(Color.FromRgb(56, 189, 248)); // #38BDF8
+                btn.BorderThickness = new Thickness(2.5);
+                btn.Background      = new SolidColorBrush(Color.FromRgb(8, 47, 78));   // #082F4E
+            }
         }
+
+        // ── Rezervasyon İşlemleri ────────────────────────────────────────────
 
         private void BtnRezerveEt_Click(object sender, RoutedEventArgs e)
         {
             if (_secilenMasa == null) return;
             if (_secilenMasa.Durum != "Boş")
             {
-                MessageBox.Show("Bu masa zaten dolu veya rezerve!", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Bu masa zaten dolu veya rezerve edilmiş.\nLütfen başka bir masa seçin.",
+                    "Masa Müsait Değil", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var sure = (cbSure.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Standart";
+            string kisi = txtKullanici.Text.Trim();
+            if (string.IsNullOrWhiteSpace(kisi))
+            {
+                MessageBox.Show("Lütfen rezervasyonu yapacak kişinin adını veya öğrenci numarasını girin.",
+                    "Eksik Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+                txtKullanici.Focus();
+                return;
+            }
+
+            var sure = (cbSure.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "2 Saat";
+            var amac = txtAkademikNot.Text.Trim();
+            string amacBilgi = string.IsNullOrWhiteSpace(amac) ? "" : $"\nAmaç: {amac}";
+
+            var onay = MessageBox.Show(
+                $"Aşağıdaki rezervasyon oluşturulsun mu?\n\n" +
+                $"📌 Masa       : {_secilenMasa.Kod} — {_secilenMasa.Bolge}\n" +
+                $"👤 Kişi       : {kisi}\n" +
+                $"⏱️ Süre       : {sure}\n" +
+                $"📅 Zaman Dilimi: {_aktifSlot}" +
+                amacBilgi,
+                "Rezervasyonu Onayla", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (onay != MessageBoxResult.Yes) return;
+
             _secilenMasa.Durum = "Rezerve";
-            _secilenMasa.RezerveEden = "Aktif Kullanıcı";
+            _secilenMasa.RezerveEden = kisi;
+            _secilenMasa.RezerveZamanAraligi = _aktifSlot;
 
-            MessageBox.Show($"Tebrikler! {_secilenMasa.Kod} numaralı masa {sure} süresince adınıza rezerve edildi.",
-                "Rezervasyon Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+            KatPlaniniCiz();
+            AktifRezervasyonlariGuncelle();
+            txtKullanici.Clear();
+            txtAkademikNot.Clear();
 
-            ArayuzuDoldur();
+            MessageBox.Show(
+                $"✅ Rezervasyon başarıyla oluşturuldu!\n\n" +
+                $"Masa {_secilenMasa.Kod} • {_aktifSlot}\n{kisi} adına {sure} süresince ayrıldı.",
+                "Rezervasyon Tamamlandı", MessageBoxButton.OK, MessageBoxImage.None);
         }
 
         private void BtnIptalEt_Click(object sender, RoutedEventArgs e)
         {
             if (_secilenMasa == null) return;
-            var sonuc = MessageBox.Show($"{_secilenMasa.Kod} numaralı masanın rezervasyonunu iptal edip boşaltmak istiyor musunuz?",
-                "Masa Boşalt", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            if (sonuc == MessageBoxResult.Yes)
+            var sonuc = MessageBox.Show(
+                $"{_secilenMasa.Kod} numaralı masanın rezervasyonu iptal edilsin mi?\n" +
+                $"Kullanan: {_secilenMasa.RezerveEden ?? "—"}\n\n" +
+                "Masa tüm öğrencilere açılacaktır.",
+                "Rezervasyonu İptal Et", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (sonuc != MessageBoxResult.Yes) return;
+
+            _secilenMasa.Durum = "Boş";
+            _secilenMasa.RezerveEden = null;
+            _secilenMasa.RezerveZamanAraligi = null;
+
+            KatPlaniniCiz();
+            AktifRezervasyonlariGuncelle();
+
+            MessageBox.Show($"{_secilenMasa.Kod} masası başarıyla boşaltıldı ve kullanıma açıldı.",
+                "Masa Boşaltıldı", MessageBoxButton.OK, MessageBoxImage.None);
+        }
+
+        // ── Zaman Dilimi Seçici ──────────────────────────────────────────────
+
+        private void BdSlot_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is not Border clickedBorder) return;
+            _aktifSlot = clickedBorder.Tag?.ToString() ?? _aktifSlot;
+
+            // Tüm slot sınırlarını sıfırla
+            var slots = new[] { bdSlot1, bdSlot2, bdSlot3, bdSlot4, bdSlot5, bdSlot6 };
+            foreach (var slot in slots)
             {
-                _secilenMasa.Durum = "Boş";
-                _secilenMasa.RezerveEden = null;
-                MessageBox.Show($"{_secilenMasa.Kod} masası başarıyla boşaltıldı ve kullanıma açıldı.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
-                ArayuzuDoldur();
+                slot.Background = new SolidColorBrush(Color.FromRgb(22, 32, 50));
+                if (slot.Child is TextBlock tb) tb.Foreground = new SolidColorBrush(Color.FromRgb(100, 116, 139));
             }
+
+            // Seçili slot
+            clickedBorder.Background = new SolidColorBrush(Color.FromRgb(15, 42, 74));
+            if (clickedBorder.Child is TextBlock selTb)
+            {
+                selTb.Foreground = new SolidColorBrush(Color.FromRgb(56, 189, 248));
+                selTb.FontWeight = FontWeights.SemiBold;
+            }
+        }
+
+        // ── Aktif Rezervasyonlar Listesi ─────────────────────────────────────
+
+        private void AktifRezervasyonlariGuncelle()
+        {
+            var aktif = _masalar
+                .Where(m => m.Durum != "Boş" && !string.IsNullOrWhiteSpace(m.RezerveEden))
+                .Select(m => new AktifRezervasyonVM
+                {
+                    Kod   = m.Kod,
+                    Kisi  = m.RezerveEden ?? "—",
+                    Zaman = m.RezerveZamanAraligi ?? _aktifSlot,
+                    Sure  = m.Durum == "Dolu" ? "Aktif" : "Rezerve"
+                })
+                .ToList();
+
+            lstAktifRezervasyonlar.ItemsSource = aktif;
+        }
+
+        // ── Saat Güncelleme ──────────────────────────────────────────────────
+
+        private void SaatiGuncelle()
+        {
+            var simdi = DateTime.Now;
+            txtSaat.Text  = simdi.ToString("HH:mm");
+            txtTarih.Text = simdi.ToString("dddd, d MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"));
         }
     }
 }

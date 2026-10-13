@@ -58,7 +58,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
                     r.Id.ToString().Contains(arama));
             }
 
-            if (durumSecim != null && durumSecim != "Tümü")
+            if (durumSecim != null && durumSecim != "Tüm Durumlar")
             {
                 filtered = filtered.Where(r => r.Durumu.ToString().Equals(durumSecim, StringComparison.OrdinalIgnoreCase));
             }

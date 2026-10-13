@@ -60,50 +60,64 @@
                 Padding="16,12" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="340"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="180"/>
                     <ColumnDefinition Width="200"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- Arama Kutusu -->
-                <TextBox Grid.Column="0" x:Name="txtArama" Height="40"
-                         materialDesign:HintAssist.Hint="🔍 Başlık, yazar, danışman, DOI veya anahtar kelime..."
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         Foreground="White" FontFamily="Segoe UI" Margin="0,0,10,0"
-                         TextChanged="TxtArama_TextChanged"/>
+                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,10,0" Height="40">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Foreground="#64748B"
+                                                 VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" x:Name="txtArama"
+                                 materialDesign:HintAssist.Hint="Başlık, yazar, danışman, DOI veya anahtar kelime..."
+                                 materialDesign:HintAssist.IsFloating="False"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                                 BorderThickness="0" Background="Transparent"
+                                 Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                                 VerticalAlignment="Center" TextChanged="TxtArama_TextChanged"/>
+                    </Grid>
+                </Border>
 
                 <!-- Yayın Türü -->
-                <ComboBox Grid.Column="1" x:Name="cbYayinTuru" Height="40"
-                          materialDesign:HintAssist.Hint="Yayın Türü"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          Foreground="White" FontFamily="Segoe UI" Margin="0,0,10,0"
-                          SelectionChanged="CbFiltre_Changed">
-                    <ComboBoxItem Content="Tüm Türler" IsSelected="True"/>
-                    <ComboBoxItem Content="Doktora Tezi"/>
-                    <ComboBoxItem Content="Yüksek Lisans Tezi"/>
-                    <ComboBoxItem Content="Hakemli Makale"/>
-                </ComboBox>
+                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
+                    <ComboBox x:Name="cbYayinTuru"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                        <ComboBoxItem Content="Tüm Türler" IsSelected="True"/>
+                        <ComboBoxItem Content="Doktora Tezi"/>
+                        <ComboBoxItem Content="Yüksek Lisans Tezi"/>
+                        <ComboBoxItem Content="Hakemli Makale"/>
+                    </ComboBox>
+                </Border>
 
                 <!-- Kampüs Lokasyonu -->
-                <ComboBox Grid.Column="2" x:Name="cbKampus" Height="40"
-                          materialDesign:HintAssist.Hint="Bulunduğu Kampüs"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          Foreground="White" FontFamily="Segoe UI" Margin="0,0,10,0"
-                          SelectionChanged="CbFiltre_Changed">
-                    <ComboBoxItem Content="Tüm Kampüsler" IsSelected="True"/>
-                    <ComboBoxItem Content="Merkez Kütüphane"/>
-                    <ComboBoxItem Content="Mühendislik Kütüphanesi"/>
-                    <ComboBoxItem Content="Tıp Sağlık Kütüphanesi"/>
-                    <ComboBoxItem Content="Sosyal Bilimler Kütüphanesi"/>
-                </ComboBox>
+                <Border Grid.Column="2" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
+                    <ComboBox x:Name="cbKampus"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                        <ComboBoxItem Content="Tüm Kampüsler" IsSelected="True"/>
+                        <ComboBoxItem Content="Merkez Kütüphane"/>
+                        <ComboBoxItem Content="Mühendislik Kütüphanesi"/>
+                        <ComboBoxItem Content="Tıp Sağlık Kütüphanesi"/>
+                        <ComboBoxItem Content="Sosyal Bilimler Kütüphanesi"/>
+                    </ComboBox>
+                </Border>
 
                 <!-- İstatistik Özeti -->
-                <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Border Background="#1E293B" CornerRadius="8" Padding="10,6">
-                        <TextBlock x:Name="txtSonucSayisi" Text="5 Akademik Eser" FontSize="12" FontWeight="SemiBold" Foreground="#38BDF8"/>
-                    </Border>
-                </StackPanel>
+                <Border Grid.Column="3" Background="#1E293B" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+                    <TextBlock x:Name="txtSonucSayisi" Text="5 Akademik Eser" FontSize="12" FontWeight="SemiBold" Foreground="#38BDF8"/>
+                </Border>
             </Grid>
         </Border>
 

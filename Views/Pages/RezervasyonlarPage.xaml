@@ -50,37 +50,63 @@
         </Grid>
 
         <!-- Filtre ve Arama Araç Çubuğu -->
-        <Grid Grid.Row="1" Margin="0,0,0,14">
-            <StackPanel Orientation="Horizontal">
-                <TextBox x:Name="txtArama" Width="280" Height="38"
-                         materialDesign:HintAssist.Hint="🔍 Kitap veya üye ara..."
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         Foreground="White" FontFamily="Segoe UI" Margin="0,0,10,0"
-                         TextChanged="TxtArama_TextChanged"/>
-                <ComboBox x:Name="cbFiltreDurum" Width="160" Height="38"
-                          materialDesign:HintAssist.Hint="Durum Filtresi"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                          Foreground="White" FontFamily="Segoe UI"
-                          SelectionChanged="CbFiltreDurum_SelectionChanged">
-                    <ComboBoxItem Content="Tümü" IsSelected="True"/>
-                    <ComboBoxItem Content="Bekliyor"/>
-                    <ComboBoxItem Content="Onaylandı"/>
-                    <ComboBoxItem Content="Tamamlandı"/>
-                    <ComboBoxItem Content="İptal"/>
-                </ComboBox>
-            </StackPanel>
+        <Border Grid.Row="1" CornerRadius="12" Padding="14,10" Margin="0,0,0,14"
+                Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="btnOdunceDonustur" Content="✓ Ödünce Dönüştür" Height="36" Padding="12,0"
-                        materialDesign:ButtonAssist.CornerRadius="8" Margin="0,0,8,0"
-                        Background="#059669" Foreground="White" FontWeight="SemiBold"
-                        Click="BtnOdunceDonustur_Click" IsEnabled="False"/>
-                <Button x:Name="btnIptalEt" Content="✕ Sırayı İptal Et" Height="36" Padding="12,0"
-                        materialDesign:ButtonAssist.CornerRadius="8"
-                        Background="#7F1D1D" Foreground="#FCA5A5" FontWeight="SemiBold"
-                        Click="BtnIptalEt_Click" IsEnabled="False"/>
-            </StackPanel>
-        </Grid>
+                <!-- Arama Kutusu -->
+                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,10,0" Height="40">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Foreground="#64748B"
+                                                 VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" x:Name="txtArama"
+                                 materialDesign:HintAssist.Hint="Kitap başlığı veya üye adı ara..."
+                                 materialDesign:HintAssist.IsFloating="False"
+                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                                 BorderThickness="0" Background="Transparent"
+                                 Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                                 VerticalAlignment="Center" TextChanged="TxtArama_TextChanged"/>
+                    </Grid>
+                </Border>
+
+                <!-- Durum Filtresi -->
+                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
+                    <ComboBox x:Name="cbFiltreDurum"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center"
+                              SelectionChanged="CbFiltreDurum_SelectionChanged">
+                        <ComboBoxItem Content="Tüm Durumlar" IsSelected="True"/>
+                        <ComboBoxItem Content="Bekliyor"/>
+                        <ComboBoxItem Content="Onaylandı"/>
+                        <ComboBoxItem Content="Tamamlandı"/>
+                        <ComboBoxItem Content="İptal"/>
+                    </ComboBox>
+                </Border>
+
+                <!-- Eylem Butonları -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="btnOdunceDonustur" Content="✓ Ödünce Dönüştür" Height="40" Padding="12,0" Margin="0,0,8,0"
+                            materialDesign:ButtonAssist.CornerRadius="8"
+                            Background="#059669" Foreground="White" FontWeight="SemiBold"
+                            Click="BtnOdunceDonustur_Click" IsEnabled="False"/>
+                    <Button x:Name="btnIptalEt" Content="✕ Sırayı İptal Et" Height="40" Padding="12,0"
+                            materialDesign:ButtonAssist.CornerRadius="8"
+                            Background="#7F1D1D" Foreground="#FCA5A5" FontWeight="SemiBold"
+                            Click="BtnIptalEt_Click" IsEnabled="False"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!-- Liste Kartı -->
         <Border Grid.Row="2" CornerRadius="12" ClipToBounds="True" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1">

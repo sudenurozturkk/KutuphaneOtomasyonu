@@ -27,14 +27,19 @@
 
             <!-- Okuyucu Araç Çubuğu -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <ComboBox x:Name="cbKitapSecimi" Width="240" Height="40" Margin="0,0,10,0"
-                          Style="{StaticResource MaterialDesignOutlinedComboBox}" Foreground="White"
-                          SelectionChanged="CbKitapSecimi_SelectionChanged">
-                    <ComboBoxItem Content="Temiz Kod (Clean Code)" IsSelected="True"/>
-                    <ComboBoxItem Content="Tasarım Desenleri (GoF)"/>
-                    <ComboBoxItem Content="Algoritmalar &amp; Veri Yapıları"/>
-                    <ComboBoxItem Content="Yapay Zeka: Modern Yaklaşım"/>
-                </ComboBox>
+                <Border Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40" Width="240">
+                    <ComboBox x:Name="cbKitapSecimi"
+                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
+                              BorderThickness="0" Background="Transparent"
+                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
+                              VerticalAlignment="Center"
+                              SelectionChanged="CbKitapSecimi_SelectionChanged">
+                        <ComboBoxItem Content="Temiz Kod (Clean Code)" IsSelected="True"/>
+                        <ComboBoxItem Content="Tasarım Desenleri (GoF)"/>
+                        <ComboBoxItem Content="Algoritmalar &amp; Veri Yapıları"/>
+                        <ComboBoxItem Content="Yapay Zeka: Modern Yaklaşım"/>
+                    </ComboBox>
+                </Border>
 
                 <Button x:Name="btnFontKucult" Content="A-" Width="42" Height="40" Margin="0,0,4,0"
                         Style="{StaticResource MaterialDesignOutlinedButton}"
