@@ -102,7 +102,47 @@
             <Style x:Key="ModernTextBox" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
                 <Setter Property="FontFamily" Value="{StaticResource PrimaryFont}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="12,4"/>
+                <Setter Property="MinHeight" Value="44"/>
+                <Setter Property="materialDesign:HintAssist.IsFloating" Value="False"/>
             </Style>
+            <Style x:Key="ModernComboBox" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+                <Setter Property="FontFamily" Value="{StaticResource PrimaryFont}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="10,4"/>
+                <Setter Property="MinHeight" Value="44"/>
+                <Setter Property="ItemContainerStyle">
+                    <Setter.Value>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="8,4"/>
+                            <Setter Property="MinHeight" Value="32"/>
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Koyu arama ve filtre alanlarinda Material Design ic bosluklarini korur. -->
+            <Style x:Key="SearchTextBox" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="8,0"/>
+                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="SearchComboBox" TargetType="ComboBox" BasedOn="{StaticResource ModernComboBox}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="8,0"/>
+                <Setter Property="MinHeight" Value="40"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+
+            <!-- Material Design alanlarında metnin kırpılmasını önleyen varsayılan ölçüler -->
+            <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}"/>
+            <Style TargetType="ComboBox" BasedOn="{StaticResource ModernComboBox}"/>
 
         </ResourceDictionary>
     </Application.Resources>

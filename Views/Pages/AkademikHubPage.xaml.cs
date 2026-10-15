@@ -101,7 +101,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void BtnKopyalaApa_Click(object sender, RoutedEventArgs e)
         {
-            if (_seciliYayin == null) return;
+            if (!YayinSeciliMi()) return;
             Clipboard.SetText(_seciliYayin.ApaCitation);
             await AlintiKaydet();
             MessageBox.Show($"✅ APA 7th Edition formatındaki akademik alıntı panoya kopyalandı:\n\n{_seciliYayin.ApaCitation}",
@@ -110,7 +110,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void BtnKopyalaMla_Click(object sender, RoutedEventArgs e)
         {
-            if (_seciliYayin == null) return;
+            if (!YayinSeciliMi()) return;
             Clipboard.SetText(_seciliYayin.MlaCitation);
             await AlintiKaydet();
             MessageBox.Show($"✅ MLA 9th Edition formatındaki akademik alıntı panoya kopyalandı:\n\n{_seciliYayin.MlaCitation}",
@@ -119,7 +119,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void BtnKopyalaBibTex_Click(object sender, RoutedEventArgs e)
         {
-            if (_seciliYayin == null) return;
+            if (!YayinSeciliMi()) return;
             Clipboard.SetText(_seciliYayin.BibTexCitation);
             await AlintiKaydet();
             MessageBox.Show($"✅ LaTeX için BibTeX formatı panoya kopyalandı:\n\n{_seciliYayin.BibTexCitation}",
@@ -136,12 +136,16 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 await service.AlintiArtirAsync(_seciliYayin.Id);
                 _seciliYayin.AlintiSayisi++;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Atıf sayısı güncellenemedi: {ex.Message}", "Uyarı",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private async void BtnTamMetinIndir_Click(object sender, RoutedEventArgs e)
         {
-            if (_seciliYayin == null) return;
+            if (!YayinSeciliMi()) return;
             try
             {
                 using var context = new KutuphaneDbContext();
@@ -160,7 +164,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void BtnBaskaKampustenIste_Click(object sender, RoutedEventArgs e)
         {
-            if (_seciliYayin == null) return;
+            if (!YayinSeciliMi()) return;
 
             var onay = MessageBox.Show($"'{_seciliYayin.Baslik}' eserinin basılı kopyasını {_seciliYayin.MevcutKampus} şubesinden Merkez Kütüphane'ye kurye ile transfer etmek istiyor musunuz?",
                 "Inter-Library Loan (ILL) Talebi", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -188,37 +192,22 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void BtnYeniYayin_Click(object sender, RoutedEventArgs e)
         {
-            try
+            var dialog = new AkademikYayinEkleDialog
             {
-                using var context = new KutuphaneDbContext();
-                var yeni = new AkademikYayin
-                {
-                    Baslik = $"Quantum-Resistant Cryptography in Autonomous IoT Libraries #{Random.Shared.Next(100, 999)}",
-                    Yazar = AuthService.Instance.AktifKullanici?.TamAd ?? "Dr. Araştırmacı",
-                    Danisman = "Prof. Dr. Hakan Erdem",
-                    Tur = YayinTuru.HakemliMakale,
-                    Universite = "Global University Consortium",
-                    EnstituFakulte = "Bilgisayar Bilimleri",
-                    AnabilimDali = "Siber Güvenlik",
-                    Yil = DateTime.Now.Year,
-                    DOI = $"10.1109/TIFS.2026.{Random.Shared.Next(10000, 99999)}",
-                    AnahtarKelimeler = "Post-Quantum, Kyber, Dilithium, IoT Security",
-                    Ozet = "Uluslararası standartlarda kuantum sonrası kriptografik algoritmaların kütüphane ve kampus IoT sensör ağlarına entegrasyonu.",
-                    MevcutKampus = KampusLokasyonu.MerkezKutuphane,
-                    AlintiSayisi = 0,
-                    IndirmeSayisi = 1
-                };
-
-                context.AkademikYayinlar.Add(yeni);
-                await context.SaveChangesAsync();
-
-                MessageBox.Show($"Yeni akademik yayın başarıyla indekslendi ve arşive eklendi!\nDOI: {yeni.DOI}", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+                Owner = Window.GetWindow(this)
+            };
+            if (dialog.ShowDialog() == true)
                 await VeriYukle();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Kayıt eklenemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+        }
+
+        private bool YayinSeciliMi()
+        {
+            if (_seciliYayin != null)
+                return true;
+
+            MessageBox.Show("Önce listeden bir akademik eser seçin.", "Seçim Gerekli",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return false;
         }
     }
 }

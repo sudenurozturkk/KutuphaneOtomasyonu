@@ -18,7 +18,7 @@
                     <TextBlock x:Name="txtUyeSayisi" Text="0 üye" FontSize="13" Foreground="#8B5CF6" FontFamily="Segoe UI"/>
                 </Border>
             </StackPanel>
-            <Button Content="＋  Üye Ekle" HorizontalAlignment="Right" Height="40" Padding="16,0"
+            <Button Content="ï¼‹  Üye Ekle" HorizontalAlignment="Right" Height="40" Padding="16,0"
                     materialDesign:ButtonAssist.CornerRadius="10"
                     FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold"
                     Click="BtnUyeEkle_Click">
@@ -44,7 +44,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Arama Kutusu -->
-                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,10,0" Height="40">
+                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,10,0" Height="44">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -52,23 +52,25 @@
                         </Grid.ColumnDefinitions>
                         <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Foreground="#64748B"
                                                  VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBox Grid.Column="1" x:Name="txtArama"
+                        <TextBox Grid.Column="1" x:Name="txtArama" Style="{StaticResource SearchTextBox}"
                                  materialDesign:HintAssist.Hint="Ad, soyad veya öğrenci no ara..."
                                  materialDesign:HintAssist.IsFloating="False"
                                  materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
                                  BorderThickness="0" Background="Transparent"
                                  Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                                 VerticalAlignment="Center" TextChanged="TxtArama_TextChanged"/>
+                                 VerticalAlignment="Center" VerticalContentAlignment="Center"
+                                 TextChanged="TxtArama_TextChanged"/>
                     </Grid>
                 </Border>
 
                 <!-- Tip Filtresi -->
-                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
-                    <ComboBox x:Name="cbTip"
+                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="44">
+                    <ComboBox x:Name="cbTip" Style="{StaticResource SearchComboBox}"
                               materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
                               BorderThickness="0" Background="Transparent"
                               Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                              VerticalAlignment="Center" VerticalContentAlignment="Center"
+                              SelectionChanged="CbFiltre_Changed">
                         <ComboBoxItem Content="Tüm Tipler" IsSelected="True"/>
                         <ComboBoxItem Content="Öğrenci"/>
                         <ComboBoxItem Content="Akademisyen"/>
@@ -77,12 +79,13 @@
                 </Border>
 
                 <!-- Durum Filtresi -->
-                <Border Grid.Column="2" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
-                    <ComboBox x:Name="cbDurum"
+                <Border Grid.Column="2" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="44">
+                    <ComboBox x:Name="cbDurum" Style="{StaticResource SearchComboBox}"
                               materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
                               BorderThickness="0" Background="Transparent"
                               Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                              VerticalAlignment="Center" SelectionChanged="CbFiltre_Changed">
+                              VerticalAlignment="Center" VerticalContentAlignment="Center"
+                              SelectionChanged="CbFiltre_Changed">
                         <ComboBoxItem Content="Tüm Durumlar" IsSelected="True"/>
                         <ComboBoxItem Content="Aktif"/>
                         <ComboBoxItem Content="Pasif"/>

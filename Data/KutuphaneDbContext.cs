@@ -25,6 +25,7 @@ namespace KutuphaneOtomasyonu.Data
         public DbSet<AktiviteLog> AktiviteLoglar { get; set; }
         public DbSet<AkademikYayin> AkademikYayinlar { get; set; }
         public DbSet<MateryalTransfer> MateryalTransferler { get; set; }
+        public DbSet<SalonRezervasyonu> SalonRezervasyonlari { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -126,6 +127,11 @@ namespace KutuphaneOtomasyonu.Data
             modelBuilder.Entity<CezaKaydi>()
                 .Property(c => c.Tutar)
                 .HasColumnType("decimal(10,2)");
+
+            modelBuilder.Entity<SalonRezervasyonu>()
+                .HasIndex(r => new { r.MasaKodu, r.Tarih, r.ZamanAraligi })
+                .IsUnique()
+                .HasFilter("[Durum] = 'Aktif'");
         }
     }
 }

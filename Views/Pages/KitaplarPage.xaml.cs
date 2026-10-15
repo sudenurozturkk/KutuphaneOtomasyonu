@@ -15,10 +15,12 @@ namespace KutuphaneOtomasyonu.Views.Pages
     {
         private List<Kitap> _tumKitaplar = new();
         private KitapService? _kitapService;
+        private bool _isInitialized;
 
         public KitaplarPage()
         {
             InitializeComponent();
+            _isInitialized = true;
             Loaded += KitaplarPage_Loaded;
         }
 
@@ -52,7 +54,8 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private void Filtrele()
         {
-            if (!IsLoaded || dgKitaplar == null || txtKitapSayisi == null || cbKategori == null || cbDil == null || cbDurum == null)
+            if (!_isInitialized || !IsLoaded || dgKitaplar == null || txtKitapSayisi == null ||
+                txtArama == null || cbKategori == null || cbDil == null || cbDurum == null)
                 return;
 
             var arama = txtArama?.Text?.Trim().ToLower() ?? "";

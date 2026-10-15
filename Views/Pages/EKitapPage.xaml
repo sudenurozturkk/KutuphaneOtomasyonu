@@ -28,7 +28,7 @@
             <!-- Okuyucu Araç Çubuğu -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <Border Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40" Width="240">
-                    <ComboBox x:Name="cbKitapSecimi"
+                    <ComboBox x:Name="cbKitapSecimi" Style="{StaticResource ModernComboBox}"
                               materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
                               BorderThickness="0" Background="Transparent"
                               Foreground="White" FontFamily="Segoe UI" FontSize="13"

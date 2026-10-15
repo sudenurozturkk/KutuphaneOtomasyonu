@@ -66,23 +66,23 @@
                         </StackPanel>
 
                         <TextBlock Text="Kütüphane Adı" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                        <TextBox x:Name="txtKutuphaneAdi" Height="42" Foreground="White" Margin="0,0,0,14"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        <TextBox x:Name="txtKutuphaneAdi" Foreground="White" Margin="0,0,0,14"
+                                 Style="{StaticResource ModernTextBox}"
                                  materialDesign:HintAssist.Hint="Kütüphane adını girin"/>
 
                         <TextBlock Text="E-Posta Adresi" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                        <TextBox x:Name="txtEmail" Height="42" Foreground="White" Margin="0,0,0,14"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        <TextBox x:Name="txtEmail" Foreground="White" Margin="0,0,0,14"
+                                 Style="{StaticResource ModernTextBox}"
                                  materialDesign:HintAssist.Hint="ornek@kutuphane.edu.tr"/>
 
                         <TextBlock Text="Telefon Numarası" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                        <TextBox x:Name="txtTelefon" Height="42" Foreground="White" Margin="0,0,0,14"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        <TextBox x:Name="txtTelefon" Foreground="White" Margin="0,0,0,14"
+                                 Style="{StaticResource ModernTextBox}"
                                  materialDesign:HintAssist.Hint="+90 212 000 00 00"/>
 
                         <TextBlock Text="Fiziksel Adres" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                        <TextBox x:Name="txtAdres" Height="42" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        <TextBox x:Name="txtAdres" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"
                                  materialDesign:HintAssist.Hint="Kütüphane adresi"/>
                     </StackPanel>
                 </Border>
@@ -120,14 +120,14 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
                                 <TextBlock Text="Maks. Ödünç Süresi (Gün)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                                <TextBox x:Name="txtMaxSure" Height="42" Foreground="White"
-                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                <TextBox x:Name="txtMaxSure" Foreground="White"
+                                         Style="{StaticResource ModernTextBox}"
                                          materialDesign:HintAssist.Hint="14"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                 <TextBlock Text="Maks. Ödünç Adedi (Kitap)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                                <TextBox x:Name="txtMaxAdet" Height="42" Foreground="White"
-                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                <TextBox x:Name="txtMaxAdet" Foreground="White"
+                                         Style="{StaticResource ModernTextBox}"
                                          materialDesign:HintAssist.Hint="3"/>
                             </StackPanel>
                         </Grid>
@@ -139,21 +139,21 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="0,0,6,0">
                                 <TextBlock Text="Günlük Gecikme Cezası (₺)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                                <TextBox x:Name="txtGunlukCeza" Height="42" Foreground="White"
-                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                <TextBox x:Name="txtGunlukCeza" Foreground="White"
+                                         Style="{StaticResource ModernTextBox}"
                                          materialDesign:HintAssist.Hint="5.00"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                 <TextBlock Text="Maks. Uzatma Sayısı" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                                <TextBox x:Name="txtMaxUzatma" Height="42" Foreground="White"
-                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                <TextBox x:Name="txtMaxUzatma" Foreground="White"
+                                         Style="{StaticResource ModernTextBox}"
                                          materialDesign:HintAssist.Hint="2"/>
                             </StackPanel>
                         </Grid>
 
                         <TextBlock Text="Uzatma Süresi (Gün)" FontSize="12" Foreground="#475569" Margin="0,0,0,6" FontFamily="Segoe UI"/>
-                        <TextBox x:Name="txtUzatmaSuresi" Height="42" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        <TextBox x:Name="txtUzatmaSuresi" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"
                                  materialDesign:HintAssist.Hint="7"/>
                     </StackPanel>
                 </Border>

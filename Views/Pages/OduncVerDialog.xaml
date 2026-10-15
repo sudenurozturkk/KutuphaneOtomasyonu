@@ -18,13 +18,13 @@
             </Grid>
 
             <TextBlock Text="Kitap Seçin *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-            <ComboBox x:Name="cbKitaplar" Height="42" Foreground="White"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+            <ComboBox x:Name="cbKitaplar" Foreground="White"
+                      Style="{StaticResource ModernComboBox}"
                       DisplayMemberPath="Baslik" SelectedValuePath="Id" Margin="0,0,0,16"/>
 
             <TextBlock Text="Üye Seçin *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-            <ComboBox x:Name="cbUyeler" Height="42" Foreground="White"
-                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+            <ComboBox x:Name="cbUyeler" Foreground="White"
+                      Style="{StaticResource ModernComboBox}"
                       DisplayMemberPath="TamAd" SelectedValuePath="Id" Margin="0,0,0,24"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

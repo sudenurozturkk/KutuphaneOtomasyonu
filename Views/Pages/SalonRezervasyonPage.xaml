@@ -2,628 +2,228 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-      Background="#080C18">
-
+      Background="#0B1120"
+      FontFamily="Segoe UI">
     <Page.Resources>
-        <!-- Masa Buton Stili - Boş -->
-        <Style x:Key="MasaBosStyle" TargetType="Button">
-            <Setter Property="Width" Value="88"/>
-            <Setter Property="Height" Value="80"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="BorderBrush" Value="#10B981"/>
-            <Setter Property="Background" Value="#042f2e"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#065f46"/>
-                                <Setter Property="BorderBrush" Value="#34D399"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="SectionCard" TargetType="Border">
+            <Setter Property="Background" Value="#111B2E"/>
+            <Setter Property="BorderBrush" Value="#22314A"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="18"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
         </Style>
-        <!-- Masa Buton Stili - Dolu -->
-        <Style x:Key="MasaDoluStyle" TargetType="Button">
-            <Setter Property="Width" Value="88"/>
-            <Setter Property="Height" Value="80"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="BorderBrush" Value="#EF4444"/>
-            <Setter Property="Background" Value="#450A0A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#7F1D1D"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="QuietText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#8190A8"/>
+            <Setter Property="FontSize" Value="12"/>
         </Style>
-        <!-- Masa Buton Stili - Rezerve -->
-        <Style x:Key="MasaRezerveStyle" TargetType="Button">
-            <Setter Property="Width" Value="88"/>
-            <Setter Property="Height" Value="80"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="BorderBrush" Value="#F59E0B"/>
-            <Setter Property="Background" Value="#451A03"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="SlotText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#AAB7CB"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-        <!-- Masa Buton Stili - Seçili -->
-        <Style x:Key="MasaSeciliStyle" TargetType="Button">
-            <Setter Property="Width" Value="88"/>
-            <Setter Property="Height" Value="80"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="2.5"/>
-            <Setter Property="BorderBrush" Value="#38BDF8"/>
-            <Setter Property="Background" Value="#082f4e"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="FieldTextBox" TargetType="TextBox" BasedOn="{StaticResource ModernTextBox}">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Background" Value="#0B1425"/>
+            <Setter Property="Foreground" Value="#F1F5F9"/>
+            <Setter Property="BorderBrush" Value="#2A3A55"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
-        <!-- Grup Masa Stili - Geniş -->
-        <Style x:Key="GrupMasaBosStyle" TargetType="Button">
-            <Setter Property="Width" Value="150"/>
-            <Setter Property="Height" Value="90"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="BorderBrush" Value="#10B981"/>
-            <Setter Property="Background" Value="#042f2e"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#065f46"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="GrupMasaDoluStyle" TargetType="Button">
-            <Setter Property="Width" Value="150"/>
-            <Setter Property="Height" Value="90"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="BorderBrush" Value="#EF4444"/>
-            <Setter Property="Background" Value="#450A0A"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="GrupMasaSeciliStyle" TargetType="Button">
-            <Setter Property="Width" Value="150"/>
-            <Setter Property="Height" Value="90"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="2.5"/>
-            <Setter Property="BorderBrush" Value="#38BDF8"/>
-            <Setter Property="Background" Value="#082f4e"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="FieldComboBox" TargetType="ComboBox" BasedOn="{StaticResource ModernComboBox}">
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="#0B1425"/>
+            <Setter Property="Foreground" Value="#F1F5F9"/>
+            <Setter Property="BorderBrush" Value="#2A3A55"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </Page.Resources>
 
-    <Grid>
+    <Grid Margin="28,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ═══ HEADER BAR ═══ -->
-        <Border Grid.Row="0" Background="#0B1225" BorderBrush="#1E293B" BorderThickness="0,0,0,1" Padding="28,18,28,18">
-            <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="44" Height="44" CornerRadius="12" Margin="0,0,14,0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#0369A1" Offset="0"/>
-                                <GradientStop Color="#7C3AED" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <materialDesign:PackIcon Kind="FloorPlan" Width="24" Height="24" Foreground="White"
-                                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <Grid Grid.Row="0" Margin="0,0,0,22">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Rezervasyon merkezi" FontSize="27" FontWeight="SemiBold" Foreground="#F8FAFC"/>
+                    <Border Background="#17304A" CornerRadius="5" Padding="8,4" Margin="12,4,0,0">
+                        <TextBlock x:Name="txtSalonDurum" Text="16 / 24 müsait" Foreground="#7DD3FC" FontSize="11" FontWeight="SemiBold"/>
                     </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Kütüphane Salon &amp; Masa Rezervasyonu" FontSize="20" FontWeight="Bold"
-                                       Foreground="White" FontFamily="Segoe UI"/>
-                            <Border Background="#0C2244" CornerRadius="8" Padding="10,3" Margin="12,0,0,0" VerticalAlignment="Center">
-                                <TextBlock x:Name="txtSalonDurum" Text="16 / 24 Masa Müsait"
-                                           FontSize="12" FontWeight="Bold" Foreground="#38BDF8"/>
-                            </Border>
-                            <Border Background="#1A2A0F" CornerRadius="8" Padding="10,3" Margin="8,0,0,0" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal">
-                                    <Ellipse Width="7" Height="7" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <TextBlock Text="Salon Açık" FontSize="12" Foreground="#86EFAC"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                        <TextBlock Text="İnteraktif kat planından masa seçin → Süre belirleyin → Anında rezerve edin. Gerçek zamanlı doluluk görünümü."
-                                   FontSize="12" Foreground="#64748B" Margin="0,3,0,0"/>
-                    </StackPanel>
                 </StackPanel>
+                <TextBlock Text="Çalışma alanlarını zaman dilimine göre görüntüleyin ve uygun masayı ayırtın."
+                           Style="{StaticResource QuietText}" Margin="0,5,0,0"/>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                <StackPanel Margin="0,0,20,0" HorizontalAlignment="Right">
+                    <TextBlock x:Name="txtSaat" Text="14:35" Foreground="#F8FAFC" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                    <TextBlock x:Name="txtTarih" Text="13 Ekim 2026" Style="{StaticResource QuietText}"/>
+                </StackPanel>
+                <Border Background="#122238" BorderBrush="#27415F" BorderThickness="1" CornerRadius="8" Padding="11,7">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="7" Height="7" Fill="#34D399" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Salon açık" Foreground="#B7F7DB" FontSize="11" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
 
-                <!-- Sağ: Zaman ve Legend -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <!-- Saat -->
-                    <Border Background="#0F172A" CornerRadius="10" Padding="12,8" Margin="0,0,16,0">
-                        <StackPanel>
-                            <TextBlock x:Name="txtSaat" Text="14:35" FontSize="20" FontWeight="Bold"
-                                       Foreground="White" HorizontalAlignment="Center"/>
-                            <TextBlock x:Name="txtTarih" Text="Pazartesi, 13 Ekim 2026" FontSize="10"
-                                       Foreground="#64748B" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
-                    <!-- Legend -->
-                    <Border Background="#0F172A" CornerRadius="10" Padding="14,8">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="10" Height="10" CornerRadius="5" Background="#10B981" Margin="0,0,5,0"/>
-                            <TextBlock Text="Boş" Foreground="#94A3B8" FontSize="11" Margin="0,0,14,0" VerticalAlignment="Center"/>
-                            <Border Width="10" Height="10" CornerRadius="5" Background="#EF4444" Margin="0,0,5,0"/>
-                            <TextBlock Text="Dolu" Foreground="#94A3B8" FontSize="11" Margin="0,0,14,0" VerticalAlignment="Center"/>
-                            <Border Width="10" Height="10" CornerRadius="5" Background="#F59E0B" Margin="0,0,5,0"/>
-                            <TextBlock Text="Rezerve" Foreground="#94A3B8" FontSize="11" Margin="0,0,14,0" VerticalAlignment="Center"/>
-                            <Border Width="10" Height="10" CornerRadius="5" Background="#38BDF8" Margin="0,0,5,0"/>
-                            <TextBlock Text="Seçili" Foreground="#38BDF8" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
+        <Border Grid.Row="1" Background="#111B2E" BorderBrush="#22314A" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,18">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0,18,0">
+                    <materialDesign:PackIcon Kind="CalendarClock" Width="19" Height="19" Foreground="#7DD3FC" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="Zaman dilimi" Foreground="#CBD5E1" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Border x:Name="bdSlot1" Tag="09:00 – 11:00" MouseLeftButtonDown="BdSlot_Click" Background="#1D4E6D" CornerRadius="7" Padding="13,8" Margin="0,0,6,0"><TextBlock Text="09:00 – 11:00" Style="{StaticResource SlotText}" Foreground="#E0F2FE"/></Border>
+                    <Border x:Name="bdSlot2" Tag="11:00 – 13:00" MouseLeftButtonDown="BdSlot_Click" Background="#18263A" CornerRadius="7" Padding="13,8" Margin="0,0,6,0"><TextBlock Text="11:00 – 13:00" Style="{StaticResource SlotText}"/></Border>
+                    <Border x:Name="bdSlot3" Tag="13:00 – 15:00" MouseLeftButtonDown="BdSlot_Click" Background="#18263A" CornerRadius="7" Padding="13,8" Margin="0,0,6,0"><TextBlock Text="13:00 – 15:00" Style="{StaticResource SlotText}"/></Border>
+                    <Border x:Name="bdSlot4" Tag="15:00 – 17:00" MouseLeftButtonDown="BdSlot_Click" Background="#18263A" CornerRadius="7" Padding="13,8" Margin="0,0,6,0"><TextBlock Text="15:00 – 17:00" Style="{StaticResource SlotText}"/></Border>
+                    <Border x:Name="bdSlot5" Tag="17:00 – 19:00" MouseLeftButtonDown="BdSlot_Click" Background="#18263A" CornerRadius="7" Padding="13,8" Margin="0,0,6,0"><TextBlock Text="17:00 – 19:00" Style="{StaticResource SlotText}"/></Border>
+                    <Border x:Name="bdSlot6" Tag="19:00 – 22:00" MouseLeftButtonDown="BdSlot_Click" Background="#18263A" CornerRadius="7" Padding="13,8"><TextBlock Text="19:00 – 22:00" Style="{StaticResource SlotText}"/></Border>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
+                    <Border Width="8" Height="8" CornerRadius="4" Background="#35D399" Margin="0,0,5,0"/>
+                    <TextBlock Text="Müsait" Style="{StaticResource QuietText}" Margin="0,0,12,0"/>
+                    <Border Width="8" Height="8" CornerRadius="4" Background="#F59E0B" Margin="0,0,5,0"/>
+                    <TextBlock Text="Rezerve" Style="{StaticResource QuietText}" Margin="0,0,12,0"/>
+                    <Border Width="8" Height="8" CornerRadius="4" Background="#64748B" Margin="0,0,5,0"/>
+                    <TextBlock Text="Kullanımda" Style="{StaticResource QuietText}"/>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ═══ ZAMAN DİLİMİ SEÇİCİ ═══ -->
-        <Border Grid.Row="1" Background="#0D1528" BorderBrush="#1E293B" BorderThickness="0,0,0,1" Padding="28,10">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="📅  Zaman Dilimi:" FontSize="13" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                <Border x:Name="bdSlot1" Background="#0F2A4A" CornerRadius="8" Padding="12,6" Margin="0,0,6,0"
-                        Cursor="Hand" MouseLeftButtonDown="BdSlot_Click" Tag="09:00 – 11:00">
-                    <TextBlock Text="09:00 – 11:00" FontSize="12" Foreground="#38BDF8" FontWeight="SemiBold"/>
-                </Border>
-                <Border x:Name="bdSlot2" Background="#162032" CornerRadius="8" Padding="12,6" Margin="0,0,6,0"
-                        Cursor="Hand" MouseLeftButtonDown="BdSlot_Click" Tag="11:00 – 13:00">
-                    <TextBlock Text="11:00 – 13:00" FontSize="12" Foreground="#64748B"/>
-                </Border>
-                <Border x:Name="bdSlot3" Background="#162032" CornerRadius="8" Padding="12,6" Margin="0,0,6,0"
-                        Cursor="Hand" MouseLeftButtonDown="BdSlot_Click" Tag="13:00 – 15:00">
-                    <TextBlock Text="13:00 – 15:00" FontSize="12" Foreground="#64748B"/>
-                </Border>
-                <Border x:Name="bdSlot4" Background="#162032" CornerRadius="8" Padding="12,6" Margin="0,0,6,0"
-                        Cursor="Hand" MouseLeftButtonDown="BdSlot_Click" Tag="15:00 – 17:00">
-                    <TextBlock Text="15:00 – 17:00" FontSize="12" Foreground="#64748B"/>
-                </Border>
-                <Border x:Name="bdSlot5" Background="#162032" CornerRadius="8" Padding="12,6" Margin="0,0,6,0"
-                        Cursor="Hand" MouseLeftButtonDown="BdSlot_Click" Tag="17:00 – 19:00">
-                    <TextBlock Text="17:00 – 19:00" FontSize="12" Foreground="#64748B"/>
-                </Border>
-                <Border x:Name="bdSlot6" Background="#162032" CornerRadius="8" Padding="12,6" Margin="0,0,0,0"
-                        Cursor="Hand" MouseLeftButtonDown="BdSlot_Click" Tag="19:00 – 22:00">
-                    <TextBlock Text="19:00 – 22:00" FontSize="12" Foreground="#64748B"/>
-                </Border>
-
-                <!-- Anlık doluluk göstergesi -->
-                <Border Background="#0F172A" CornerRadius="8" Padding="14,6" Margin="20,0,0,0">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="AccountGroup" Width="16" Height="16" Foreground="#A855F7" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="txtDolulukOran" Text="Doluluk: %67" FontSize="12" Foreground="#A855F7" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </Border>
-
-        <!-- ═══ ANA İÇERİK: KAT PLANI + DETAY PANELİ ═══ -->
-        <Grid Grid.Row="2" Margin="0">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="360"/>
+                <ColumnDefinition Width="350"/>
             </Grid.ColumnDefinitions>
-
-            <!-- ── SOL: İnteraktif Kat Planı ── -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                          Padding="28,20,20,20">
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,18,0">
                 <StackPanel>
-
-                    <!-- BÖLÜM 1: Sessiz Çalışma + Bireysel -->
-                    <Grid Margin="0,0,0,24">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- 🤫 Sessiz Çalışma Bölgesi -->
-                        <Border Grid.Column="0" Background="#0A1628" CornerRadius="14" BorderBrush="#1a3350" BorderThickness="1" Padding="18" Margin="0,0,12,0">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                    <Border Background="#083344" CornerRadius="8" Padding="8,4" Margin="0,0,10,0">
-                                        <TextBlock Text="🤫" FontSize="14"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Sessiz Çalışma Bölgesi" FontSize="14" FontWeight="Bold" Foreground="#38BDF8"/>
-                                        <TextBlock Text="Tekli masa · Prizli · Pencere kenarı" FontSize="11" Foreground="#475569"/>
-                                    </StackPanel>
-                                    <Border Background="#0C2040" CornerRadius="6" Padding="8,3" Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock x:Name="txtSessizSayac" Text="6/8 boş" FontSize="11" Foreground="#7DD3FC" FontWeight="SemiBold"/>
-                                    </Border>
-                                </StackPanel>
-
-                                <!-- Masa düzeni: 4 satır x 2 sütun (8 masa) -->
-                                <UniformGrid x:Name="gridSessiz" Columns="4" HorizontalAlignment="Left"/>
-
-                                <!-- Gürültü Seviyesi -->
-                                <Border Background="#06213A" CornerRadius="8" Padding="12,8" Margin="0,14,0,0">
-                                    <Grid>
-                                        <TextBlock Text="🔇  Gürültü Seviyesi: ÇOK DÜŞÜK" FontSize="11" Foreground="#22D3EE" VerticalAlignment="Center"/>
-                                        <ProgressBar Value="15" Maximum="100" Height="5" VerticalAlignment="Center"
-                                                     HorizontalAlignment="Right" Width="100"
-                                                     Foreground="#22D3EE" Background="#1E293B"/>
-                                    </Grid>
-                                </Border>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- 💻 Bireysel Çalışma Bölgesi -->
-                        <Border Grid.Column="1" Background="#0F0A20" CornerRadius="14" BorderBrush="#2D1D55" BorderThickness="1" Padding="18" Margin="12,0,0,0">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                    <Border Background="#1B0F42" CornerRadius="8" Padding="8,4" Margin="0,0,10,0">
-                                        <TextBlock Text="💻" FontSize="14"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Bireysel Bilgisayar Masaları" FontSize="14" FontWeight="Bold" Foreground="#A855F7"/>
-                                        <TextBlock Text="Monitor · Ethernet · Kablo düzeni" FontSize="11" Foreground="#475569"/>
-                                    </StackPanel>
-                                    <Border Background="#1B0F42" CornerRadius="6" Padding="8,3" Margin="8,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock x:Name="txtBireyselSayac" Text="5/8 boş" FontSize="11" Foreground="#C4B5FD" FontWeight="SemiBold"/>
-                                    </Border>
-                                </StackPanel>
-
-                                <UniformGrid x:Name="gridBireysel" Columns="4" HorizontalAlignment="Left"/>
-
-                                <Border Background="#0D0820" CornerRadius="8" Padding="12,8" Margin="0,14,0,0">
-                                    <Grid>
-                                        <TextBlock Text="🔉  Gürültü Seviyesi: DÜŞÜK" FontSize="11" Foreground="#C084FC" VerticalAlignment="Center"/>
-                                        <ProgressBar Value="30" Maximum="100" Height="5" VerticalAlignment="Center"
-                                                     HorizontalAlignment="Right" Width="100"
-                                                     Foreground="#A855F7" Background="#1E293B"/>
-                                    </Grid>
-                                </Border>
-                            </StackPanel>
-                        </Border>
+                    <Grid Margin="0,0,0,14">
+                        <TextBlock Text="Çalışma alanları" Foreground="#F1F5F9" FontSize="16" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="txtDolulukOran" Text="Doluluk: %0" Style="{StaticResource QuietText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                     </Grid>
 
-                    <!-- BÖLÜM 2: Grup Çalışma Odaları -->
-                    <Border Background="#0D1508" CornerRadius="14" BorderBrush="#1F3010" BorderThickness="1" Padding="18" Margin="0,0,0,24">
+                    <Border Style="{StaticResource SectionCard}">
                         <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                <Border Background="#1A2E0A" CornerRadius="8" Padding="8,4" Margin="0,0,10,0">
-                                    <TextBlock Text="👥" FontSize="14"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Grup Çalışma Odaları" FontSize="14" FontWeight="Bold" Foreground="#84CC16"/>
-                                    <TextBlock Text="6 kişilik · 4K Projeksiyon · Ses yalıtımlı · Akıllı tahta" FontSize="11" Foreground="#475569"/>
+                            <Grid Margin="0,0,0,14">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#17324A" CornerRadius="6" Padding="7" Margin="0,0,10,0"><materialDesign:PackIcon Kind="VolumeMute" Width="17" Height="17" Foreground="#7DD3FC"/></Border>
+                                    <StackPanel><TextBlock Text="Sessiz çalışma" Foreground="#F8FAFC" FontSize="14" FontWeight="SemiBold"/><TextBlock Text="Odaklanmak için düşük ses seviyesi" Style="{StaticResource QuietText}" Margin="0,2,0,0"/></StackPanel>
                                 </StackPanel>
-                                <Border Background="#1A2E0A" CornerRadius="6" Padding="8,3" Margin="8,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock x:Name="txtGrupSayac" Text="3/4 boş" FontSize="11" Foreground="#BEF264" FontWeight="SemiBold"/>
-                                </Border>
-                            </StackPanel>
-
-                            <WrapPanel x:Name="pnlGrup" Orientation="Horizontal"/>
-
-                            <Border Background="#0A1504" CornerRadius="8" Padding="12,8" Margin="0,14,0,0">
-                                <Grid>
-                                    <TextBlock Text="🔊  Gürültü Seviyesi: ORTA (Ses yalıtımlı odalar)" FontSize="11" Foreground="#86EFAC" VerticalAlignment="Center"/>
-                                    <ProgressBar Value="55" Maximum="100" Height="5" VerticalAlignment="Center"
-                                                 HorizontalAlignment="Right" Width="100"
-                                                 Foreground="#22C55E" Background="#1E293B"/>
-                                </Grid>
-                            </Border>
+                                <TextBlock x:Name="txtSessizSayac" Text="6 / 8 müsait" Style="{StaticResource QuietText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                            <UniformGrid x:Name="gridSessiz" Columns="4" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </Border>
 
-                    <!-- BÖLÜM 3: Premium Özel Çalışma Kabinleri -->
-                    <Border Background="#1A100A" CornerRadius="14" BorderBrush="#3B2010" BorderThickness="1" Padding="18">
+                    <Border Style="{StaticResource SectionCard}">
                         <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                <Border Background="#2A1A0A" CornerRadius="8" Padding="8,4" Margin="0,0,10,0">
-                                    <TextBlock Text="🏆" FontSize="14"/>
-                                </Border>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Premium Araştırma Kabinleri" FontSize="14" FontWeight="Bold" Foreground="#FB923C"/>
-                                    <TextBlock Text="Kapalı kabin · Ultra sessiz · Akademisyen &amp; Yüksek Lisans öncelikli" FontSize="11" Foreground="#475569"/>
+                            <Grid Margin="0,0,0,14">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#242050" CornerRadius="6" Padding="7" Margin="0,0,10,0"><materialDesign:PackIcon Kind="Laptop" Width="17" Height="17" Foreground="#C4B5FD"/></Border>
+                                    <StackPanel><TextBlock Text="Bireysel bilgisayar" Foreground="#F8FAFC" FontSize="14" FontWeight="SemiBold"/><TextBlock Text="Monitör ve yüksek hızlı bağlantı" Style="{StaticResource QuietText}" Margin="0,2,0,0"/></StackPanel>
                                 </StackPanel>
-                                <Border Background="#2A1208" CornerRadius="6" Padding="8,3" Margin="8,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock x:Name="txtPremiumSayac" Text="2/4 boş" FontSize="11" Foreground="#FDBA74" FontWeight="SemiBold"/>
-                                </Border>
-                            </StackPanel>
-
-                            <WrapPanel x:Name="pnlPremium" Orientation="Horizontal"/>
-
-                            <Border Background="#150C04" CornerRadius="8" Padding="12,8" Margin="0,14,0,0">
-                                <Grid>
-                                    <TextBlock Text="🔇  Gürültü Seviyesi: SIFIR (Kapalı fonoabsorban panelli)" FontSize="11" Foreground="#FED7AA" VerticalAlignment="Center"/>
-                                    <ProgressBar Value="5" Maximum="100" Height="5" VerticalAlignment="Center"
-                                                 HorizontalAlignment="Right" Width="100"
-                                                 Foreground="#F97316" Background="#1E293B"/>
-                                </Grid>
-                            </Border>
+                                <TextBlock x:Name="txtBireyselSayac" Text="5 / 8 müsait" Style="{StaticResource QuietText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                            <UniformGrid x:Name="gridBireysel" Columns="4" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </Border>
 
+                    <Border Style="{StaticResource SectionCard}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,14">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#173D39" CornerRadius="6" Padding="7" Margin="0,0,10,0"><materialDesign:PackIcon Kind="AccountGroup" Width="17" Height="17" Foreground="#6EE7B7"/></Border>
+                                    <StackPanel><TextBlock Text="Grup odaları" Foreground="#F8FAFC" FontSize="14" FontWeight="SemiBold"/><TextBlock Text="Toplantı ve ortak çalışma alanları" Style="{StaticResource QuietText}" Margin="0,2,0,0"/></StackPanel>
+                                </StackPanel>
+                                <TextBlock x:Name="txtGrupSayac" Text="3 / 4 müsait" Style="{StaticResource QuietText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                            <WrapPanel x:Name="pnlGrup"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,14">
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Background="#3D2C16" CornerRadius="6" Padding="7" Margin="0,0,10,0"><materialDesign:PackIcon Kind="StarFourPoints" Width="17" Height="17" Foreground="#FBBF24"/></Border>
+                                    <StackPanel><TextBlock Text="Premium kabinler" Foreground="#F8FAFC" FontSize="14" FontWeight="SemiBold"/><TextBlock Text="Akademik araştırma için özel alanlar" Style="{StaticResource QuietText}" Margin="0,2,0,0"/></StackPanel>
+                                </StackPanel>
+                                <TextBlock x:Name="txtPremiumSayac" Text="2 / 4 müsait" Style="{StaticResource QuietText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                            <WrapPanel x:Name="pnlPremium"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- ── SAĞ: Masa Detay + Rezervasyon Paneli ── -->
-            <Border Grid.Column="1" Background="#0B1225" BorderBrush="#1E293B" BorderThickness="1,0,0,0">
+            <Border Grid.Column="1" Background="#111B2E" BorderBrush="#22314A" BorderThickness="1" CornerRadius="14" Padding="20">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="20,20,20,20">
-
-                        <!-- Seçilen Masa Kartı -->
-                        <Border x:Name="bdMasaKart" CornerRadius="14" Padding="20" Margin="0,0,0,16">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#0C2040" Offset="0"/>
-                                    <GradientStop Color="#0A1628" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <Border.BorderBrush>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#1E4A7A" Offset="0"/>
-                                    <GradientStop Color="#0E2240" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.BorderBrush>
-                            <Border.BorderThickness>1</Border.BorderThickness>
+                    <StackPanel>
+                        <TextBlock Text="Seçili alan" Foreground="#8190A8" FontSize="11" FontWeight="SemiBold"/>
+                        <Grid Margin="0,5,0,16">
                             <StackPanel>
-                                <Grid Margin="0,0,0,10">
-                                    <StackPanel>
-                                        <TextBlock x:Name="txtMasaKodu" Text="D-103" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                                        <TextBlock x:Name="txtMasaBolum" Text="Sessiz Çalışma Bölgesi" FontSize="12" Foreground="#64748B"/>
-                                    </StackPanel>
-                                    <Border x:Name="bdDurumBadge" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                            CornerRadius="8" Padding="10,5" Background="#064E3B">
-                                        <TextBlock x:Name="txtDurumBadge" Text="BOŞ" FontSize="11" FontWeight="Bold" Foreground="#34D399"/>
+                                <TextBlock x:Name="txtMasaKodu" Text="D-103" Foreground="#F8FAFC" FontSize="26" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="txtMasaBolum" Text="Sessiz çalışma" Style="{StaticResource QuietText}" Margin="0,3,0,0"/>
+                            </StackPanel>
+                            <Border x:Name="bdDurumBadge" Background="#123B35" CornerRadius="6" Padding="9,5" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                <TextBlock x:Name="txtDurumBadge" Text="MÜSAİT" Foreground="#6EE7B7" FontSize="10" FontWeight="Bold"/>
+                            </Border>
+                        </Grid>
+                        <Border Background="#0C1627" CornerRadius="8" Padding="12" Margin="0,0,0,14">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <StackPanel><TextBlock Text="KAPASİTE" Foreground="#64748B" FontSize="10" FontWeight="SemiBold"/><TextBlock x:Name="txtKapasite" Text="1 kişilik" Foreground="#E2E8F0" FontSize="13" Margin="0,4,0,0"/></StackPanel>
+                                <StackPanel Grid.Column="1"><TextBlock Text="KONUM" Foreground="#64748B" FontSize="10" FontWeight="SemiBold"/><TextBlock x:Name="txtKat" Text="Kat 1" Foreground="#E2E8F0" FontSize="13" Margin="0,4,0,0"/></StackPanel>
+                            </Grid>
+                        </Border>
+                        <TextBlock Text="Olanaklar" Foreground="#CBD5E1" FontSize="11" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="txtOzellikler" Text="220V priz • 5GHz Wi-Fi" Foreground="#91D5F3" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,14"/>
+                        <Border x:Name="bdRezerveEden" Background="#321C1C" CornerRadius="7" Padding="10" Margin="0,0,0,14" Visibility="Collapsed">
+                            <StackPanel><TextBlock Text="AKTİF KULLANIM" Foreground="#FCA5A5" FontSize="10" FontWeight="SemiBold"/><TextBlock x:Name="txtRezerveEden" Foreground="#FECACA" FontSize="12" Margin="0,4,0,0"/></StackPanel>
+                        </Border>
+
+                        <Border Background="#0C1627" BorderBrush="#22314A" BorderThickness="1" CornerRadius="9" Padding="14" Margin="0,0,0,14">
+                            <StackPanel>
+                                <TextBlock Text="Yeni rezervasyon" Foreground="#F8FAFC" FontSize="14" FontWeight="SemiBold"/>
+                                <TextBlock Text="Seçili zaman dilimi için alan ayırın." Style="{StaticResource QuietText}" Margin="0,3,0,14"/>
+                                <Grid Margin="0,0,0,9"><Grid.ColumnDefinitions><ColumnDefinition Width="92"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="Ad soyad" Style="{StaticResource QuietText}" VerticalAlignment="Center"/><TextBox Grid.Column="1" x:Name="txtKullanici" Style="{StaticResource FieldTextBox}"/></Grid>
+                                <Grid Margin="0,0,0,9"><Grid.ColumnDefinitions><ColumnDefinition Width="92"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="Süre" Style="{StaticResource QuietText}" VerticalAlignment="Center"/><ComboBox Grid.Column="1" x:Name="cbSure" Style="{StaticResource FieldComboBox}" SelectedIndex="1"><ComboBoxItem Content="1 saat"/><ComboBoxItem Content="2 saat"/><ComboBoxItem Content="3 saat"/><ComboBoxItem Content="4 saat"/><ComboBoxItem Content="Tüm gün"/></ComboBox></Grid>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="92"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="Amaç" Style="{StaticResource QuietText}" VerticalAlignment="Top" Margin="0,8,0,0"/><TextBox Grid.Column="1" x:Name="txtAkademikNot" Style="{StaticResource FieldTextBox}" Height="52" TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="10,8"/></Grid>
+                                <Button x:Name="btnRezerveEt" Content="Rezervasyonu oluştur" Height="40" Margin="0,14,0,0" Background="#2563EB" Foreground="White" BorderThickness="0" FontWeight="SemiBold" Click="BtnRezerveEt_Click"/>
+                                <Button x:Name="btnIptalEt" Content="Rezervasyonu iptal et" Height="34" Margin="0,7,0,0" Background="Transparent" Foreground="#FCA5A5" BorderBrush="#633030" BorderThickness="1" Click="BtnIptalEt_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Grid Margin="0,3,0,10"><TextBlock Text="Bugünkü rezervasyonlar" Foreground="#CBD5E1" FontSize="13" FontWeight="SemiBold"/><TextBlock Text="Tümü" Foreground="#7DD3FC" FontSize="11" HorizontalAlignment="Right"/></Grid>
+                        <ItemsControl x:Name="lstAktifRezervasyonlar">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#0C1627" CornerRadius="7" Padding="10" Margin="0,0,0,6">
+                                        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="48"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Kod}" Foreground="#7DD3FC" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1"><TextBlock Text="{Binding Kisi}" Foreground="#E2E8F0" FontSize="11"/><TextBlock Text="{Binding Zaman}" Foreground="#64748B" FontSize="10" Margin="0,2,0,0"/></StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{Binding Sure}" Foreground="#94A3B8" FontSize="10" VerticalAlignment="Center"/>
+                                    </Grid>
                                     </Border>
-                                </Grid>
-
-                                <Separator Background="#1E293B" Margin="0,0,0,12"/>
-
-                                <!-- Özellikler Grid -->
-                                <Grid Margin="0,0,0,4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <TextBlock Text="KAPASİTE" FontSize="10" Foreground="#475569" FontWeight="SemiBold"/>
-                                        <TextBlock x:Name="txtKapasite" Text="1 Kişilik" FontSize="14" Foreground="White" FontWeight="SemiBold" Margin="0,3,0,0"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1">
-                                        <TextBlock Text="KAT" FontSize="10" Foreground="#475569" FontWeight="SemiBold"/>
-                                        <TextBlock x:Name="txtKat" Text="Kat 1 · Kuzey Kanat" FontSize="14" Foreground="White" FontWeight="SemiBold" Margin="0,3,0,0"/>
-                                    </StackPanel>
-                                </Grid>
-
-                                <Border Background="#071528" CornerRadius="8" Padding="12,10" Margin="0,12,0,0">
-                                    <StackPanel>
-                                        <TextBlock Text="DONANIM &amp; OLANAKLAR" FontSize="10" Foreground="#475569" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                        <TextBlock x:Name="txtOzellikler" Text="⚡ 220V Priz  •  📶 5GHz Wi-Fi  •  🪟 Pencere"
-                                                   FontSize="12" Foreground="#7DD3FC" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                </Border>
-
-                                <!-- Rezerve eden (varsa) -->
-                                <Border x:Name="bdRezerveEden" CornerRadius="8" Padding="12,10" Margin="0,10,0,0"
-                                        Background="#1C0A0A" Visibility="Collapsed">
-                                    <StackPanel>
-                                        <TextBlock Text="KULLANAN / REZERVE EDEN" FontSize="10" Foreground="#7F1D1D" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="Account" Width="16" Height="16" Foreground="#FCA5A5" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                            <TextBlock x:Name="txtRezerveEden" Text="" FontSize="13" Foreground="#FCA5A5" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- ─ Rezervasyon Formu ─ -->
-                        <Border Background="#0F172A" CornerRadius="14" Padding="20" Margin="0,0,0,16"
-                                BorderBrush="#1E293B" BorderThickness="1">
-                            <StackPanel>
-                                <TextBlock Text="📋  Rezervasyon Formu" FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,0,0,16"/>
-
-                                <!-- Ad Soyad -->
-                                <TextBlock Text="Ad Soyad / Öğrenci No" FontSize="11" Foreground="#64748B" Margin="0,0,0,4" FontWeight="SemiBold"/>
-                                <Border Background="#1E293B" CornerRadius="8" Height="40" Padding="12,0" Margin="0,0,0,12">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <materialDesign:PackIcon Kind="Account" Width="16" Height="16" Foreground="#475569" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBox Grid.Column="1" x:Name="txtKullanici"
-                                                 materialDesign:HintAssist.Hint="Örn: Ahmet Yıldız / 20210001"
-                                                 materialDesign:HintAssist.IsFloating="False"
-                                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
-                                                 BorderThickness="0" Background="Transparent"
-                                                 Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                                                 VerticalAlignment="Center"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Süre -->
-                                <TextBlock Text="Rezervasyon Süresi" FontSize="11" Foreground="#64748B" Margin="0,0,0,4" FontWeight="SemiBold"/>
-                                <Border Background="#1E293B" CornerRadius="8" Height="40" Padding="8,0" Margin="0,0,0,12">
-                                    <ComboBox x:Name="cbSure" SelectedIndex="1"
-                                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
-                                              BorderThickness="0" Background="Transparent"
-                                              Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                                              VerticalAlignment="Center">
-                                        <ComboBoxItem Content="🕐  1 Saat (Kısa Çalışma)"/>
-                                        <ComboBoxItem Content="🕑  2 Saat (Standart Oturum)"/>
-                                        <ComboBoxItem Content="🕓  4 Saat (Yoğun Çalışma)"/>
-                                        <ComboBoxItem Content="☀️  Tüm Gün (Akademik Araştırma)"/>
-                                    </ComboBox>
-                                </Border>
-
-                                <!-- Amaç -->
-                                <TextBlock Text="Kullanım Amacı (İsteğe Bağlı)" FontSize="11" Foreground="#64748B" Margin="0,0,0,4" FontWeight="SemiBold"/>
-                                <Border Background="#1E293B" CornerRadius="8" Height="40" Padding="12,0" Margin="0,0,0,20">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <materialDesign:PackIcon Kind="Notebook" Width="16" Height="16" Foreground="#475569" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBox Grid.Column="1" x:Name="txtAkademikNot"
-                                                 materialDesign:HintAssist.Hint="Tez çalışması, Final hazırlığı..."
-                                                 materialDesign:HintAssist.IsFloating="False"
-                                                 materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
-                                                 BorderThickness="0" Background="Transparent"
-                                                 Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                                                 VerticalAlignment="Center"/>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Rezerve Et Butonu -->
-                                <Button x:Name="btnRezerveEt" Height="48" FontWeight="Bold" FontSize="14" Foreground="White"
-                                        materialDesign:ButtonAssist.CornerRadius="12" Click="BtnRezerveEt_Click">
-                                    <Button.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                            <GradientStop Color="#0369A1" Offset="0"/>
-                                            <GradientStop Color="#0EA5E9" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Button.Background>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="CheckCircleOutline" Width="20" Height="20" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBlock Text="Masayı Rezerve Et" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
-
-                                <Button x:Name="btnIptalEt" Height="40" Margin="0,8,0,0"
-                                        materialDesign:ButtonAssist.CornerRadius="10"
-                                        Click="BtnIptalEt_Click">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-                                            <Setter Property="BorderBrush" Value="#EF4444"/>
-                                            <Setter Property="Foreground" Value="#EF4444"/>
-                                        </Style>
-                                    </Button.Style>
-                                    <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="LockOpenVariant" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <TextBlock Text="Masayı Boşalt / İptal Et" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- ─ Günlük Aktif Rezervasyonlar Özeti ─ -->
-                        <Border Background="#0F172A" CornerRadius="14" Padding="18" BorderBrush="#1E293B" BorderThickness="1">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                    <materialDesign:PackIcon Kind="ClipboardList" Width="18" Height="18" Foreground="#F59E0B" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <TextBlock Text="Bugünkü Aktif Rezervasyonlar" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                                </StackPanel>
-
-                                <ItemsControl x:Name="lstAktifRezervasyonlar">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Background="#0D1729" CornerRadius="8" Padding="12,10" Margin="0,0,0,6">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#162040" Margin="0,0,10,0">
-                                                        <TextBlock Text="{Binding Kod}" FontSize="10" FontWeight="Bold"
-                                                                   Foreground="#38BDF8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Kisi}" FontSize="12" Foreground="White" FontWeight="SemiBold"/>
-                                                        <TextBlock Text="{Binding Zaman}" FontSize="11" Foreground="#64748B"/>
-                                                    </StackPanel>
-                                                    <Border Grid.Column="2" CornerRadius="6" Padding="7,3" VerticalAlignment="Center" Background="#1A2E0A">
-                                                        <TextBlock Text="{Binding Sure}" FontSize="10" Foreground="#86EFAC" FontWeight="SemiBold"/>
-                                                    </Border>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </ScrollViewer>
             </Border>

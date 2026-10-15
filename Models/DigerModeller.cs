@@ -4,6 +4,37 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KutuphaneOtomasyonu.Models
 {
+    public class SalonRezervasyonu
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required, MaxLength(20)]
+        public string MasaKodu { get; set; } = string.Empty;
+
+        [Required, MaxLength(30)]
+        public string Bolge { get; set; } = string.Empty;
+
+        [Required, MaxLength(200)]
+        public string Kullanici { get; set; } = string.Empty;
+
+        [Required, MaxLength(30)]
+        public string ZamanAraligi { get; set; } = string.Empty;
+
+        [Required, MaxLength(20)]
+        public string Sure { get; set; } = string.Empty;
+
+        [MaxLength(1000)]
+        public string Amac { get; set; } = string.Empty;
+
+        public DateTime Tarih { get; set; } = DateTime.Today;
+
+        public DateTime OlusturulmaTarihi { get; set; } = DateTime.Now;
+
+        [MaxLength(20)]
+        public string Durum { get; set; } = "Aktif";
+    }
+
     /// <summary>
     /// Kitap rezervasyonunu temsil eden entity.
     /// Bir üye mevcut olmayan kitap için rezervasyon yapabilir.

@@ -21,6 +21,34 @@ namespace KutuphaneOtomasyonu
                 DatabaseSeeder.Seed(context);
                 results.AppendLine("[PASS] Veritabani baglantisi ve seed islemi basarili.");
 
+                var testMasaKodu = $"T-{Guid.NewGuid():N}".Substring(0, 10);
+                var salonService = new SalonRezervasyonService(context);
+                var olusturma = await salonService.OlusturAsync(
+                    testMasaKodu, "Test", "Smoke Test", "00:00 - 01:00",
+                    "1 saat", string.Empty, DateTime.Today);
+                if (!olusturma.BasariliMi || olusturma.Rezervasyon == null)
+                    throw new Exception($"Salon rezervasyonu oluşturulamadı: {olusturma.Mesaj}");
+
+                var yinelenen = await salonService.OlusturAsync(
+                    testMasaKodu, "Test", "Başka Kullanıcı", "00:00 - 01:00",
+                    "1 saat", string.Empty, DateTime.Today);
+                if (yinelenen.BasariliMi)
+                    throw new Exception("Aynı masa ve zaman dilimi için yinelenen rezervasyon kabul edildi.");
+
+                var aktif = await salonService.GetAktifAsync(DateTime.Today, "00:00 - 01:00");
+                if (aktif.All(r => r.Id != olusturma.Rezervasyon.Id))
+                    throw new Exception("Oluşturulan salon rezervasyonu aktif listede bulunamadı.");
+
+                var iptal = await salonService.IptalEtAsync(olusturma.Rezervasyon.Id);
+                if (!iptal.BasariliMi)
+                    throw new Exception($"Salon rezervasyonu iptal edilemedi: {iptal.Mesaj}");
+
+                var tekrarIptal = await salonService.IptalEtAsync(olusturma.Rezervasyon.Id);
+                if (tekrarIptal.BasariliMi)
+                    throw new Exception("İptal edilmiş salon rezervasyonu tekrar iptal edilebildi.");
+
+                results.AppendLine("[PASS] Salon servisi ekleme, listeleme, yinelenen kayıt engeli ve iptal kuralları testi basarili.");
+
                 // 1. AuthService Test
                 var loginOk = await AuthService.Instance.GirisAsync("admin", "admin123", context);
                 if (!loginOk) throw new Exception("Admin girisi basarisiz!");

@@ -26,19 +26,19 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
                         <TextBlock Text="Ad *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtAd" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtAd" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
                         <TextBlock Text="Soyad *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtSoyad" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtSoyad" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                 </Grid>
 
                 <TextBlock Text="T.C. Kimlik No *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                <TextBox x:Name="txtTC" MaxLength="11" Height="40" Foreground="White"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"/>
+                <TextBox x:Name="txtTC" MaxLength="11" Foreground="White"
+                         Style="{StaticResource ModernTextBox}" Margin="0,0,0,12"/>
 
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
@@ -47,13 +47,13 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
                         <TextBlock Text="E-Posta *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtEmail" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtEmail" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
                         <TextBlock Text="Telefon" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtTelefon" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtTelefon" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                 </Grid>
 
@@ -64,13 +64,13 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
                         <TextBlock Text="Üye Tipi" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <ComboBox x:Name="cbUyeTipi" Height="40" Foreground="White"
-                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
+                        <ComboBox x:Name="cbUyeTipi" Foreground="White"
+                                  Style="{StaticResource ModernComboBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
                         <TextBlock Text="Öğrenci / Sicil No" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtOgrenciNo" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtOgrenciNo" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                 </Grid>
 
@@ -81,13 +81,13 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
                         <TextBlock Text="Bölüm" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtBolum" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtBolum" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
                         <TextBlock Text="Fakülte" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtFakulte" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtFakulte" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                 </Grid>
 

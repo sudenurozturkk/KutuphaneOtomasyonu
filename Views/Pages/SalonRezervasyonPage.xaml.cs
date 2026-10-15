@@ -7,6 +7,10 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using MaterialDesignThemes.Wpf;
+using KutuphaneOtomasyonu.Data;
+using KutuphaneOtomasyonu.Models;
+using KutuphaneOtomasyonu.Services;
 
 namespace KutuphaneOtomasyonu.Views.Pages
 {
@@ -22,6 +26,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
         public string Kat { get; set; } = "Kat 1 · Kuzey Kanat";
         public string? RezerveEden { get; set; }
         public string? RezerveZamanAraligi { get; set; }
+        public int? SalonRezervasyonId { get; set; }
     }
 
     public class AktifRezervasyonVM
@@ -56,6 +61,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
             _saatTimer.Tick += (_, _) => SaatiGuncelle();
             _saatTimer.Start();
+            Loaded += async (_, _) => await SalonRezervasyonlariniYukleAsync();
         }
 
         // ── Veri Başlangıcı ──────────────────────────────────────────────────
@@ -196,16 +202,6 @@ namespace KutuphaneOtomasyonu.Views.Pages
             bool grupMu    = masa.Bolge == "Grup";
             bool premiumMu = masa.Bolge == "Premium";
 
-            // İkon
-            string ikon = masa.Bolge switch
-            {
-                "Sessiz"   => "🤫",
-                "Bireysel" => "💻",
-                "Grup"     => "👥",
-                "Premium"  => "🏆",
-                _          => "📌"
-            };
-
             // Durum rengi
             string renk = masa.Durum switch
             {
@@ -214,15 +210,27 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 "Rezerve"=> "#F59E0B",
                 _        => "#94A3B8"
             };
+            var borderColor = (Color)ColorConverter.ConvertFromString(renk);
 
             // İçerik paneli
             var sp = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center };
 
             // Kabin ikonu
-            var tbIkon = new TextBlock
+            var ikon = masa.Bolge switch
             {
-                Text = ikon,
-                FontSize = grupMu ? 18 : premiumMu ? 16 : 13,
+                "Sessiz" => PackIconKind.VolumeMute,
+                "Bireysel" => PackIconKind.Laptop,
+                "Grup" => PackIconKind.AccountGroup,
+                "Premium" => PackIconKind.StarFourPoints,
+                _ => PackIconKind.ViewDashboard
+            };
+
+            var tbIkon = new PackIcon
+            {
+                Kind = ikon,
+                Width = grupMu ? 21 : 18,
+                Height = grupMu ? 21 : 18,
+                Foreground = new SolidColorBrush(borderColor),
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 2)
             };
@@ -267,7 +275,6 @@ namespace KutuphaneOtomasyonu.Views.Pages
             int yukseklik = grupMu ? 95  : premiumMu ? 90  : 82;
 
             // Arkaplan ve kenarlık
-            var borderColor = (Color)ColorConverter.ConvertFromString(renk);
             var bgColor = masa.Durum switch
             {
                 "Boş"    => Color.FromRgb(4, 47, 46),
@@ -319,7 +326,25 @@ namespace KutuphaneOtomasyonu.Views.Pages
             if (_secilenBtn != null)
             {
                 var oncekiMasa = _secilenBtn.Tag as MasaModel;
-                if (oncekiMasa != null) _secilenBtn = null;
+                if (oncekiMasa != null)
+                {
+                    var normalColor = oncekiMasa.Durum switch
+                    {
+                        "Boş" => Color.FromRgb(52, 211, 153),
+                        "Dolu" => Color.FromRgb(248, 113, 113),
+                        "Rezerve" => Color.FromRgb(251, 191, 36),
+                        _ => Color.FromRgb(148, 163, 184)
+                    };
+                    _secilenBtn.BorderBrush = new SolidColorBrush(normalColor);
+                    _secilenBtn.BorderThickness = new Thickness(1.5);
+                    _secilenBtn.Background = new SolidColorBrush(oncekiMasa.Durum switch
+                    {
+                        "Boş" => Color.FromRgb(12, 55, 55),
+                        "Dolu" => Color.FromRgb(65, 25, 30),
+                        "Rezerve" => Color.FromRgb(67, 47, 15),
+                        _ => Color.FromRgb(30, 41, 59)
+                    });
+                }
             }
 
             _secilenMasa = masa;
@@ -364,7 +389,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
             // Buton durumları
             btnRezerveEt.IsEnabled = masa.Durum == "Boş";
-            btnIptalEt.IsEnabled   = masa.Durum != "Boş";
+            btnIptalEt.IsEnabled   = masa.SalonRezervasyonId.HasValue;
 
             // Seçili butonun görünümünü vurgula (arka plan mavi border)
             if (btn != null)
@@ -377,7 +402,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         // ── Rezervasyon İşlemleri ────────────────────────────────────────────
 
-        private void BtnRezerveEt_Click(object sender, RoutedEventArgs e)
+        private async void BtnRezerveEt_Click(object sender, RoutedEventArgs e)
         {
             if (_secilenMasa == null) return;
             if (_secilenMasa.Durum != "Boş")
@@ -411,47 +436,84 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
             if (onay != MessageBoxResult.Yes) return;
 
-            _secilenMasa.Durum = "Rezerve";
-            _secilenMasa.RezerveEden = kisi;
-            _secilenMasa.RezerveZamanAraligi = _aktifSlot;
+            try
+            {
+                using var context = new KutuphaneDbContext();
+                var servis = new SalonRezervasyonService(context);
+                var sonuc = await servis.OlusturAsync(
+                    _secilenMasa.Kod,
+                    _secilenMasa.Bolge,
+                    kisi,
+                    _aktifSlot,
+                    sure,
+                    amac,
+                    DateTime.Today);
+                if (!sonuc.BasariliMi)
+                {
+                    MessageBox.Show($"{sonuc.Mesaj} Liste yenilendi.",
+                        "Masa Müsait Değil", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    await SalonRezervasyonlariniYukleAsync();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Rezervasyon kaydedilemedi: {ex.Message}",
+                    "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-            KatPlaniniCiz();
-            AktifRezervasyonlariGuncelle();
+            var rezerveEdilenMasa = _secilenMasa;
             txtKullanici.Clear();
             txtAkademikNot.Clear();
+            await SalonRezervasyonlariniYukleAsync();
 
             MessageBox.Show(
                 $"✅ Rezervasyon başarıyla oluşturuldu!\n\n" +
-                $"Masa {_secilenMasa.Kod} • {_aktifSlot}\n{kisi} adına {sure} süresince ayrıldı.",
+                $"Masa {rezerveEdilenMasa.Kod} • {_aktifSlot}\n{kisi} adına {sure} süresince ayrıldı.",
                 "Rezervasyon Tamamlandı", MessageBoxButton.OK, MessageBoxImage.None);
         }
 
-        private void BtnIptalEt_Click(object sender, RoutedEventArgs e)
+        private async void BtnIptalEt_Click(object sender, RoutedEventArgs e)
         {
-            if (_secilenMasa == null) return;
+            if (_secilenMasa?.SalonRezervasyonId is not int rezervasyonId) return;
 
-            var sonuc = MessageBox.Show(
+            var onaySonucu = MessageBox.Show(
                 $"{_secilenMasa.Kod} numaralı masanın rezervasyonu iptal edilsin mi?\n" +
                 $"Kullanan: {_secilenMasa.RezerveEden ?? "—"}\n\n" +
                 "Masa tüm öğrencilere açılacaktır.",
                 "Rezervasyonu İptal Et", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-            if (sonuc != MessageBoxResult.Yes) return;
+            if (onaySonucu != MessageBoxResult.Yes) return;
 
-            _secilenMasa.Durum = "Boş";
-            _secilenMasa.RezerveEden = null;
-            _secilenMasa.RezerveZamanAraligi = null;
+            try
+            {
+                using var context = new KutuphaneDbContext();
+                var sonuc = await new SalonRezervasyonService(context).IptalEtAsync(rezervasyonId);
+                if (!sonuc.BasariliMi)
+                {
+                    MessageBox.Show($"{sonuc.Mesaj} Liste yenilendi.",
+                        "İşlem Yapılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    await SalonRezervasyonlariniYukleAsync();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Rezervasyon iptal edilemedi: {ex.Message}",
+                    "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-            KatPlaniniCiz();
-            AktifRezervasyonlariGuncelle();
+            await SalonRezervasyonlariniYukleAsync();
 
-            MessageBox.Show($"{_secilenMasa.Kod} masası başarıyla boşaltıldı ve kullanıma açıldı.",
+            MessageBox.Show($"{_secilenMasa?.Kod} masası başarıyla boşaltıldı ve kullanıma açıldı.",
                 "Masa Boşaltıldı", MessageBoxButton.OK, MessageBoxImage.None);
         }
 
         // ── Zaman Dilimi Seçici ──────────────────────────────────────────────
 
-        private void BdSlot_Click(object sender, MouseButtonEventArgs e)
+        private async void BdSlot_Click(object sender, MouseButtonEventArgs e)
         {
             if (sender is not Border clickedBorder) return;
             _aktifSlot = clickedBorder.Tag?.ToString() ?? _aktifSlot;
@@ -471,6 +533,8 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 selTb.Foreground = new SolidColorBrush(Color.FromRgb(56, 189, 248));
                 selTb.FontWeight = FontWeights.SemiBold;
             }
+
+            await SalonRezervasyonlariniYukleAsync();
         }
 
         // ── Aktif Rezervasyonlar Listesi ─────────────────────────────────────
@@ -489,6 +553,40 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 .ToList();
 
             lstAktifRezervasyonlar.ItemsSource = aktif;
+        }
+
+        private async Task SalonRezervasyonlariniYukleAsync()
+        {
+            try
+            {
+                var seciliKod = _secilenMasa?.Kod;
+                using var context = new KutuphaneDbContext();
+                var rezervasyonlar = await new SalonRezervasyonService(context)
+                    .GetAktifAsync(DateTime.Today, _aktifSlot);
+
+                MasalariOlustur();
+                foreach (var rezervasyon in rezervasyonlar)
+                {
+                    var masa = _masalar.FirstOrDefault(m => m.Kod == rezervasyon.MasaKodu);
+                    if (masa == null) continue;
+                    masa.Durum = "Rezerve";
+                    masa.RezerveEden = rezervasyon.Kullanici;
+                    masa.RezerveZamanAraligi = rezervasyon.ZamanAraligi;
+                    masa.SalonRezervasyonId = rezervasyon.Id;
+                }
+
+                KatPlaniniCiz();
+                AktifRezervasyonlariGuncelle();
+                var yeniSecim = _masalar.FirstOrDefault(m => m.Kod == seciliKod)
+                    ?? _masalar.FirstOrDefault(m => m.Durum == "Boş")
+                    ?? _masalar[0];
+                MasaSec(yeniSecim, null);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Salon rezervasyonları yüklenemedi: {ex.Message}",
+                    "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // ── Saat Güncelleme ──────────────────────────────────────────────────

@@ -17,6 +17,7 @@ namespace KutuphaneOtomasyonu.Data
         public static void Seed(KutuphaneDbContext context)
         {
             context.Database.EnsureCreated();
+            EnsureSalonRezervasyonSchema(context);
 
             // Sırayla seed et
             SeedSistemAyarlari(context);
@@ -27,6 +28,28 @@ namespace KutuphaneOtomasyonu.Data
             SeedRezervasyonlar(context);
             SeedAkademikYayinlar(context);
             SeedMateryalTransferler(context);
+        }
+
+        private static void EnsureSalonRezervasyonSchema(KutuphaneDbContext context)
+        {
+            context.Database.ExecuteSqlRaw("""
+                CREATE TABLE IF NOT EXISTS "SalonRezervasyonlari" (
+                    "Id" INTEGER NOT NULL CONSTRAINT "PK_SalonRezervasyonlari" PRIMARY KEY AUTOINCREMENT,
+                    "MasaKodu" TEXT NOT NULL,
+                    "Bolge" TEXT NOT NULL,
+                    "Kullanici" TEXT NOT NULL,
+                    "ZamanAraligi" TEXT NOT NULL,
+                    "Sure" TEXT NOT NULL,
+                    "Amac" TEXT NOT NULL,
+                    "Tarih" TEXT NOT NULL,
+                    "OlusturulmaTarihi" TEXT NOT NULL,
+                    "Durum" TEXT NOT NULL
+                );
+                DROP INDEX IF EXISTS "IX_SalonRezervasyonlari_MasaKodu_Tarih_ZamanAraligi";
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_SalonRezervasyonlari_MasaKodu_Tarih_ZamanAraligi"
+                    ON "SalonRezervasyonlari" ("MasaKodu", "Tarih", "ZamanAraligi")
+                    WHERE "Durum" = 'Aktif';
+                """);
         }
 
         private static void SeedSistemAyarlari(KutuphaneDbContext context)

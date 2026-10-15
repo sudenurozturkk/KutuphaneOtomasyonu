@@ -20,12 +20,12 @@
                 </Grid>
 
                 <TextBlock Text="Kitap Başlığı *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                <TextBox x:Name="txtBaslik" Height="40" Foreground="White"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"/>
+                <TextBox x:Name="txtBaslik" Foreground="White"
+                         Style="{StaticResource ModernTextBox}" Margin="0,0,0,12"/>
 
                 <TextBlock Text="Yazar *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                <TextBox x:Name="txtYazar" Height="40" Foreground="White"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"/>
+                <TextBox x:Name="txtYazar" Foreground="White"
+                         Style="{StaticResource ModernTextBox}" Margin="0,0,0,12"/>
 
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
@@ -34,13 +34,13 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
                         <TextBlock Text="ISBN *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtISBN" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtISBN" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
                         <TextBlock Text="Yayın Yılı" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtYayinYili" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtYayinYili" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                 </Grid>
 
@@ -51,13 +51,13 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,8,0">
                         <TextBlock Text="Kategori *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtKategori" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtKategori" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="8,0,0,0">
                         <TextBlock Text="Yayınevi" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtYayinevi" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtYayinevi" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                 </Grid>
 
@@ -69,24 +69,24 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,6,0">
                         <TextBlock Text="Sayfa Sayısı" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtSayfaSayisi" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtSayfaSayisi" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="3,0,3,0">
                         <TextBlock Text="Toplam Adet *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtToplamAdet" Height="40" Foreground="White" Text="1"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtToplamAdet" Foreground="White" Text="1"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Margin="6,0,0,0">
                         <TextBlock Text="Raf Konumu" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                        <TextBox x:Name="txtRafKonumu" Height="40" Foreground="White"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"/>
+                        <TextBox x:Name="txtRafKonumu" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
                     </StackPanel>
                 </Grid>
 
                 <TextBlock Text="Açıklama" Foreground="#94A3B8" Margin="0,0,0,4"/>
                 <TextBox x:Name="txtAciklama" Height="80" Foreground="White" TextWrapping="Wrap"
-                         AcceptsReturn="True" Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,20"/>
+                         AcceptsReturn="True" Style="{StaticResource ModernTextBox}" Margin="0,0,0,20"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="İptal" Width="100" Height="40" Margin="0,0,12,0"

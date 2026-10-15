@@ -78,7 +78,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private void GuncelleButonlar()
         {
-            if (dgRezervasyonlar.SelectedItem is Rezervasyon rez && rez.Durumu == RezervasyonDurumu.Bekliyor)
+            if (dgRezervasyonlar.SelectedItem is Rezervasyon rez && DonusturulebilirMi(rez))
             {
                 btnOdunceDonustur.IsEnabled = true;
                 btnIptalEt.IsEnabled = true;
@@ -90,67 +90,58 @@ namespace KutuphaneOtomasyonu.Views.Pages
             }
         }
 
+        private static bool DonusturulebilirMi(Rezervasyon rezervasyon) =>
+            (rezervasyon.Durumu == RezervasyonDurumu.Bekliyor ||
+             rezervasyon.Durumu == RezervasyonDurumu.Onaylandi) &&
+            rezervasyon.GecerlilikTarihi >= DateTime.Now;
+
         private async void BtnYeniRezervasyon_Click(object sender, RoutedEventArgs e)
         {
-            try
+            var dialog = new RezervasyonEkleDialog
             {
-                using var context = new KutuphaneDbContext();
-                var kitaplar = await context.Kitaplar.Take(10).ToListAsync();
-                var uyeler = await context.Uyeler.Where(u => u.Durumu == UyeDurumu.Aktif).Take(10).ToListAsync();
-
-                if (kitaplar.Count == 0 || uyeler.Count == 0)
-                {
-                    MessageBox.Show("Rezervasyon oluşturmak için sistemde kayıtlı kitap ve üye bulunmalıdır.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // İlk kitap ve üyeyi örnek rezervasyon olarak ekle
-                var rastgeleKitap = kitaplar.First();
-                var rastgeleUye = uyeler.First();
-
-                var yeniRez = new Rezervasyon
-                {
-                    KitapId = rastgeleKitap.Id,
-                    UyeId = rastgeleUye.Id,
-                    RezervasyonTarihi = DateTime.Now,
-                    GecerlilikTarihi = DateTime.Now.AddDays(7),
-                    Durumu = RezervasyonDurumu.Bekliyor,
-                    SiraNumarasi = (await context.Rezervasyonlar.CountAsync(r => r.KitapId == rastgeleKitap.Id && r.Durumu == RezervasyonDurumu.Bekliyor)) + 1,
-                    Notlar = "Kullanıcı talebiyle oluşturuldu"
-                };
-
-                context.Rezervasyonlar.Add(yeniRez);
-                await context.SaveChangesAsync();
-
-                MessageBox.Show($"'{rastgeleKitap.Baslik}' kitabı için '{rastgeleUye.TamAd}' adına {yeniRez.SiraNumarasi}. sıradan rezervasyon oluşturuldu!", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+                Owner = Window.GetWindow(this)
+            };
+            if (dialog.ShowDialog() == true)
                 await VeriYukle();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Rezervasyon oluşturulamadı: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private async void BtnOdunceDonustur_Click(object sender, RoutedEventArgs e)
         {
-            if (dgRezervasyonlar.SelectedItem is not Rezervasyon rez) return;
+            if (dgRezervasyonlar.SelectedItem is not Rezervasyon rez)
+            {
+                MessageBox.Show("Önce bekleyen bir rezervasyon seçin.", "Seçim Gerekli",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             try
             {
                 using var context = new KutuphaneDbContext();
+                var dbRez = await context.Rezervasyonlar
+                    .Include(r => r.Kitap)
+                    .Include(r => r.Uye)
+                    .FirstOrDefaultAsync(r => r.Id == rez.Id);
+
+                if (dbRez == null || !DonusturulebilirMi(dbRez))
+                {
+                    MessageBox.Show("Bu rezervasyon artık geçerli değil veya başka bir işlem tarafından kullanıldı.",
+                        "İşlem Yapılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    await VeriYukle();
+                    return;
+                }
+
                 var bildirimService = new BildirimService(context);
                 var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
                 var oduncService = new OduncService(context, bildirimService, ayarlar);
 
-                var sonuc = await oduncService.OduncVerAsync(rez.KitapId, rez.UyeId, AuthService.Instance.AktifKullanici?.Id ?? 1);
+                var sonuc = await oduncService.OduncVerAsync(dbRez.KitapId, dbRez.UyeId, AuthService.Instance.AktifKullanici?.Id ?? 1);
                 if (sonuc.Basarili)
                 {
                     // Rezervasyonu tamamlandı yap
-                    var dbRez = await context.Rezervasyonlar.FindAsync(rez.Id);
-                    if (dbRez != null) dbRez.Durumu = RezervasyonDurumu.Tamamlandi;
+                    dbRez.Durumu = RezervasyonDurumu.Tamamlandi;
                     await context.SaveChangesAsync();
 
-                    MessageBox.Show($"Rezervasyon başarıyla ödünce dönüştürüldü!\nKitap: {rez.Kitap?.Baslik}\nÜye: {rez.Uye?.TamAd}", "İşlem Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Rezervasyon başarıyla ödünce dönüştürüldü!\nKitap: {dbRez.Kitap?.Baslik}\nÜye: {dbRez.Uye?.TamAd}", "İşlem Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
                     await VeriYukle();
                 }
                 else
@@ -166,7 +157,12 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void BtnIptalEt_Click(object sender, RoutedEventArgs e)
         {
-            if (dgRezervasyonlar.SelectedItem is not Rezervasyon rez) return;
+            if (dgRezervasyonlar.SelectedItem is not Rezervasyon rez)
+            {
+                MessageBox.Show("Önce iptal edilecek bekleyen rezervasyonu seçin.", "Seçim Gerekli",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
 
             var onay = MessageBox.Show($"'{rez.Kitap?.Baslik}' kitabı için olan rezervasyon sırasını iptal etmek istiyor musunuz?", "İptal Onayı", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (onay != MessageBoxResult.Yes) return;

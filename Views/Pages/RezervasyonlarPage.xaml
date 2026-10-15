@@ -31,10 +31,10 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="🔄 Yenile" Style="{StaticResource MaterialDesignOutlinedButton}"
+                <Button Content="Yenile" Style="{StaticResource MaterialDesignOutlinedButton}"
                         BorderBrush="#334155" Foreground="#94A3B8" Height="36" Padding="12,0" Margin="0,0,8,0"
                         materialDesign:ButtonAssist.CornerRadius="8" Click="BtnYenile_Click"/>
-                <Button Content="➕ Yeni Rezervasyon" Height="36" Padding="14,0"
+                <Button Content="Yeni Rezervasyon" Height="36" Padding="14,0"
                         materialDesign:ButtonAssist.CornerRadius="8"
                         FontFamily="Segoe UI" FontSize="12.5" FontWeight="SemiBold"
                         Click="BtnYeniRezervasyon_Click">
@@ -60,7 +60,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Arama Kutusu -->
-                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,10,0" Height="40">
+                <Border Grid.Column="0" Background="#1E293B" CornerRadius="10" Padding="12,0" Margin="0,0,10,0" Height="44">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -68,23 +68,24 @@
                         </Grid.ColumnDefinitions>
                         <materialDesign:PackIcon Kind="Magnify" Width="18" Height="18" Foreground="#64748B"
                                                  VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBox Grid.Column="1" x:Name="txtArama"
+                        <TextBox Grid.Column="1" x:Name="txtArama" Style="{StaticResource SearchTextBox}"
                                  materialDesign:HintAssist.Hint="Kitap başlığı veya üye adı ara..."
                                  materialDesign:HintAssist.IsFloating="False"
                                  materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
                                  BorderThickness="0" Background="Transparent"
                                  Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                                 VerticalAlignment="Center" TextChanged="TxtArama_TextChanged"/>
+                                 VerticalAlignment="Center" VerticalContentAlignment="Center"
+                                 TextChanged="TxtArama_TextChanged"/>
                     </Grid>
                 </Border>
 
                 <!-- Durum Filtresi -->
-                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="40">
-                    <ComboBox x:Name="cbFiltreDurum"
+                <Border Grid.Column="1" Background="#1E293B" CornerRadius="10" Padding="8,0" Margin="0,0,10,0" Height="44">
+                    <ComboBox x:Name="cbFiltreDurum" Style="{StaticResource SearchComboBox}"
                               materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
                               BorderThickness="0" Background="Transparent"
                               Foreground="White" FontFamily="Segoe UI" FontSize="13"
-                              VerticalAlignment="Center"
+                              VerticalAlignment="Center" VerticalContentAlignment="Center"
                               SelectionChanged="CbFiltreDurum_SelectionChanged">
                         <ComboBoxItem Content="Tüm Durumlar" IsSelected="True"/>
                         <ComboBoxItem Content="Bekliyor"/>
