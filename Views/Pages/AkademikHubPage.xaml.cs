@@ -102,27 +102,30 @@ namespace KutuphaneOtomasyonu.Views.Pages
         private async void BtnKopyalaApa_Click(object sender, RoutedEventArgs e)
         {
             if (!YayinSeciliMi()) return;
-            Clipboard.SetText(_seciliYayin.ApaCitation);
+            var yayin = _seciliYayin!;
+            Clipboard.SetText(yayin.ApaCitation);
             await AlintiKaydet();
-            MessageBox.Show($"✅ APA 7th Edition formatındaki akademik alıntı panoya kopyalandı:\n\n{_seciliYayin.ApaCitation}",
+            MessageBox.Show($"✅ APA 7th Edition formatındaki akademik alıntı panoya kopyalandı:\n\n{yayin.ApaCitation}",
                 "Citation Kopyalandı", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private async void BtnKopyalaMla_Click(object sender, RoutedEventArgs e)
         {
             if (!YayinSeciliMi()) return;
-            Clipboard.SetText(_seciliYayin.MlaCitation);
+            var yayin = _seciliYayin!;
+            Clipboard.SetText(yayin.MlaCitation);
             await AlintiKaydet();
-            MessageBox.Show($"✅ MLA 9th Edition formatındaki akademik alıntı panoya kopyalandı:\n\n{_seciliYayin.MlaCitation}",
+            MessageBox.Show($"✅ MLA 9th Edition formatındaki akademik alıntı panoya kopyalandı:\n\n{yayin.MlaCitation}",
                 "Citation Kopyalandı", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private async void BtnKopyalaBibTex_Click(object sender, RoutedEventArgs e)
         {
             if (!YayinSeciliMi()) return;
-            Clipboard.SetText(_seciliYayin.BibTexCitation);
+            var yayin = _seciliYayin!;
+            Clipboard.SetText(yayin.BibTexCitation);
             await AlintiKaydet();
-            MessageBox.Show($"✅ LaTeX için BibTeX formatı panoya kopyalandı:\n\n{_seciliYayin.BibTexCitation}",
+            MessageBox.Show($"✅ LaTeX için BibTeX formatı panoya kopyalandı:\n\n{yayin.BibTexCitation}",
                 "BibTeX Kopyalandı", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -146,14 +149,15 @@ namespace KutuphaneOtomasyonu.Views.Pages
         private async void BtnTamMetinIndir_Click(object sender, RoutedEventArgs e)
         {
             if (!YayinSeciliMi()) return;
+            var yayin = _seciliYayin!;
             try
             {
                 using var context = new KutuphaneDbContext();
                 var service = new AkademikService(context);
-                await service.IndirmeArtirAsync(_seciliYayin.Id);
-                _seciliYayin.IndirmeSayisi++;
+                await service.IndirmeArtirAsync(yayin.Id);
+                yayin.IndirmeSayisi++;
 
-                MessageBox.Show($"📥 '{_seciliYayin.Baslik}' eseri açık erişim (Open Access) lisansıyla indirildi!\nBoyut: {_seciliYayin.DosyaBoyutu}",
+                MessageBox.Show($"📥 '{yayin.Baslik}' eseri açık erişim (Open Access) lisansıyla indirildi!\nBoyut: {yayin.DosyaBoyutu}",
                     "Tam Metin İndirildi", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -165,8 +169,9 @@ namespace KutuphaneOtomasyonu.Views.Pages
         private async void BtnBaskaKampustenIste_Click(object sender, RoutedEventArgs e)
         {
             if (!YayinSeciliMi()) return;
+            var yayin = _seciliYayin!;
 
-            var onay = MessageBox.Show($"'{_seciliYayin.Baslik}' eserinin basılı kopyasını {_seciliYayin.MevcutKampus} şubesinden Merkez Kütüphane'ye kurye ile transfer etmek istiyor musunuz?",
+            var onay = MessageBox.Show($"'{yayin.Baslik}' eserinin basılı kopyasını {yayin.MevcutKampus} şubesinden Merkez Kütüphane'ye kurye ile transfer etmek istiyor musunuz?",
                 "Inter-Library Loan (ILL) Talebi", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (onay == MessageBoxResult.Yes)
@@ -176,7 +181,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
                     using var context = new KutuphaneDbContext();
                     var service = new AkademikService(context);
                     var uye = AuthService.Instance.AktifKullanici?.Id ?? 1;
-                    var transfer = await service.TransferTalepEtAsync(1, uye, _seciliYayin.MevcutKampus, KampusLokasyonu.MerkezKutuphane);
+                    var transfer = await service.TransferTalepEtAsync(1, uye, yayin.MevcutKampus, KampusLokasyonu.MerkezKutuphane);
 
                     MessageBox.Show($"✅ ILL Kütüphaneler arası transfer talebi oluşturuldu!\nTakip Kodu: {transfer.KuryeTakipKodu}\nTahmini Varış: 24 Saat İçinde",
                         "Transfer Başlatıldı", MessageBoxButton.OK, MessageBoxImage.Information);

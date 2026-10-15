@@ -28,7 +28,7 @@ namespace KutuphaneOtomasyonu.Views
             await GirisYap();
         }
 
-        private async void TxtKullaniciAdi_KeyDown(object sender, KeyEventArgs e)
+        private void TxtKullaniciAdi_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter) txtSifre.Focus();
         }

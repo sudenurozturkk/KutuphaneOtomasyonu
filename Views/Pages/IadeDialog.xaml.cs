@@ -32,7 +32,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
                 if (odunc != null)
                 {
-                    txtOduncBilgi.Text = $"Kitap: {odunc.Kitap.Baslik}\nÜye: {odunc.Uye.TamAd}";
+                    txtOduncBilgi.Text = $"Kitap: {odunc.Kitap?.Baslik ?? "Bilinmeyen kitap"}\nÜye: {odunc.Uye?.TamAd ?? "Bilinmeyen üye"}";
                 }
             }
             catch (Exception ex)

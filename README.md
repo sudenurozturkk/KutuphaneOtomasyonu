@@ -111,7 +111,9 @@ KutuphaneOtomasyonu/
 │       ├── SalonRezervasyonPage.xaml # 2D interaktif masa haritası
 │       └── ...                    # Diğer 9 modül ve modal diyaloglar
 ├── SmokeTester.cs                 # Otomatik Uçtan Uca Doğrulama Motoru
-└── KutuphaneOtomasyonu.csproj     # .NET 9.0 Windows WPF Proje Tanımı
+├── Services/SalonRezervasyonService.cs # Salon rezervasyon iş kuralları
+└── Tests/KutuphaneOtomasyonu.Tests/    # İzole SQLite servis testleri
+    └── KutuphaneOtomasyonu.Tests.csproj
 ```
 
 ---
@@ -150,6 +152,15 @@ Proje, 14 modülün, 6 modal pencerenin ve tüm menü geçişlerinin UI seviyesi
 # Otomatik doğrulamayı çalıştırın:
 dotnet run -- --test
 ```
+
+Salon rezervasyon servisinin iş kurallarını WPF başlatmadan, izole SQLite veritabanında test etmek için:
+
+```bash
+dotnet test .\Tests\KutuphaneOtomasyonu.Tests\KutuphaneOtomasyonu.Tests.csproj
+```
+
+Bu testler geçerli rezervasyon oluşturma, aktif listeleme, aynı masa/zaman diliminde yinelenen kayıt engeli,
+farklı gün veya slot desteği, zorunlu alan doğrulaması ve iptal kurallarını kapsar.
 
 **Konsol Çıktısı:**
 ```

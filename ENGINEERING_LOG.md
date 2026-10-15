@@ -2,6 +2,45 @@
 
 ## 2026-10-15 cycle
 
+### Continued cycle: isolated service test project
+
+#### Completed
+
+- Added constructor-based `DbContextOptions` injection while preserving the existing application database default.
+- Added an isolated `net9.0-windows` xUnit project using an in-memory SQLite connection.
+- Added five focused tests for salon reservation creation, active listing, duplicate rejection, different day/slot behavior, validation, and cancellation.
+- Excluded the test directory from the WPF project's default source glob so test files cannot leak into the application build.
+- Documented the isolated test command in `README.md`.
+- Cleaned the previously reported nullable navigation and unnecessary async warnings in the academic, barcode, return-dialog, and login surfaces.
+
+#### Changed files
+
+- `Data/KutuphaneDbContext.cs`
+- `KutuphaneOtomasyonu.csproj`
+- `Tests/KutuphaneOtomasyonu.Tests/KutuphaneOtomasyonu.Tests.csproj`
+- `Tests/KutuphaneOtomasyonu.Tests/SalonRezervasyonServiceTests.cs`
+- `README.md`
+- `Views/Pages/AkademikHubPage.xaml.cs`
+- `Views/Pages/BarkodBankoPage.xaml.cs`
+- `Views/Pages/IadeDialog.xaml.cs`
+- `Views/LoginWindow.xaml.cs`
+- `ENGINEERING_LOG.md`
+
+#### Verification
+
+- `dotnet test .\Tests\KutuphaneOtomasyonu.Tests\KutuphaneOtomasyonu.Tests.csproj` — 5 passed, 0 failed.
+- `dotnet build .\KutuphaneOtomasyonu.csproj --no-restore` — passed with 0 warnings and 0 errors.
+- `dotnet run --project .\KutuphaneOtomasyonu.csproj --no-build -- --test` — passed service smoke checks, 14 page checks, 6 dialog checks, and all navigation checks.
+- `git diff --check` — passed except for existing LF/CRLF normalization notices.
+
+#### Remaining / unverified
+
+- UI click automation and true multi-process concurrency are still not covered.
+
+#### Next recommended task
+
+- Audit and fix the existing nullable warnings in academic, barcode, return-dialog, and login code, then rerun both test suites.
+
 ### Continued cycle: salon reservation service rules
 
 #### Completed

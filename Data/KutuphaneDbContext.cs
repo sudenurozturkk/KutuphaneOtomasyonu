@@ -12,6 +12,15 @@ namespace KutuphaneOtomasyonu.Data
     /// </summary>
     public class KutuphaneDbContext : DbContext
     {
+        public KutuphaneDbContext()
+        {
+        }
+
+        public KutuphaneDbContext(DbContextOptions<KutuphaneDbContext> options)
+            : base(options)
+        {
+        }
+
         public DbSet<Kitap> Kitaplar { get; set; }
         public DbSet<Uye> Uyeler { get; set; }
         public DbSet<Odunc> Oduncler { get; set; }
@@ -29,6 +38,9 @@ namespace KutuphaneOtomasyonu.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (optionsBuilder.IsConfigured)
+                return;
+
             var dbPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "KutuphaneOtomasyonu",

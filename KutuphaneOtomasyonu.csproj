@@ -22,6 +22,9 @@
     <Compile Remove="KutuphaneOtomasyonuApp\**" />
     <EmbeddedResource Remove="KutuphaneOtomasyonuApp\**" />
     <None Remove="KutuphaneOtomasyonuApp\**" />
+    <Compile Remove="Tests\**" />
+    <EmbeddedResource Remove="Tests\**" />
+    <None Remove="Tests\**" />
   </ItemGroup>
 
 </Project>

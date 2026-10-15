@@ -136,7 +136,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
                 if (sonuc.Basarili)
                 {
-                    LogTerminal($"İADE BAŞARILI: '{kitap.Baslik}' kitabı '{aktifOdunc.Uye.TamAd}' adlı üyeden teslim alındı.");
+                    LogTerminal($"İADE BAŞARILI: '{kitap.Baslik}' kitabı '{aktifOdunc.Uye?.TamAd ?? "bilinmeyen üye"}' adlı üyeden teslim alındı.");
                     LogTerminal($"RAF KONUMU: Raf {kitap.RafKonumu} | Mevcut Stok: {kitap.MevcutAdet}");
                     txtBarkod.Clear();
                     txtBarkod.Focus();
