@@ -14,8 +14,8 @@
   `POST /api/uyeler/{id}/portal-sifresi` (Kütüphaneci, `Cache-Control: no-store`). Temporary password forces a change.
 - Web UI: Öğrenci/Personel login tabs, "Hesabım" page, "Rezerve et" on book pages (shows existing queue position),
   portal account section on the staff member page. WPF member dialog: "Portal Hesabı Aç / Şifresini Sıfırla".
-- Note: part of the member-session scaffolding (`UyeOturumu.cs`, `UyeOturumEndpoints.cs`, Program/DTO wiring) appeared in
-  the working tree from outside this session mid-task; it was kept and completed (it did not compile: duplicate
+- Note: part of the member-session scaffolding (`UyeOturumu.cs`, `UyeOturumEndpoints.cs`, Program/DTO wiring) was written mid-task
+  by a GitHub Copilot automation the owner had left running (since removed); it was kept and completed (it did not compile: duplicate
   `SifreDegistirmeli` extension; temporary-password flag ignored; no session re-validation).
 
 ### Verification
