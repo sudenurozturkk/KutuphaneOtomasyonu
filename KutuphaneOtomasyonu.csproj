@@ -10,13 +10,15 @@
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.21" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.21">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <!-- Alan modeli, veri erişimi ve servisler (Web API ile ortak) -->
+    <ProjectReference Include="src\KutuphaneOtomasyonu.Core\KutuphaneOtomasyonu.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="src\**" />
+    <EmbeddedResource Remove="src\**" />
+    <None Remove="src\**" />
     <Compile Remove="legacy\**" />
     <EmbeddedResource Remove="legacy\**" />
     <None Remove="legacy\**" />

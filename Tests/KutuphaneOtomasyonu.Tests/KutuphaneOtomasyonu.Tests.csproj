@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\KutuphaneOtomasyonu.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.21" />
+    <ProjectReference Include="..\..\src\KutuphaneOtomasyonu.Core\KutuphaneOtomasyonu.Core.csproj" />
   </ItemGroup>
 </Project>
