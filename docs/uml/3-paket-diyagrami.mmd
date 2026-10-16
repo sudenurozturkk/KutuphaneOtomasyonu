@@ -5,12 +5,12 @@ flowchart TB
     subgraph Sunum[" "]
         direction LR
         subgraph Api["📁 «package» KutuphaneOtomasyonu.Api — Web API (ASP.NET Core)"]
-            A1["Program · Altyapi.Oturum · Altyapi.Yanit"]
+            A1["Program · Altyapi.Oturum · Altyapi.UyeOturumu · Altyapi.Yanit"]
             subgraph Endpoints["📁 «package» Api.Endpoints"]
-                A2["KatalogEndpoints · OturumEndpoints · UyeEndpoints<br/>OduncEndpoints · RezervasyonVePanoEndpoints"]
+                A2["KatalogEndpoints · OturumEndpoints · UyeEndpoints<br/>OduncEndpoints · RezervasyonVePanoEndpoints<br/>UyeOturumEndpoints · HesabimEndpoints (öğrenci portalı)"]
             end
             subgraph Dto["📁 «package» Api.Dto"]
-                A3["KitapDto · UyeDetayDto · OduncDto<br/>RezervasyonDto · OduncVerIstegi …"]
+                A3["KitapDto · UyeDetayDto · OduncDto · RezervasyonDto<br/>OduncVerIstegi · UyeOturumDto · HesapDto …"]
             end
         end
         subgraph Views["📁 «package» KutuphaneOtomasyonu.Views — Masaüstü (WPF)"]
@@ -23,12 +23,12 @@ flowchart TB
 
     subgraph Core["📦 KutuphaneOtomasyonu.Core (ortak çekirdek)"]
         subgraph Services["📁 «package» KutuphaneOtomasyonu.Services — İş Mantığı"]
-            S["OduncService · KitapService · UyeService · RezervasyonService<br/>KimlikDogrulamaService · BankoAramaService · ServisKapsami …"]
+            S["OduncService · KitapService · UyeService · RezervasyonService<br/>KimlikDogrulamaService · UyeHesapService · BankoAramaService · ServisKapsami …"]
         end
         subgraph Data["📁 «package» KutuphaneOtomasyonu.Data — Veri Erişimi"]
             D["KutuphaneDbContext · VeritabaniSemasi · DatabaseSeeder"]
             subgraph Migrations["📁 «package» Data.Migrations"]
-                M["TabanSema · KitapNushalari · CuzdanHareketleri …"]
+                M["TabanSema · KitapNushalari · CuzdanHareketleri<br/>UyePortalHesabi …"]
             end
         end
         subgraph Models["📁 «package» KutuphaneOtomasyonu.Models — Alan (Domain)"]

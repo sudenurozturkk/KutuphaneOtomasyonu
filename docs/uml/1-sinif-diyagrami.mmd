@@ -99,8 +99,8 @@ classDiagram
     class OduncService {
         <<service>>
         +OduncVerAsync(kitapId, uyeId, kutuphanecId, nushaBarkodu) OduncSonuc
-        +IadeAlAsync(oduncId, kitapDurumu, notlar) OduncSonuc
-        +UzatAsync(oduncId) OduncSonuc
+        +IadeAlAsync(oduncId, kitapDurumu, notlar, kullaniciId) OduncSonuc
+        +UzatAsync(oduncId, kullaniciId) OduncSonuc
         +GetUyeOdunclerAsync(uyeId) List~Odunc~
     }
 

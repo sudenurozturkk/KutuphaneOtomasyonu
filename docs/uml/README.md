@@ -52,9 +52,9 @@ Kod, C# isim alanlarına (namespace) karşılık gelen 5 mantıksal pakete ve 4 
 
 | Paket | Sorumluluk |
 |---|---|
-| `KutuphaneOtomasyonu.Api` (+ `Api.Endpoints`, `Api.Dto`) | Web API: HTTP uç noktaları, oturum ve yetki, API veri modelleri, tarayıcı arayüzü |
+| `KutuphaneOtomasyonu.Api` (+ `Api.Endpoints`, `Api.Dto`) | Web API: HTTP uç noktaları (personel paneli ve öğrenci portalı), oturum ve yetki, API veri modelleri, tarayıcı arayüzü |
 | `KutuphaneOtomasyonu.Views` (+ `Views.Pages`) | Masaüstü (WPF) arayüzü: pencereler, sayfalar ve diyaloglar |
-| `KutuphaneOtomasyonu.Services` | İş mantığı: ödünç/iade kuralları, rezervasyon kuyruğu, kimlik doğrulama |
+| `KutuphaneOtomasyonu.Services` | İş mantığı: ödünç/iade kuralları, rezervasyon kuyruğu, personel ve öğrenci kimlik doğrulaması |
 | `KutuphaneOtomasyonu.Data` (+ `Data.Migrations`) | Veri erişimi: EF Core `DbContext`, şema migration'ları, demo verisi |
 | `KutuphaneOtomasyonu.Models` | Alan (domain) sınıfları: `Uye`, `Kitap`, `Odunc` … |
 
