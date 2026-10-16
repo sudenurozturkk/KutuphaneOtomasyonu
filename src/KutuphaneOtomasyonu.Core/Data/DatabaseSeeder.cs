@@ -42,6 +42,16 @@ namespace KutuphaneOtomasyonu.Data
             SeedMateryalTransferler(context);
         }
 
+        /// <summary>12 haneli gövdeye ISBN-13 kontrol basamağını ekler.</summary>
+        internal static string Isbn13(long govde)
+        {
+            var ilk12 = govde.ToString("D12");
+            var toplam = 0;
+            for (var i = 0; i < 12; i++)
+                toplam += (ilk12[i] - '0') * (i % 2 == 0 ? 1 : 3);
+            return ilk12 + (char)('0' + (10 - toplam % 10) % 10);
+        }
+
         private static void SeedSistemAyarlari(KutuphaneDbContext context)
         {
             if (context.SistemAyarlari.Any()) return;
@@ -125,7 +135,7 @@ namespace KutuphaneOtomasyonu.Data
             };
 
             var kitaplar = new List<Kitap>();
-            long isbn = 9780001000001L;
+            long isbnGovdesi = 978000100000L; // ilk 12 hane; 13. hane kontrol basamağıdır
 
             var kitapVerileri = new[]
             {
@@ -170,7 +180,7 @@ namespace KutuphaneOtomasyonu.Data
                 {
                     Baslik = baslik,
                     Yazar = yazar,
-                    ISBN = $"978{isbn++:D10}",
+                    ISBN = Isbn13(isbnGovdesi++),
                     YayinYili = yil,
                     Kategori = kat,
                     AltKategori = altKat,

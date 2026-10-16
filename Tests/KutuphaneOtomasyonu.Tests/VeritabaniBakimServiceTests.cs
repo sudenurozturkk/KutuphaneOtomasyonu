@@ -89,6 +89,18 @@ public sealed class VeritabaniBakimServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task DemoVerisi_KitapIsbnleriGecerliVeBenzersiz()
+    {
+        using var context = _db.YeniContext();
+        DatabaseSeeder.Seed(context);
+
+        var isbnler = await context.Kitaplar.Select(k => k.ISBN).ToListAsync();
+        Assert.NotEmpty(isbnler);
+        Assert.All(isbnler, isbn => Assert.True(Dogrulama.IsbnGecerliMi(isbn), $"Geçersiz demo ISBN: {isbn}"));
+        Assert.Equal(isbnler.Count, isbnler.Distinct().Count());
+    }
+
+    [Fact]
     public async Task DemoVerisineSifirla_TransferVarkenCalisir_HesaplariVeDenetimKayitlariniKorur()
     {
         int kullaniciSayisi;
