@@ -11,7 +11,7 @@ flowchart LR
 
     subgraph OGR["📱 «device» Öğrenci cihazı — PC / mobil"]
         subgraph TR2["«executionEnvironment» Web tarayıcısı"]
-            A4["📄 «artifact»<br/>Katalog (OPAC) sayfaları"]
+            A4["📄 «artifact»<br/>Katalog (OPAC) + öğrenci portalı<br/>(Hesabım)"]
         end
     end
 
@@ -27,6 +27,6 @@ flowchart LR
 
     BR -- "USB HID (klavye)" --- A1
     A1 -- "«HTTPS» REST / JSON<br/>oturum çerezi" --- A2
-    A4 -- "«HTTPS» REST / JSON<br/>/api/katalog" --- A2
+    A4 -- "«HTTPS» REST / JSON<br/>/api/katalog, /api/hesabim<br/>öğrenci oturum çerezi" --- A2
     A2 -. "«use»" .-> A3
     A3 -- "«EF Core / Microsoft.Data.Sqlite»" --- DB

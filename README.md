@@ -155,6 +155,7 @@ Yeni migration eklendiğinde `Tests` içindeki şema yükseltme testleri de çal
 |---|---|---|
 | **Sistem Yöneticisi (Admin)** | `admin` | `admin123` |
 | **Kütüphaneci (Staff)** | `fatmak` | `123456` |
+| **Öğrenci (web portalı)** | `2026000001` veya `ogrenci@demo.edu.tr` | `ogrenci123` |
 
 > ⚠️ Bunlar demo hesaplarıdır. Gerçek bir kurulumda ilk girişten sonra sol menüdeki **Şifre Değiştir** ile
 > değiştirilmelidir (en az 8 karakter). Demo bilgileri giriş ekranında yalnızca **Debug** derlemelerinde otomatik doldurulur.
@@ -212,6 +213,8 @@ Sistem yalnızca masaüstünde değil, **ağ üzerinden de** çalışır. `src/K
 (`KutuphaneOtomasyonu.Core`) bir **ASP.NET Core Web API** olarak sunar ve tarayıcı arayüzünü (`wwwroot`) barındırır:
 
 - **Herkes (giriş gerekmez):** katalogda arama, kategori süzme, kitabın nüshalarının rafta/ödünçte durumu.
+- **Öğrenci (giriş ile, "Hesabım"):** ödünçteki kitaplar ve kalan gün, süre uzatma, kitap rezervasyonu ve iptali,
+  borç, bildirimler, geçmiş ödünçler, şifre değiştirme. Öğrenci yalnızca kendi kayıtlarını görür.
 - **Personel (giriş ile):** pano, barkod bankosu (nüsha barkodu + üye ile ödünç, barkodla iade), ödünç listesi
   (uzatma/iade), üyeler, rezervasyonlar, kitap ve üye ekleme.
 
@@ -228,6 +231,12 @@ dotnet run --project src/KutuphaneOtomasyonu.Api --launch-profile https
 
 Aynı ağdaki başka cihazlardan erişmek için sunucuyu `--urls "https://0.0.0.0:7215"` ile başlatıp güvenlik duvarında
 portu açın. Personel girişinde masaüstü uygulamasıyla aynı hesaplar kullanılır (`admin` / `admin123`, `fatmak` / `123456`).
+Demo öğrenci: `2026000001` / `ogrenci123`.
+
+**Öğrenci hesabı nasıl açılır?** Kütüphaneci, üye detayında (web panelinde veya masaüstünde) **"Portal hesabı aç"** der;
+sistem 10 karakterlik **geçici şifre** üretir ve bir kez gösterir. Öğrenci öğrenci numarası (veya e-postası) ve bu şifreyle
+girer, devam etmeden önce kendi şifresini belirlemek zorundadır. "Şifremi unuttum" durumunda aynı düğme şifreyi sıfırlar
+ve öğrencinin açık oturumlarını kapatır.
 
 ### Uç noktalar
 
@@ -242,6 +251,10 @@ portu açın. Personel girişinde masaüstü uygulamasıyla aynı hesaplar kulla
 | `POST /api/uyeler`, `PUT /api/uyeler/{id}`, `POST /api/uyeler/{id}/ceza-ode` | Kütüphaneci | Üye kaydı, güncelleme, ceza tahsilatı |
 | `POST /api/kitaplar`, `PUT /api/kitaplar/{id}`, `DELETE /api/kitaplar/{id}` | Kütüphaneci | Kitap ekleme, güncelleme, arşivleme |
 | `GET/POST /api/rezervasyonlar`, `POST …/{id}/iptal`, `POST …/{id}/odunce-donustur` | Personel | Bekleme sırası |
+| `POST /api/uyeler/{id}/portal-sifresi` | Kütüphaneci | Öğrenci portalı için tek seferlik geçici şifre |
+| `POST /api/uye-oturum/giris`, `…/cikis`, `GET …/ben`, `POST …/sifre` | — / Öğrenci | Öğrenci girişi (öğrenci no veya e-posta), çıkış, şifre |
+| `GET /api/hesabim`, `GET …/oduncler`, `POST …/oduncler/{id}/uzat` | Öğrenci | Kendi özeti, ödünçleri, süre uzatma |
+| `GET/POST /api/hesabim/rezervasyonlar`, `POST …/{id}/iptal`, `GET …/bildirimler`, `POST …/bildirimler/{id}/okundu` | Öğrenci | Kendi rezervasyonları ve bildirimleri |
 
 Hatalar [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457) biçiminde döner; kullanıcıya gösterilecek
 mesaj `detail` alanındadır. Enum değerleri metin olarak gelir (`"Aktif"`, `"Rafta"` …).
@@ -255,6 +268,10 @@ mesaj `detail` alanındadır. Enum değerleri metin olarak gelir (`"Aktif"`, `"R
 | `Guvenlik:VarsayilanSifreDegisimiZorunlu` | `true` (geliştirmede `false`) | Varsayılan/kısa parolayla giren personel, parolasını değiştirene kadar işlem yapamaz |
 
 ### Web güvenliği
+- Personel ve öğrenci oturumları **ayrı çerezlerdir**; öğrenci çerezi personel uç noktalarına, personel çerezi `/api/hesabim`
+  uç noktalarına erişim sağlamaz. Öğrencinin kimliği istekten değil oturumdan alınır; başka üyenin kaydı `404` döner.
+- Öğrenci şifresi değişince veya sıfırlanınca eski oturumları geçersiz olur (oturumda şifreye bağlı damga tutulur);
+  yasaklanan veya anonimleştirilen öğrencinin oturumu hemen düşer.
 - Oturum çerezi `HttpOnly`, `SameSite=Strict` ve üretimde `Secure`; 8 saat, kayan süre. Her istekte personelin hâlâ
   aktif olduğu ve rolünün değişmediği veritabanından denetlenir.
 - Giriş: hesap başına 5 hatalı denemede 1 dakika kilit + IP başına dakikada 10 deneme sınırı (`429`).
@@ -291,7 +308,9 @@ dotnet test .\Tests\KutuphaneOtomasyonu.Api.Tests\KutuphaneOtomasyonu.Api.Tests.
 API testleri; anonim katalog erişimini, oturumsuz isteklerin `401` almasını, çerez güvenlik özelliklerini, hesap kilidini,
 pasifleştirilen personelin oturumunun düşmesini, barkodla ödünç/iade turunu ve denetim kaydını, **eşzamanlı isteklerde son
 nüshanın yalnızca bir kez verilmesini**, rol bazlı maskeleme ve `403` yanıtlarını, zorunlu parola değişimini ve güvenlik
-başlıklarını doğrular.
+başlıklarını doğrular. Öğrenci portalı testleri; öğrenci ve personel oturumlarının birbirinin uç noktalarına erişememesini,
+öğrencinin yalnızca kendi ödünç/rezervasyon kayıtlarını görüp değiştirebilmesini, geçici şifrenin değiştirilmeden işlem
+yapılamamasını ve şifre sıfırlanınca/üye yasaklanınca oturumun düşmesini doğrular.
 
 Testler uygulamanın gerçek şema hazırlığını (tetikleyiciler ve indeksler dahil) kullanır ve şunları kapsar:
 ödünç/iade/uzatma kuralları ve stok değişmezi, gecikme/hasar/kayıp cezaları, rezervasyon kuyruğu ve ayırma,

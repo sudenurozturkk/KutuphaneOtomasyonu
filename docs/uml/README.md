@@ -69,7 +69,9 @@ Sistem çevrimiçi çalışır; istemciler yalnızca bir web tarayıcısıdır:
 
 - **Kütüphane bankosu PC:** tarayıcıda personel paneli (giriş, banko, ödünçler, üyeler, rezervasyonlar). USB barkod
   okuyucu klavye gibi çalışır ve barkodu doğrudan forma yazar.
-- **Öğrenci cihazı (PC veya mobil):** tarayıcıdan katalog araması ve kitabın rafta olup olmadığı (giriş gerekmez).
+- **Öğrenci cihazı (PC veya mobil):** tarayıcıdan katalog araması (giriş gerekmez) ve öğrenci girişiyle **Hesabım**
+  portalı: ödünçler ve iade tarihleri, süre uzatma, rezervasyon, borç ve bildirimler. Öğrenci oturumu personel
+  oturumundan ayrı bir çerezle tutulur.
 - **Uygulama sunucusu:** .NET 9 / ASP.NET Core (Kestrel) üzerinde `KutuphaneOtomasyonu.Api.dll` çalışır; REST/JSON uç
   noktalarını ve tarayıcı arayüzü dosyalarını (`wwwroot`) HTTPS üzerinden sunar. İş kuralları `KutuphaneOtomasyonu.Core.dll`
   içindedir.

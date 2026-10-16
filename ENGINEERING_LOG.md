@@ -1,5 +1,32 @@
 # Engineering Log
 
+## 2026-10-16 cycle, part 4 — student (member) portal
+
+### Completed
+
+- Core: `Uye.PortalSifreHash` / `PortalSifreGecici` (migration `UyePortalHesabi`, additive columns only).
+  `UyeHesapService`: login by student number or e-mail (ambiguous student numbers rejected), PBKDF2, shared
+  `GirisKilidi` lockout, staff-issued 10-character one-time password (CSPRNG, unambiguous alphabet), member password change.
+  `KimlikDogrulamaService.YeniSifreHatasi` shared by staff and members. Anonymisation clears portal credentials.
+- Demo data: deterministic demo student `2026000001` / `ogrenci123` with two active and two past loans (no extra RNG draws).
+- API: separate member cookie scheme (`UyeOturumu`) re-validated on every request (member still allowed, password stamp
+  unchanged); `/api/uye-oturum/*`, `/api/hesabim/*` (own summary, loans + renew, reservations + cancel, notifications);
+  `POST /api/uyeler/{id}/portal-sifresi` (Kütüphaneci, `Cache-Control: no-store`). Temporary password forces a change.
+- Web UI: Öğrenci/Personel login tabs, "Hesabım" page, "Rezerve et" on book pages (shows existing queue position),
+  portal account section on the staff member page. WPF member dialog: "Portal Hesabı Aç / Şifresini Sıfırla".
+- Note: part of the member-session scaffolding (`UyeOturumu.cs`, `UyeOturumEndpoints.cs`, Program/DTO wiring) appeared in
+  the working tree from outside this session mid-task; it was kept and completed (it did not compile: duplicate
+  `SifreDegistirmeli` extension; temporary-password flag ignored; no session re-validation).
+
+### Verification
+
+- `KutuphaneOtomasyonu.Tests`: 144 passed. `KutuphaneOtomasyonu.Api.Tests`: 28 passed.
+  Mutation checks: removing the loan-ownership check or the password-stamp check each makes its test fail.
+- Build WPF + API: 0 warnings, 0 errors; `has-pending-model-changes`: none; WPF smoke: exit 0, 44 PASS, 0 FAIL.
+- Headless Chrome (temp demo DB): student login, redirect when not logged in, Hesabım with loans, renew, existing-queue
+  message, staff issues temporary password (confirm on reset), new student forced to change password then reserves a book,
+  mobile 390 px without horizontal scroll, logout → 401; staff flow regression run passed. No script errors.
+
 ## 2026-10-16 cycle, part 3 — online system: Web API + browser UI
 
 Course requirement: "online library management system" with a deployment diagram containing a Web API and a database.
