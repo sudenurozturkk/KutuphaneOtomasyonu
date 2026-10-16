@@ -1,5 +1,86 @@
 # Engineering Log
 
+## 2026-10-16 cycle, part 2 — resolving all open decisions
+
+Decisions and evidence per item: `docs/engineering-backlog.md` ("Owner decisions — resolved").
+
+### Completed
+
+- D-06/M-05: EF Core migrations (`Data/Migrations`, local tool `dotnet-ef` 9.0.21 in `.config/dotnet-tools.json`).
+  `VeritabaniSemasi.Hazirla` baselines pre-migration databases and repairs legacy duplicate active loans (audited).
+  `DatabaseSeeder` now only loads demo data.
+- D-04: copy-level model `KitapNushasi` + `Odunc.NushaId`; data migration from counters; barcode desk lends/returns exact copies;
+  book detail lists copies; self-heal for books without copy rows.
+- D-09: `PasaportNo`; TC or passport required; filtered unique indexes.
+- D-08: role-based masking, admin anonymisation (`AnonimlestirmeTarihi`), `docs/kisisel-veri-notlari.md`.
+- D-05: persisted wallet ledger (`CuzdanHareketi`, `CuzdanService`, rewritten `CuzdanPage`); fictional salon occupants
+  and dashboard salon numbers replaced with real reservation data.
+- D-02: renewal blocked when another member waits and no free copy exists.
+- D-07: Release builds force password change for default/short passwords.
+- D-01: prototypes moved to `legacy/` and excluded from the build.
+- M-04: `ServisKapsami` replaces duplicated service setup in pages. M-06: PBKDF2 off the UI thread; smoke harness pumps the dispatcher.
+- Audit details now use invariant number formatting; barcode desk and wallet buttons have automation names.
+
+### Verification
+
+- Build Debug/Release: 0 warnings, 0 errors. `dotnet ef migrations has-pending-model-changes`: none.
+- `dotnet test`: 137 passed, 0 failed.
+- Smoke (`--test`): exit 0 on an isolated temp DB.
+- Live-data upgrade (copy of `%APPDATA%` DB, through normal app start): legacy detected and baselined, 5 migrations applied,
+  30 books → 79 copies (65 on shelf, 14 on loan), 14/14 active loans linked, 0 counter/copy mismatches, 50 members / 114 loans intact.
+- UI Automation on that copy: lend by copy barcode (`kb0000010004`) and return by barcode only; wallet member selection and
+  ₺50 top-up persisted with audit row. Live database timestamp unchanged.
+
+### Next recommended task
+
+- Add a FlaUI-based UI test project if UI work continues (R-01); agree retention periods with the institution (R-02).
+
+## 2026-10-16 cycle — hardening pass (branch `engineering/hardening-2026-10`)
+
+Backlog with evidence and IDs: `docs/engineering-backlog.md`.
+
+### Baseline (before changes)
+
+- `dotnet build` — 0 warnings, 0 errors.
+- `dotnet test` (Tests project) — 5 passed.
+- `KutuphaneOtomasyonu.exe --test` — all smoke checks passed (ran against the real `%APPDATA%` database).
+- `dotnet list package --vulnerable --include-transitive` — **High**: SQLitePCLRaw.lib.e_sqlite3 2.1.10 (CVE-2025-6965).
+
+### Progress (in order)
+
+1. Dependencies (B-01, M-01, M-02): EF Core Sqlite/Tools 9.0.0 → 9.0.21 (SQLitePCLRaw 2.1.13), removed unused `Bogus` and `LiveChartsCore`, removed unused root `MainWindow.xaml(.cs)`. Vulnerability scan now clean.
+2. Logging and smoke isolation (B-14, B-15): `UygulamaLog` writes to `%APPDATA%\KutuphaneOtomasyonu\logs\app.log`, never throws, rotates at 1 MB. `KUTUPHANE_DB_PATH` overrides the DB file; `--test` uses a temporary DB and returns a non-zero exit code on failure.
+3. Authentication (B-12, B-13): PBKDF2-SHA256 (600k iterations, per-user salt); legacy SHA-256 hashes verified and upgraded on login; 5 failures → 1 minute lockout; demo credentials pre-filled only in Debug builds; logins and password changes audited; new "Şifre Değiştir" dialog.
+4. Circulation (B-02…B-08): every loan/return/renew runs in one SQLite `BEGIN IMMEDIATE` transaction; DB triggers enforce `0 <= MevcutAdet <= ToplamAdet`; filtered unique index allows one active loan per member/title; archived books and expired memberships are rejected; `MaxUzatmaSayisi` comes from settings; damaged returns no longer leak inventory; returned copies are held for the next valid reservation with a fresh pick-up deadline.
+   - Mutation check: with the transaction disabled, the concurrency tests fail (8 loans for 3 copies; 6 loans for a limit of 2). With it they pass.
+5. Reservations (B-06): new `RezervasyonService` (create, cancel with hold hand-over, convert-to-loan atomically, expire stale).
+6. Catalog/members (C-02…C-05, C-07, C-08): ISBN-10/13 and TC Kimlik checksum validation for new/changed values; friendly duplicate messages; stock edits cannot go below copies on loan; archive blocked while copies are on loan; member quotas by type; popular-books ranking fixed; RFC 4180 CSV with formula-injection guard; fine payments validated.
+
+7. Maintenance and authorization (B-09, B-10, B-11): `VeritabaniBakimService` (online backup, transactional reset, validated settings), Admin-only at UI and service level; bulk export Admin-only with a personal-data warning and audit entry.
+8. Barcode terminal (C-01): `BankoAramaService` — exact identifiers first; fuzzy title/name only when unique; multi-copy returns require the member.
+9. ILL (B-16): academic requests record the publication and a chosen member; generic `SecimDialog` replaces "first book / first member".
+10. Reliability (C-10, C-11): unprotected `async void` loaders now log and report errors; misleading settings field fixed.
+11. Docs (M-03): README describes real patterns, data/log locations, roles, circulation rules and tests.
+
+### Verification (final, this cycle)
+
+- `dotnet build .\KutuphaneOtomasyonu.csproj` (Debug and Release) — 0 warnings, 0 errors.
+- `dotnet test .\Tests\KutuphaneOtomasyonu.Tests\KutuphaneOtomasyonu.Tests.csproj` — 108 passed, 0 failed (was 5).
+- `KutuphaneOtomasyonu.exe --test` — exit 0, all checks passed, isolated temp DB; live DB timestamp unchanged.
+- `dotnet list package --vulnerable --include-transitive` — no vulnerable packages.
+- Upgrade path: app started against a copy of the live `%APPDATA%` DB → reached login; triggers and index added; 30 books / 50 members / 114 loans intact.
+- UI Automation (PowerShell, on the copy): admin login upgrades legacy hash and writes audit row; wrong password rejected; librarian cannot see System Settings; ILL dialog lists real books/members/campuses; password change works and old password is rejected afterwards.
+- PBKDF2 cost: ~83 ms per hash on .NET 9 on this machine.
+
+### Not verified / remaining
+
+- No UI automation for loan/return/reservation grids; those flows are covered at service level and by the smoke round-trip.
+- Owner decisions D-01…D-09 in the backlog.
+
+### Next recommended task
+
+- Decide D-06 (EF migrations) and D-04 (copy-level model) before further schema work; then introduce DI for services (M-04).
+
 ## 2026-10-15 cycle
 
 ### Continued cycle: isolated service test project

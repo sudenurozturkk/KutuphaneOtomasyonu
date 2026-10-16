@@ -3,9 +3,9 @@
 [![.NET 9.0](https://img.shields.io/badge/.NET-9.0%20Windows%20WPF-512BD4?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com/)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%26%204--Tier%20Layered-10B981?style=for-the-badge)](https://en.wikipedia.org/wiki/Multitier_architecture)
 [![Database](https://img.shields.io/badge/Database-SQLite%20%2B%20EF%20Core-003B57?style=for-the-badge&logo=sqlite)](https://www.sqlite.org/)
-[![Design Patterns](https://img.shields.io/badge/GoF%20Patterns-5%20Verified%20Patterns-7C3AED?style=for-the-badge)](https://en.wikipedia.org/wiki/Design_Patterns)
+[![Design Patterns](https://img.shields.io/badge/Patterns-Singleton%20%7C%20Observer%20%7C%20Unit%20of%20Work-7C3AED?style=for-the-badge)](https://en.wikipedia.org/wiki/Design_Patterns)
 [![i18n](https://img.shields.io/badge/i18n-Turkish%20%2F%20English-F59E0B?style=for-the-badge)](https://github.com/sudenurozturkk/KutuphaneOtomasyonu)
-[![Build Status](https://img.shields.io/badge/Tests-14%20Pages%20%2B%206%20Dialogs%20PASS-22C55E?style=for-the-badge)]()
+[![Tests](https://img.shields.io/badge/Tests-xUnit%20services%20%2B%20UI%20smoke-22C55E?style=for-the-badge)]()
 
 **IRIS (Integrated Research & Information System)**, dünya çapındaki araştırma üniversiteleri, enstitüler ve konsorsiyumlar (*Ex Libris Alma / FOLIO standardı*) seviyesinde tasarlanmış, ultra-modernist ve kurumsal masaüstü kütüphane otomasyon sistemidir.
 
@@ -40,21 +40,20 @@ graph TD
     Service --> Data["💾 Veri Erişim Katmanı (Data Access - EF Core SQLite)"]
     Data --> Domain["📦 Alan Modelleri & Varlıklar (Domain Entities)"]
 
-    subgraph "GoF Tasarım Desenleri"
+    subgraph "Kullanılan Desenler"
         S["Singleton: AuthService & LocalizationService"]
-        F["Factory Method: Kullanici & Materyal Üretimi"]
-        O["Observer: BildirimService & Gecikme Uyarıları"]
-        ST["Strategy: Dinamik Ceza/İndirim Hesaplama"]
-        R["Repository: KutuphaneDbContext Veri İzolasyonu"]
+        O["Observer: BildirimService.YeniBildirim olayı"]
+        U["Unit of Work: DbContext + tek transaction"]
     end
 ```
 
-### Uygulanan GoF Desenleri
-1. **Singleton Deseni (`AuthService`, `LocalizationService`):** Oturum kimlik doğrulaması ve küresel dil kaynağının tüm pencerelerde tekil yönetimi.
-2. **Factory Method Deseni (`KullaniciFactory`):** Öğrenci, Akademisyen ve Personel nesnelerinin farklı yetki ve kota kurallarıyla dinamik üretilmesi.
-3. **Observer Deseni (`BildirimService`, `IOduncObserver`):** Kitap teslim tarihi yaklaştığında veya geciktiğinde ilgili üyelere otomatik reaktif bildirim dağıtımı.
-4. **Strategy Deseni (`ICezaHesaplamaStratejisi`):** Öğrenci (standart), Akademisyen (muafiyet/indirimli) ve Personel için farklı ceza politikalarının runtime'da enjekte edilmesi.
-5. **Repository / Unit of Work Deseni:** SQLite veri işlemlerinin doğrudan UI'a sızmasını önleyerek servis katmanında soyutlanması.
+### WPF uygulamasında kullanılan desenler
+1. **Singleton (`AuthService`, `LocalizationService`):** Oturum ve dil kaynağının tüm pencerelerde tekil yönetimi.
+2. **Observer (`BildirimService.YeniBildirim`):** Bildirim oluşturulduğunda abonelere olay yayını.
+3. **Unit of Work (`KutuphaneDbContext` + `VeritabaniIslemi`):** Ödünç, iade, uzatma ve rezervasyon işlemleri; bildirim ve denetim kaydıyla birlikte tek transaction içinde kalıcı olur.
+
+> Not: `KutuphaneOtomasyonuApp/Patterns/` altındaki Factory/Strategy örnekleri ayrı (derlenmeyen) eski WinForms prototipine aittir;
+> WPF uygulamasında üye kotaları `UyeService.VarsayilanKota`, ceza hesabı `OduncService.IadeAlAsync` içindedir.
 
 ---
 
@@ -85,7 +84,10 @@ graph TD
 KutuphaneOtomasyonu/
 ├── Data/                          # Veritabanı ve Tohumlama
 │   ├── KutuphaneDbContext.cs      # EF Core SQLite Bağlantısı & Indexler
-│   └── DatabaseSeeder.cs          # 30+ Kitap, 50 Üye, 5 Akademik Tez Tohumu
+│   ├── VeritabaniIslemi.cs        # İç içe çağrılabilen transaction yardımcısı
+│   ├── VeritabaniSemasi.cs        # Migration'ları uygular; eski (EnsureCreated) kurulumları tabanlar
+│   ├── Migrations/                # EF Core migration'ları (taban, pasaport, KVKK, nüsha, cüzdan)
+│   └── DatabaseSeeder.cs          # Demo verisi: 30 Kitap (+ nüshalar), 50 Üye, 5 Akademik Tez
 ├── Models/                        # Domain Varlıkları
 │   ├── Kitap.cs                   # Kitap entity & durum enumları
 │   ├── Uye.cs                     # Üye, rol ve borç modelleri
@@ -93,13 +95,20 @@ KutuphaneOtomasyonu/
 │   ├── AkademikVeKampus.cs        # Tez, Makale, DOI, Citation, ILL modelleri
 │   ├── DigerModeller.cs           # Rezervasyon, Favori, Bildirim modelleri
 │   └── KullaniciVeAyarlar.cs      # Admin, Kütüphaneci ve Parametreler
-├── Services/                      # İş Mantığı & GoF Desenleri
-│   ├── AuthService.cs             # [Singleton] Oturum yönetimi
+├── Services/                      # İş Mantığı
 │   ├── LocalizationService.cs     # [Singleton] Çoklu dil (TR/EN) servisi
-│   ├── KitapService.cs            # Kitap katalog operasyonları
-│   ├── OduncService.cs            # Ödünç, iade, süre uzatma ve ceza hesabı
+│   ├── KitapService.cs            # Katalog: doğrulama, stok güncelleme, arşivleme
+│   ├── OduncService.cs            # Ödünç, iade, süre uzatma ve ceza hesabı (transaction içinde)
+│   ├── RezervasyonService.cs      # Rezervasyon kuyruğu, ayırma, ödünce dönüştürme
+│   ├── BankoAramaService.cs       # Barkod bankosu için belirsizliğe dayanıklı eşleştirme
+│   ├── VeritabaniBakimService.cs  # Yedekleme, demo sıfırlama, sistem ayarları (yalnızca Admin)
+│   ├── SifreHasher.cs             # PBKDF2-SHA256 parola özetleme
+│   ├── DenetimService.cs          # AktiviteLog denetim kayıtları
 │   ├── AkademikService.cs         # Tez, DOI, Citation ve ILL lojistiği
-│   └── DigerServisler.cs          # Bildirim [Observer], Strateji [Strategy]
+│   ├── SalonRezervasyonService.cs # Salon rezervasyon iş kuralları
+│   ├── CuzdanService.cs           # Cüzdan hareketleri (yükleme, ceza ödeme)
+│   ├── ServisKapsami.cs           # Sayfalar için ortak DbContext + servis kapsamı
+│   └── DigerServisler.cs          # AuthService [Singleton], UyeService, BildirimService [Observer]
 ├── Views/                         # Modernist XAML Arayüzleri
 │   ├── LoginWindow.xaml           # Ultra-modern giriş ekranı & Demo butonları
 │   ├── MainWindow.xaml            # 260px ferah sidebar menü, TR/EN dil toggle
@@ -111,9 +120,12 @@ KutuphaneOtomasyonu/
 │       ├── SalonRezervasyonPage.xaml # 2D interaktif masa haritası
 │       └── ...                    # Diğer 9 modül ve modal diyaloglar
 ├── SmokeTester.cs                 # Otomatik Uçtan Uca Doğrulama Motoru
-├── Services/SalonRezervasyonService.cs # Salon rezervasyon iş kuralları
-└── Tests/KutuphaneOtomasyonu.Tests/    # İzole SQLite servis testleri
-    └── KutuphaneOtomasyonu.Tests.csproj
+├── Tests/KutuphaneOtomasyonu.Tests/ # İzole SQLite servis testleri (xUnit)
+├── docs/
+│   ├── engineering-backlog.md     # Bulunan hatalar, kararlar ve doğrulama kanıtları
+│   └── kisisel-veri-notlari.md    # KVKK: işlenen veriler ve teknik tedbirler
+├── ENGINEERING_LOG.md             # Tarihli geliştirme günlüğü
+└── legacy/                        # Derlenmeyen eski WinForms ve web prototipleri (bkz. legacy/README.md)
 ```
 
 ---
@@ -136,11 +148,72 @@ cd KutuphaneOtomasyonu
 dotnet run
 ```
 
+### Veritabanı şeması ve migration'lar
+Şema EF Core migration'ları ile yönetilir ve uygulama her açılışta bekleyen migration'ları otomatik uygular.
+Migration'lardan önceki sürümlerle oluşturulmuş veritabanları ilk açılışta algılanır, veri kaybı olmadan taban
+migration'a bağlanır ve yükseltilir (mevcut kitap adetlerinden barkodlu nüshalar üretilir). Yükseltmeden önce
+**Sistem Ayarları → Veritabanı Yedeği** ile yedek almanız önerilir.
+
+Geliştiriciler için (araç sürümü `.config/dotnet-tools.json` içinde sabitlenmiştir):
+```bash
+dotnet tool restore
+dotnet ef migrations add <Ad> --output-dir Data/Migrations --namespace KutuphaneOtomasyonu.Data.Migrations
+```
+Yeni migration eklendiğinde `Tests` içindeki şema yükseltme testleri de çalıştırılmalıdır.
+
 ### Varsayılan Giriş Hesapları
 | Rol | Kullanıcı Adı | Şifre |
 |---|---|---|
 | **Sistem Yöneticisi (Admin)** | `admin` | `admin123` |
 | **Kütüphaneci (Staff)** | `fatmak` | `123456` |
+
+> ⚠️ Bunlar demo hesaplarıdır. Gerçek bir kurulumda ilk girişten sonra sol menüdeki **Şifre Değiştir** ile
+> değiştirilmelidir (en az 8 karakter). Demo bilgileri giriş ekranında yalnızca **Debug** derlemelerinde otomatik doldurulur.
+> Parolalar PBKDF2-SHA256 (600.000 iterasyon, kullanıcı başına tuz) ile saklanır; eski sürümün özetleri ilk başarılı girişte
+> otomatik yükseltilir. Art arda 5 hatalı denemeden sonra hesap 1 dakika kilitlenir.
+
+### Veri ve günlük konumları
+| Öğe | Varsayılan konum |
+|---|---|
+| Veritabanı | `%APPDATA%\KutuphaneOtomasyonu\kutuphane.db` (`KUTUPHANE_DB_PATH` ortam değişkeni ile değiştirilebilir) |
+| Tanılama günlüğü | `%APPDATA%\KutuphaneOtomasyonu\logs\app.log` (1 MB'da döner; parola/kimlik no yazılmaz) |
+| Denetim kayıtları | Veritabanında `AktiviteLoglar` tablosu (giriş, ödünç/iade/uzatma, rezervasyon, katalog, üye, ayar, yedek, sıfırlama, dışa aktarma) |
+
+### Yetkilendirme
+| İşlem | Gerekli rol |
+|---|---|
+| Sistem ayarları, veritabanı yedeği, demo verisine sıfırlama, toplu veri dışa aktarımı | Sistem Yöneticisi |
+| Diğer tüm modüller | Giriş yapmış personel |
+
+### Dolaşım kuralları (uygulanan)
+- Ödünç, iade, uzatma ve rezervasyon işlemleri tek bir SQLite yazma transaction'ı içinde yürür; eşzamanlı iki istek aynı son kopyayı veremez.
+- Veritabanı tetikleyicileri `0 <= MevcutAdet <= ToplamAdet` kuralını korur; bir üyenin aynı kitap için yalnızca bir aktif ödüncü olabilir.
+- Arşivlenmiş kitap ödünç verilemez/rezerve edilemez; ödünçte kopyası olan kitap arşivlenemez.
+- Üyelik bitiş tarihi geçmiş, aktif olmayan, borcu olan veya kotasını doldurmuş üyeye ödünç verilmez.
+- İade edilen kopya, sıradaki geçerli rezervasyon sahibine `RezervasyonGecerlilikSuresi` gün boyunca ayrılır; bu sürede başkasına verilemez.
+- Her fiziksel kopya bir **nüsha** kaydıdır ve benzersiz barkod taşır (`KB` + 6 hane kitap no + 4 hane sıra, ör. `KB0000120003`).
+  Ödünç kaydı hangi nüshanın verildiğini tutar; bir nüsha aynı anda yalnızca bir aktif ödünçte olabilir.
+  `ToplamAdet` = rafta + ödünçteki nüsha, `MevcutAdet` = raftaki nüsha sayısıdır. Nüshalar kitap detayında listelenir.
+- Barkod bankosunda nüsha barkodu okutulursa tam o kopya verilir; iadede nüsha barkodu tek başına yeterlidir.
+  ISBN veya başlıkla yapılan iadede aynı kitaptan birden çok kopya ödünçteyse üye bilgisi istenir.
+- `Hasarli` ve `Kayip` iadelerde nüsha dolaşımdan çıkarılır (`ToplamAdet` azalır) ve ceza kaydı oluşturulur.
+  Onarılan kopya, kitap düzenleme ekranından toplam adet artırılarak yeniden eklenir.
+- Toplam adet azaltılırsa en son eklenen raftaki nüshalar "envanterden çıkarıldı" olarak işaretlenir (kayıt silinmez).
+- Süre uzatma, sistemdeki "Maksimum Ödünç Süresi" kadar yapılır; gecikmiş ödünç uzatılamaz; uzatma hakkı ayarlardan alınır.
+  Başka bir üye kitabı bekliyorsa ve ona verilebilecek boş kopya yoksa uzatma yapılmaz.
+
+### Üyeler ve kişisel veriler
+- Türk vatandaşları için T.C. Kimlik No, yabancılar için Yabancı Kimlik No (aynı algoritma) veya **Pasaport No** girilir; en az biri zorunludur.
+- Yardımcı personel kimlik, pasaport ve telefon bilgilerini maskeli görür ve üye kimlik bilgilerini düzenleyemez.
+- Yönetici, KVKK silme talepleri için üyeyi **anonimleştirebilir**. Ayrıntılar: [`docs/kisisel-veri-notlari.md`](docs/kisisel-veri-notlari.md).
+
+### Cüzdan
+- Cüzdan bakiyesi kalıcı bir hareket defterinden hesaplanır (`CuzdanHareketleri`). Bakiye yükleme, bankoda tahsil edilen
+  tutarın kaydıdır (ödeme sağlayıcısı entegrasyonu yoktur). Ceza borcu bakiyeden tek seferde tahsil edilir; her hareket denetlenir.
+
+### Parola politikası
+- Release derlemelerinde varsayılan (`admin123`, `123456`) veya 8 karakterden kısa parolayla giriş yapan kullanıcı,
+  ana ekrana geçmeden önce parolasını değiştirmek zorundadır. Debug (demo) derlemelerinde bu adım atlanır.
 
 ---
 
@@ -153,14 +226,20 @@ Proje, 14 modülün, 6 modal pencerenin ve tüm menü geçişlerinin UI seviyesi
 dotnet run -- --test
 ```
 
-Salon rezervasyon servisinin iş kurallarını WPF başlatmadan, izole SQLite veritabanında test etmek için:
+`--test` modu kullanıcının veritabanına dokunmaz: geçici bir veritabanı oluşturur, gerçek bir ödünç/iade turu dahil
+kontrolleri çalıştırır, sonucu `test_result.txt` dosyasına yazar ve herhangi bir `[FAIL]` olursa sıfırdan farklı çıkış kodu döner.
+
+Servis katmanını WPF başlatmadan, izole SQLite veritabanlarında test etmek için:
 
 ```bash
 dotnet test .\Tests\KutuphaneOtomasyonu.Tests\KutuphaneOtomasyonu.Tests.csproj
 ```
 
-Bu testler geçerli rezervasyon oluşturma, aktif listeleme, aynı masa/zaman diliminde yinelenen kayıt engeli,
-farklı gün veya slot desteği, zorunlu alan doğrulaması ve iptal kurallarını kapsar.
+Testler uygulamanın gerçek şema hazırlığını (tetikleyiciler ve indeksler dahil) kullanır ve şunları kapsar:
+ödünç/iade/uzatma kuralları ve stok değişmezi, gecikme/hasar/kayıp cezaları, rezervasyon kuyruğu ve ayırma,
+dosya tabanlı veritabanında **eşzamanlı ödünç istekleri**, ISBN/TC Kimlik/e-posta doğrulama, katalog ve üye servisleri,
+PBKDF2 parola özetleme ve eski özetlerin yükseltilmesi, hatalı giriş kilidi, yönetici yetki kontrolleri,
+çevrimiçi yedekleme ve demo sıfırlama, eski veritabanlarının şema yükseltmesi, CSV kaçışı, barkod eşleştirme ve salon rezervasyonları.
 
 **Konsol Çıktısı:**
 ```
@@ -187,6 +266,17 @@ farklı gün veya slot desteği, zorunlu alan doğrulaması ve iptal kuralların
 --- MENÜ NAVİGASYONLARI TESTİ ---
 [PASS] MainWindow 14 sayfa rotasının tümü %100 BAŞARILI.
 ```
+
+---
+
+## 📚 Dokümanlar
+
+| Dosya | İçerik |
+|---|---|
+| [`docs/kisisel-veri-notlari.md`](docs/kisisel-veri-notlari.md) | KVKK: hangi kişisel veri, hangi amaçla, hangi tedbirlerle işleniyor; kurumun karar vermesi gerekenler |
+| [`docs/engineering-backlog.md`](docs/engineering-backlog.md) | Bulunan hatalar (P0/P1/P2), verilen tasarım kararları (D-01…D-09) ve her birinin test kanıtı |
+| [`ENGINEERING_LOG.md`](ENGINEERING_LOG.md) | Tarih sırasıyla yapılan geliştirme çalışmaları ve doğrulama sonuçları |
+| [`legacy/README.md`](legacy/README.md) | Eski prototiplerin ne olduğu ve nasıl açılacağı |
 
 ---
 
