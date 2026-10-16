@@ -14,6 +14,11 @@ namespace KutuphaneOtomasyonu.Data
     {
         private static readonly Random _random = new Random(42);
 
+        /// <summary>Demo öğrenci portalı hesabı (README'de belgelenmiştir).</summary>
+        public const string DemoOgrenciNo = "2026000001";
+        public const string DemoOgrenciEposta = "ogrenci@demo.edu.tr";
+        public const string DemoOgrenciSifresi = "ogrenci123";
+
         /// <summary>Şemayı hazırlar (migration'lar) ve veritabanı boşsa demo verisini yükler.</summary>
         public static void Seed(KutuphaneDbContext context)
         {
@@ -212,7 +217,26 @@ namespace KutuphaneOtomasyonu.Data
             var soyadlar = new[] { "Yılmaz", "Kaya", "Demir", "Şahin", "Çelik", "Arslan", "Doğan", "Aydın", "Erdoğan", "Özdemir", "Aslan", "Çetin", "Koç", "Kurt", "Güven" };
             var bolumler = new[] { "Bilgisayar Mühendisliği", "Elektrik-Elektronik Mühendisliği", "Makine Mühendisliği", "Endüstri Mühendisliği", "Matematik", "Fizik", "Kimya", "Biyoloji", "İşletme", "Hukuk" };
 
-            var uyeler = new List<Uye>();
+            // Öğrenci portalını denemek için bilinen bilgilerle demo öğrenci (gerçek kurulumda kullanılmamalıdır).
+            var uyeler = new List<Uye>
+            {
+                new()
+                {
+                    Ad = "Demo",
+                    Soyad = "Öğrenci",
+                    Email = DemoOgrenciEposta,
+                    TCKimlikNo = "10000000078",
+                    OgrenciNo = DemoOgrenciNo,
+                    Bolum = "Bilgisayar Mühendisliği",
+                    Fakulte = "Mühendislik Fakültesi",
+                    UyeTipi = UyeTipi.Ogrenci,
+                    Durumu = UyeDurumu.Aktif,
+                    KayitTarihi = DateTime.Now.AddDays(-90),
+                    MaxOduncAdet = 3,
+                    MaxOduncSuresi = 14,
+                    PortalSifreHash = SifreHasher.Hashle(DemoOgrenciSifresi),
+                },
+            };
             for (int i = 0; i < 50; i++)
             {
                 var ad = adlar[_random.Next(adlar.Length)];
@@ -311,8 +335,54 @@ namespace KutuphaneOtomasyonu.Data
                 kitap.MevcutAdet--;
             }
 
+            DemoOgrenciOdunclerEkle(oduncler, kitaplar, raftakiNushalar, uyeler, kutuphaneciId, maxUzatma);
+
             context.Oduncler.AddRange(oduncler);
             context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Öğrenci portalında gösterilecek veri olsun diye demo öğrenciye iki aktif ve iki geçmiş ödünç verir.
+        /// Rastgele sayı üretecini kullanmaz; böylece diğer demo verisi değişmez.
+        /// </summary>
+        private static void DemoOgrenciOdunclerEkle(List<Odunc> oduncler, List<Kitap> kitaplar,
+            Dictionary<int, Queue<KitapNushasi>> raftakiNushalar, List<Uye> uyeler, int? kutuphaneciId, int maxUzatma)
+        {
+            var ogrenci = uyeler.FirstOrDefault(u => u.OgrenciNo == DemoOgrenciNo);
+            if (ogrenci == null) return;
+
+            var bugun = DateTime.Today.AddHours(10);
+            var aktifGunler = new[] { -11, -3 }; // biri 3 gün içinde iade edilecek, biri yeni alınmış
+            var verilen = 0;
+            foreach (var kitap in kitaplar.OrderBy(k => k.Id))
+            {
+                if (verilen == aktifGunler.Length) break;
+                if (kitap.MevcutAdet <= 0 || !raftakiNushalar.TryGetValue(kitap.Id, out var kuyruk) || kuyruk.Count == 0) continue;
+                if (oduncler.Any(o => o.Durumu == OduncDurumu.Aktif && o.KitapId == kitap.Id && o.UyeId == ogrenci.Id)) continue;
+
+                var nusha = kuyruk.Dequeue();
+                var oduncTarihi = bugun.AddDays(aktifGunler[verilen++]);
+                nusha.Durum = NushaDurumu.Oduncte;
+                nusha.DurumTarihi = oduncTarihi;
+                oduncler.Add(new Odunc
+                {
+                    KitapId = kitap.Id, UyeId = ogrenci.Id, KutuphanecId = kutuphaneciId, Nusha = nusha,
+                    OduncTarihi = oduncTarihi, PlanlananIadeTarihi = oduncTarihi.AddDays(ogrenci.MaxOduncSuresi),
+                    Durumu = OduncDurumu.Aktif, MaxUzatmaSayisi = maxUzatma,
+                });
+                kitap.MevcutAdet--;
+            }
+
+            foreach (var (kitap, gunOnce) in kitaplar.OrderByDescending(k => k.Id).Take(2).Zip(new[] { 120, 45 }))
+            {
+                var oduncTarihi = bugun.AddDays(-gunOnce);
+                oduncler.Add(new Odunc
+                {
+                    KitapId = kitap.Id, UyeId = ogrenci.Id, KutuphanecId = kutuphaneciId,
+                    OduncTarihi = oduncTarihi, PlanlananIadeTarihi = oduncTarihi.AddDays(ogrenci.MaxOduncSuresi),
+                    GercekIadeTarihi = oduncTarihi.AddDays(10), Durumu = OduncDurumu.Iade,
+                });
+            }
         }
 
         private static void SeedRezervasyonlar(KutuphaneDbContext context)

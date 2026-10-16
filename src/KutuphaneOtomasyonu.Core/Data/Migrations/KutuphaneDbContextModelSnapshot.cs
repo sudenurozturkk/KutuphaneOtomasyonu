@@ -857,6 +857,14 @@ namespace KutuphaneOtomasyonu.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("PortalSifreGecici")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PortalSifreHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("SonGirisTarihi")
                         .HasColumnType("TEXT");
 

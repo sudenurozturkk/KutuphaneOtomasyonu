@@ -96,8 +96,11 @@ public sealed class VeritabaniBakimServiceTests : IDisposable
         {
             DatabaseSeeder.Seed(context);
             var kitap = await context.Kitaplar.FirstAsync();
-            var uye = await context.Uyeler.FirstAsync(u => u.Durumu == UyeDurumu.Aktif && u.ToplamCeza == 0);
-            await TestVeri.OduncService(context).OduncVerAsync(kitap.Id, uye.Id, 0);
+            var uye = await context.Uyeler.FirstAsync(u =>
+                u.Durumu == UyeDurumu.Aktif && u.ToplamCeza == 0 && u.OgrenciNo != DatabaseSeeder.DemoOgrenciNo &&
+                !context.Oduncler.Any(o => o.UyeId == u.Id && o.Durumu == OduncDurumu.Aktif));
+            var odunc = await TestVeri.OduncService(context).OduncVerAsync(kitap.Id, uye.Id, 0);
+            Assert.True(odunc.Basarili, odunc.Mesaj);
             context.Kitaplar.Add(new Kitap { Baslik = "Sıfırlamada silinecek", Yazar = "Y", ToplamAdet = 1, MevcutAdet = 1 });
             await context.SaveChangesAsync();
             Assert.True(await context.MateryalTransferler.AnyAsync());
@@ -113,7 +116,9 @@ public sealed class VeritabaniBakimServiceTests : IDisposable
         using var dogrulama = _db.YeniContext();
         Assert.Equal(30, await dogrulama.Kitaplar.CountAsync());
         Assert.False(await dogrulama.Kitaplar.AnyAsync(k => k.Baslik == "Sıfırlamada silinecek"));
-        Assert.Equal(50, await dogrulama.Uyeler.CountAsync());
+        // 50 rastgele demo üye + portal hesabı olan 1 demo öğrenci
+        Assert.Equal(51, await dogrulama.Uyeler.CountAsync());
+        Assert.True(await dogrulama.Uyeler.AnyAsync(u => u.OgrenciNo == DatabaseSeeder.DemoOgrenciNo && u.PortalSifreHash != ""));
         Assert.Equal(kullaniciSayisi, await dogrulama.Kullanicilar.CountAsync());
         Assert.True(await dogrulama.AktiviteLoglar.AnyAsync(l => l.Islem == DenetimService.Islemler.OduncVerildi));
         Assert.True(await dogrulama.AktiviteLoglar.AnyAsync(l => l.Islem == DenetimService.Islemler.VeritabaniSifirlandi));

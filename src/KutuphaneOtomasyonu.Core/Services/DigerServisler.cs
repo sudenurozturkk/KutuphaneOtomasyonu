@@ -200,6 +200,8 @@ namespace KutuphaneOtomasyonu.Services
             uye.OgrenciNo = string.Empty;
             uye.FotografYolu = string.Empty;
             uye.Notlar = string.Empty;
+            uye.PortalSifreHash = string.Empty;
+            uye.PortalSifreGecici = false;
             uye.Durumu = UyeDurumu.Pasif;
             uye.AnonimlestirmeTarihi = DateTime.Now;
 

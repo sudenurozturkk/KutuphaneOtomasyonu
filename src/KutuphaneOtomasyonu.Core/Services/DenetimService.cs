@@ -18,6 +18,10 @@ namespace KutuphaneOtomasyonu.Services
             public const string GirisBasarili = "GirisBasarili";
             public const string GirisBasarisiz = "GirisBasarisiz";
             public const string SifreDegistirildi = "SifreDegistirildi";
+            public const string UyeGirisBasarili = "UyeGirisBasarili";
+            public const string UyeGirisBasarisiz = "UyeGirisBasarisiz";
+            public const string UyePortalSifresiOlusturuldu = "UyePortalSifresiOlusturuldu";
+            public const string UyeSifreDegistirildi = "UyeSifreDegistirildi";
             public const string OduncVerildi = "OduncVerildi";
             public const string IadeAlindi = "IadeAlindi";
             public const string SureUzatildi = "SureUzatildi";

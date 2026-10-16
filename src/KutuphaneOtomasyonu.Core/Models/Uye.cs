@@ -73,6 +73,13 @@ namespace KutuphaneOtomasyonu.Models
         /// <summary>KVKK kapsamında kişisel verileri silinmiş üyeler için anonimleştirme zamanı.</summary>
         public DateTime? AnonimlestirmeTarihi { get; set; }
 
+        /// <summary>Öğrenci portalı parolasının PBKDF2 özeti. Boşsa üyenin çevrimiçi hesabı yoktur.</summary>
+        [MaxLength(200)]
+        public string PortalSifreHash { get; set; } = string.Empty;
+
+        /// <summary>Parola personel tarafından verilmiş geçici paroladır; üye ilk girişte değiştirmelidir.</summary>
+        public bool PortalSifreGecici { get; set; }
+
         // Navigation Properties
         public virtual ICollection<Odunc> Oduncler { get; set; } = new List<Odunc>();
         public virtual ICollection<Rezervasyon> Rezervasyonlar { get; set; } = new List<Rezervasyon>();
@@ -92,6 +99,9 @@ namespace KutuphaneOtomasyonu.Models
 
         [NotMapped]
         public bool AnonimMi => AnonimlestirmeTarihi.HasValue;
+
+        [NotMapped]
+        public bool PortalHesabiVar => !string.IsNullOrEmpty(PortalSifreHash);
 
         [NotMapped]
         public string UyeTipiMetni => UyeTipi switch
