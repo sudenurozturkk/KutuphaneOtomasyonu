@@ -19,6 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\KutuphaneOtomasyonu.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.21" />
   </ItemGroup>
 </Project>
