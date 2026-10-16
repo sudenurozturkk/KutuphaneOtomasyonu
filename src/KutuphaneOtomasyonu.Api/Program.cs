@@ -20,7 +20,9 @@ builder.Services.AddDbContext<KutuphaneDbContext>(o => o.UseSqlite($"Data Source
 // ---------- Servisler ----------
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton(sp => new KimlikDogrulamaService(sp.GetRequiredService<TimeProvider>()));
+builder.Services.AddSingleton(sp => new UyeHesapService(sp.GetRequiredService<TimeProvider>()));
 builder.Services.AddKutuphaneOturumu(builder.Environment);
+builder.Services.AddUyeOturumu(builder.Environment);
 
 builder.Services.AddRateLimiter(o =>
 {
@@ -80,6 +82,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapOturum();
+app.MapUyeOturumu();
+app.MapHesabim();
 app.MapKatalog();
 app.MapUyeler();
 app.MapOduncler();

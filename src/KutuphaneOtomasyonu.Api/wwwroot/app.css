@@ -183,6 +183,19 @@ td.sag, th.sag { text-align: right; }
 .tanim dd { margin: 0; overflow-wrap: anywhere; }
 
 .giris-kap { max-width: 400px; margin: 40px auto; }
+.giris-kap .sekmeler { margin-bottom: 4px; }
+
+.yigin { display: grid; gap: 16px; align-content: start; }
+.rezerve-kutu { display: grid; gap: 10px; margin-top: 18px; justify-items: start; }
+.gecici-sifre { display: grid; gap: 4px; margin-top: 12px; }
+.gecici-sifre code { font-size: 1.15rem; letter-spacing: .06em; padding: 2px 8px; border-radius: 6px; background: var(--yuzey); color: var(--metin); }
+
+.bildirim-listesi { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.bildirim-listesi li { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 12px; border-radius: 8px; background: var(--vurgu-acik); }
+.bildirim-listesi li.okundu { background: var(--yuzey-2); }
+.bildirim-listesi strong, .bildirim-listesi span, .bildirim-listesi small { grid-column: 1; }
+.bildirim-listesi small { color: var(--metin-soluk); }
+.bildirim-listesi button { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
 
 .bildirim { position: fixed; right: 16px; bottom: 16px; left: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; z-index: 20; }
 .bildirim .mesaj { pointer-events: auto; box-shadow: var(--golge); max-width: 420px; }

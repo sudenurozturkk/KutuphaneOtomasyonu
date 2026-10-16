@@ -23,6 +23,9 @@ public static class UyeEndpoints
             .WithSummary("Üye bilgilerini günceller.");
         grup.MapPost("/{id:int}/ceza-ode", CezaOdeAsync).RequireAuthorization(Oturum.Politikalar.Kutuphaneci)
             .WithSummary("Bankoda alınan ceza ödemesini kaydeder (en eski borçtan başlayarak).");
+        grup.MapPost("/{id:int}/portal-sifresi", PortalSifresiAsync)
+            .RequireAuthorization(Oturum.Politikalar.Kutuphaneci)
+            .WithSummary("Üye için tek sefer gösterilecek geçici portal parolası üretir.");
     }
 
     private static async Task<IResult> AraAsync(
@@ -67,5 +70,17 @@ public static class UyeEndpoints
         using var kapsam = await ServisKapsami.OlusturAsync(db);
         var sonuc = await kapsam.Uye.CezaOdeAsync(id, istek.Tutar, kullanici.KullaniciId());
         return sonuc.BasariliMi ? Results.Ok(UyeOzetDto.Olustur(sonuc.Uye!)) : Yanit.Hata(sonuc.Mesaj);
+    }
+
+    private static async Task<IResult> PortalSifresiAsync(
+        int id, ClaimsPrincipal kullanici, UyeHesapService hesap, KutuphaneDbContext db, HttpContext baglam)
+    {
+        var (sonuc, geciciSifre) = await hesap.GeciciSifreOlusturAsync(db, id, kullanici.KullaniciId());
+        if (!sonuc.BasariliMi)
+            return sonuc.Mesaj == "Üye bulunamadı." ? Yanit.Bulunamadi(sonuc.Mesaj) : Yanit.Hata(sonuc.Mesaj);
+
+        // Parola yalnızca bu yanıtta bulunur; tarayıcı veya ara katmanlar saklamamalıdır.
+        baglam.Response.Headers.CacheControl = "no-store";
+        return Results.Ok(new { uyeId = id, geciciSifre, giris = string.IsNullOrEmpty(sonuc.Uye!.OgrenciNo) ? sonuc.Uye.Email : sonuc.Uye.OgrenciNo });
     }
 }

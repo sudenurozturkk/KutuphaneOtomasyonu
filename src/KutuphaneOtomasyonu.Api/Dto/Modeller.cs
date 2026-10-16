@@ -16,6 +16,27 @@ public sealed record SifreDegistirIstegi(string? MevcutSifre, string? YeniSifre)
 
 public sealed record OturumDto(int Id, string KullaniciAdi, string AdSoyad, KullaniciRolu Rol, bool SifreDegistirmeli);
 
+public sealed record UyeGirisIstegi(string? Giris, string? Sifre);
+
+public sealed record UyeSifreDegistirIstegi(string? MevcutSifre, string? YeniSifre);
+
+public sealed record UyeOturumDto(int Id, string Giris, string AdSoyad, bool SifreDegistirmeli);
+
+// ---------- Öğrenci portalı (Hesabım) ----------
+
+/// <summary>Üyenin kendi bilgileri; kendi verisi olduğu için maskelenmez.</summary>
+public sealed record HesapDto(
+    int Id, string AdSoyad, string OgrenciNo, string Email, string Bolum, UyeTipi UyeTipi, UyeDurumu Durumu,
+    int MaxOduncAdet, int MaxOduncSuresi, int AktifOduncSayisi, int GecikmisOduncSayisi, decimal KalanCeza,
+    DateTime? UyelikBitisTarihi, int OkunmamisBildirim);
+
+public sealed record BildirimDto(int Id, string Baslik, string Mesaj, BildirimTipi Tipi, DateTime OlusturmaTarihi, bool Okundu)
+{
+    public static BildirimDto Olustur(Bildirim b) => new(b.Id, b.Baslik, b.Mesaj, b.Tipi, b.OlusturmaTarihi, b.Okundu);
+}
+
+public sealed record HesapRezervasyonIstegi(int KitapId);
+
 // ---------- Katalog ----------
 
 public sealed record KitapDto(
@@ -73,7 +94,8 @@ public sealed record UyeDetayDto(
     int Id, string Ad, string Soyad, string Email, string Telefon, string TCKimlikNo, string PasaportNo,
     string OgrenciNo, string Bolum, string Fakulte, UyeTipi UyeTipi, UyeDurumu Durumu, int MaxOduncAdet,
     int MaxOduncSuresi, decimal KalanCeza, DateTime KayitTarihi, DateTime? UyelikBitisTarihi, bool AnonimMi,
-    bool KisiselVeriMaskeli, IReadOnlyList<OduncDto> Oduncler, IReadOnlyList<RezervasyonDto> Rezervasyonlar)
+    bool KisiselVeriMaskeli, bool PortalHesabiVar, bool PortalSifreGecici,
+    IReadOnlyList<OduncDto> Oduncler, IReadOnlyList<RezervasyonDto> Rezervasyonlar)
 {
     public static UyeDetayDto Olustur(Uye u, KullaniciRolu rol) => new(
         u.Id, u.Ad, u.Soyad, u.Email,
@@ -82,7 +104,7 @@ public sealed record UyeDetayDto(
         KisiselVeri.Goster(u.PasaportNo, rol),
         u.OgrenciNo, u.Bolum, u.Fakulte, u.UyeTipi, u.Durumu, u.MaxOduncAdet, u.MaxOduncSuresi, u.KalanCeza,
         u.KayitTarihi, u.UyelikBitisTarihi, u.AnonimMi,
-        !KisiselVeri.TamGorebilirMi(rol),
+        !KisiselVeri.TamGorebilirMi(rol), u.PortalHesabiVar, u.PortalSifreGecici,
         u.Oduncler.OrderByDescending(o => o.OduncTarihi).Take(20).Select(o => OduncDto.Olustur(o, u)).ToList(),
         u.Rezervasyonlar.OrderByDescending(r => r.RezervasyonTarihi).Take(20).Select(r => RezervasyonDto.Olustur(r, u)).ToList());
 }

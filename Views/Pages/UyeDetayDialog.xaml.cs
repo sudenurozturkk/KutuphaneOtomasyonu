@@ -39,7 +39,14 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 txtBolum.Text = $"Bölüm: {u.Bolum} / {u.Fakulte}";
                 txtDurum.Text = u.AnonimMi
                     ? $"Durum: Anonimleştirildi ({u.AnonimlestirmeTarihi:dd.MM.yyyy})"
-                    : $"Durum: {u.Durumu}";
+                    : $"Durum: {u.Durumu} · Öğrenci portalı: " +
+                      (!u.PortalHesabiVar ? "hesap yok" : u.PortalSifreGecici ? "geçici şifre verildi" : "aktif");
+
+                _portalHesabiVar = u.PortalHesabiVar;
+                btnPortalSifresi.Content = u.PortalHesabiVar ? "Portal Şifresini Sıfırla" : "Portal Hesabı Aç";
+                btnPortalSifresi.Visibility = AuthService.Instance.YetkiVarMi(KullaniciRolu.Kutuphaneci) && !u.AnonimMi
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
 
                 txtMaskeBilgi.Visibility = KisiselVeri.TamGorebilirMi(kullanici) ? Visibility.Collapsed : Visibility.Visible;
                 btnAnonimlestir.Visibility = AuthService.Instance.YetkiVarMi(KullaniciRolu.Admin) && !u.AnonimMi
@@ -54,6 +61,42 @@ namespace KutuphaneOtomasyonu.Views.Pages
         }
 
         private static string Bos(string deger) => string.IsNullOrEmpty(deger) ? "-" : deger;
+
+        private bool _portalHesabiVar;
+
+        /// <summary>Öğrenci portalı için tek seferlik geçici şifre üretir; üye ilk girişte kendi şifresini belirler.</summary>
+        private async void BtnPortalSifresi_Click(object sender, RoutedEventArgs e)
+        {
+            if (_portalHesabiVar && MessageBox.Show(
+                    "Üyenin mevcut portal şifresi geçersiz olacak ve açık oturumları kapanacak.\n\nDevam edilsin mi?",
+                    "Portal Şifresini Sıfırla", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                using var context = new KutuphaneDbContext();
+                var (sonuc, geciciSifre) = await new UyeHesapService(TimeProvider.System)
+                    .GeciciSifreOlusturAsync(context, _uyeId, AuthService.Instance.AktifKullanici?.Id);
+                if (!sonuc.BasariliMi)
+                {
+                    MessageBox.Show(sonuc.Mesaj, "Portal hesabı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var giris = string.IsNullOrEmpty(sonuc.Uye!.OgrenciNo) ? sonuc.Uye.Email : sonuc.Uye.OgrenciNo;
+                MessageBox.Show(
+                    $"Giriş: {giris}\nGeçici şifre: {geciciSifre}\n\n" +
+                    "Şifreyi üyeye iletin; bu pencere kapandıktan sonra tekrar gösterilmez. " +
+                    "Üye ilk girişte kendi şifresini belirleyecektir. (Ctrl+C ile kopyalanabilir.)",
+                    "Öğrenci Portalı", MessageBoxButton.OK, MessageBoxImage.Information);
+                await YukleAsync();
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Portal sifresi olusturma", ex);
+                MessageBox.Show($"İşlem başarısız: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         private async void BtnAnonimlestir_Click(object sender, RoutedEventArgs e)
         {

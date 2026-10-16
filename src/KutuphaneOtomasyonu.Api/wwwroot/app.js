@@ -84,10 +84,17 @@ async function api(yontem, yol, govde) {
   const metin = await yanit.text();
   const veri = metin ? JSON.parse(metin) : null;
   if (!yanit.ok) {
-    if (yanit.status === 401 && oturum && !yol.startsWith("/api/oturum")) {
-      oturum = null;
-      menuyuCiz();
-      location.hash = "#/giris";
+    // Oturum süresi dolduysa (veya hesap kapatıldıysa) ilgili giriş sayfasına dönülür.
+    if (yanit.status === 401 && !yol.startsWith("/api/oturum") && !yol.startsWith("/api/uye-oturum")) {
+      if (yol.startsWith("/api/hesabim") && uyeOturumu) {
+        uyeOturumu = null;
+        menuyuCiz();
+        location.hash = "#/giris";
+      } else if (oturum && !yol.startsWith("/api/hesabim")) {
+        oturum = null;
+        menuyuCiz();
+        location.hash = "#/giris/personel";
+      }
     }
     const mesaj = (veri && (veri.detail || veri.title)) ||
       { 401: "Oturum açmanız gerekiyor.", 403: "Bu işlem için yetkiniz yok.", 429: "Çok fazla deneme. Lütfen biraz bekleyin." }[yanit.status] ||
@@ -124,9 +131,12 @@ function formIsle(form, isle) {
 
 // ---------- Oturum ve menü ----------
 
+// Personel ve öğrenci oturumları ayrı çerezlerdir; aynı tarayıcıda en fazla biri kullanılır.
 let oturum = null;
+let uyeOturumu = null;
 const personelMi = () => oturum && !oturum.sifreDegistirmeli;
 const kutuphaneciMi = () => personelMi() && (oturum.rol === "Kutuphaneci" || oturum.rol === "Admin");
+const uyeMi = () => uyeOturumu && !uyeOturumu.sifreDegistirmeli;
 
 function menuyuCiz() {
   const nav = document.getElementById("gezinti");
@@ -135,23 +145,29 @@ function menuyuCiz() {
     baglantilar.push(["#/pano", "Pano"], ["#/banko", "Banko"], ["#/oduncler", "Ödünçler"],
       ["#/uyeler", "Üyeler"], ["#/rezervasyonlar", "Rezervasyonlar"]);
   }
+  if (uyeMi()) baglantilar.push(["#/hesabim", "Hesabım"]);
   const rota = (location.hash.split("/")[1] || "katalog").split("?")[0];
+  const etiket = oturum
+    ? `${oturum.adSoyad} · ${ADLAR.rol[oturum.rol] || oturum.rol}`
+    : uyeOturumu ? `${uyeOturumu.adSoyad} · Öğrenci` : null;
   doldur(nav, ...[
     ...baglantilar.map(([adres, ad]) =>
       h("a", { href: adres, class: adres === "#/" + rota ? "aktif" : null }, ad)),
-    oturum
-      ? h("span", { class: "kullanici" }, `${oturum.adSoyad} · ${ADLAR.rol[oturum.rol] || oturum.rol}`)
-      : null,
-    oturum ? h("a", { href: "#/sifre", class: rota === "sifre" ? "aktif" : null }, "Şifre") : null,
-    oturum
+    etiket ? h("span", { class: "kullanici" }, etiket) : null,
+    etiket ? h("a", { href: "#/sifre", class: rota === "sifre" ? "aktif" : null }, "Şifre") : null,
+    etiket
       ? h("button", { type: "button", onclick: cikisYap }, "Çıkış")
-      : h("a", { href: "#/giris", class: rota === "giris" ? "aktif" : null }, "Personel girişi"),
+      : h("a", { href: "#/giris", class: rota === "giris" ? "aktif" : null }, "Giriş"),
   ]);
 }
 
 async function cikisYap() {
-  try { await api("POST", "/api/oturum/cikis"); } catch { /* oturum zaten kapalı olabilir */ }
+  try {
+    if (uyeOturumu) await api("POST", "/api/uye-oturum/cikis");
+    if (oturum) await api("POST", "/api/oturum/cikis");
+  } catch { /* oturum zaten kapalı olabilir */ }
   oturum = null;
+  uyeOturumu = null;
   bildir("Oturum kapatıldı.", "bilgi");
   location.hash = "#/katalog";
   menuyuCiz();
@@ -242,8 +258,42 @@ sayfalar.kitap = async (alan, id) => {
       h("section", { class: "kart" },
         h("h2", {}, `Nüshalar — ${kitap.mevcutAdet}/${kitap.toplamAdet} rafta`),
         tablo(["Barkod", "Durum", "Raf"], nushaSatirlari, "Nüsha kaydı yok."),
-        personelMi() ? rezervasyonFormu(kitap) : null)));
+        personelMi() ? rezervasyonFormu(kitap) : null,
+        uyeMi() ? uyeRezervasyonu(kitap) : null,
+        !oturum && !uyeOturumu
+          ? h("p", { class: "alt-baslik" }, "Rezervasyon için ", h("a", { href: "#/giris" }, "öğrenci girişi"), " yapın.")
+          : null)));
 };
+
+function uyeRezervasyonu(kitap) {
+  const kutu = h("div", { class: "rezerve-kutu" });
+  const dugme = h("button", { class: "dugme", type: "button", onclick: async () => {
+    dugme.disabled = true;
+    try {
+      const r = await api("POST", "/api/hesabim/rezervasyonlar", { kitapId: kitap.id });
+      doldur(kutu, h("p", { class: "mesaj basari" },
+        `Bekleme sırasına eklendiniz (${r.siraNumarasi}. sıra). Kitap size ayrıldığında bildirim alacaksınız.`));
+    } catch (hata) {
+      doldur(kutu, dugme, h("p", { class: "mesaj hata" }, hata.message));
+      dugme.disabled = false;
+    }
+  } }, "Rezerve et");
+  api("GET", "/api/hesabim/rezervasyonlar").then((liste) => {
+    const mevcut = liste.find((r) => r.kitapId === kitap.id && (r.durumu === "Bekliyor" || r.durumu === "Onaylandi"));
+    if (mevcut) {
+      doldur(kutu, h("p", { class: "mesaj bilgi" }, mevcut.durumu === "Onaylandi"
+        ? `Bu kitap size ayrıldı; ${tarih(mevcut.gecerlilikTarihi)} tarihine kadar bankodan alabilirsiniz.`
+        : `Bu kitap için sıradasınız (${mevcut.siraNumarasi}. sıra).`),
+        h("a", { href: "#/hesabim" }, "Rezervasyonlarım"));
+    }
+  }).catch(() => { /* liste alınamazsa düğme gösterilmeye devam eder */ });
+  doldur(kutu,
+    h("p", { class: "alt-baslik" }, kitap.mevcutAdet > 0
+      ? "Kitap rafta; bankodan doğrudan ödünç alabilirsiniz. Yine de sıraya girmek isterseniz:"
+      : "Tüm nüshalar ödünçte. Sıraya girerseniz iade edilen ilk nüsha size ayrılır."),
+    dugme);
+  return kutu;
+}
 
 function rezervasyonFormu(kitap) {
   const form = h("form", {},
@@ -265,22 +315,45 @@ async function tekUyeBul(giris) {
   return sonuc.kayitlar[0].id;
 }
 
-sayfalar.giris = async (alan) => {
-  const form = h("form", { class: "kart" },
-    h("h1", {}, "Personel girişi"),
-    h("p", { class: "alt-baslik" }, "Katalog herkese açıktır; ödünç, üye ve rezervasyon işlemleri için giriş yapın."),
-    h("label", {}, "Kullanıcı adı", h("input", { name: "kullaniciAdi", required: true, autocomplete: "username" })),
-    h("label", {}, "Şifre", h("input", { name: "sifre", type: "password", required: true, autocomplete: "current-password" })),
-    h("button", { class: "dugme", type: "submit" }, "Giriş yap"));
+sayfalar.giris = async (alan, tur) => {
+  const personel = tur === "personel";
+  const sekmeler = h("div", { class: "sekmeler" },
+    h("button", { type: "button", class: personel ? null : "aktif", onclick: () => { location.hash = "#/giris"; } }, "Öğrenci"),
+    h("button", { type: "button", class: personel ? "aktif" : null, onclick: () => { location.hash = "#/giris/personel"; } }, "Personel"));
+
+  const form = personel
+    ? h("form", { class: "kart" },
+        sekmeler,
+        h("h1", {}, "Personel girişi"),
+        h("p", { class: "alt-baslik" }, "Ödünç, iade, üye ve rezervasyon işlemleri için."),
+        h("label", {}, "Kullanıcı adı", h("input", { name: "kullaniciAdi", required: true, autocomplete: "username" })),
+        h("label", {}, "Şifre", h("input", { name: "sifre", type: "password", required: true, autocomplete: "current-password" })),
+        h("button", { class: "dugme", type: "submit" }, "Giriş yap"))
+    : h("form", { class: "kart" },
+        sekmeler,
+        h("h1", {}, "Öğrenci girişi"),
+        h("p", { class: "alt-baslik" }, "Ödünçlerinizi ve iade tarihlerinizi görün, süre uzatın, kitap rezerve edin."),
+        h("label", {}, "Öğrenci numarası veya e-posta", h("input", { name: "giris", required: true, autocomplete: "username" })),
+        h("label", {}, "Şifre", h("input", { name: "sifre", type: "password", required: true, autocomplete: "current-password" })),
+        h("button", { class: "dugme", type: "submit" }, "Giriş yap"),
+        h("p", { class: "alt-baslik" }, "Hesabınız yoksa veya şifrenizi unuttuysanız kütüphane bankosundan geçici şifre alabilirsiniz."));
+
   formIsle(form, async (veri) => {
-    oturum = await api("POST", "/api/oturum/giris", { kullaniciAdi: veri.get("kullaniciAdi"), sifre: veri.get("sifre") });
+    if (personel) {
+      if (uyeOturumu) { try { await api("POST", "/api/uye-oturum/cikis"); } catch { } uyeOturumu = null; }
+      oturum = await api("POST", "/api/oturum/giris", { kullaniciAdi: veri.get("kullaniciAdi"), sifre: veri.get("sifre") });
+    } else {
+      if (oturum) { try { await api("POST", "/api/oturum/cikis"); } catch { } oturum = null; }
+      uyeOturumu = await api("POST", "/api/uye-oturum/giris", { giris: veri.get("giris"), sifre: veri.get("sifre") });
+    }
+    const hesap = oturum || uyeOturumu;
     menuyuCiz();
-    if (oturum.sifreDegistirmeli) {
+    if (hesap.sifreDegistirmeli) {
       bildir("Güvenliğiniz için şifrenizi değiştirmeniz gerekiyor.", "bilgi");
       location.hash = "#/sifre";
     } else {
-      bildir(`Hoş geldiniz, ${oturum.adSoyad}.`);
-      location.hash = "#/pano";
+      bildir(`Hoş geldiniz, ${hesap.adSoyad}.`);
+      location.hash = personel ? "#/pano" : "#/hesabim";
     }
   });
   doldur(alan, h("div", { class: "giris-kap" }, form));
@@ -288,11 +361,12 @@ sayfalar.giris = async (alan) => {
 };
 
 sayfalar.sifre = async (alan) => {
-  if (!oturum) { location.hash = "#/giris"; return; }
+  const hesap = oturum || uyeOturumu;
+  if (!hesap) { location.hash = "#/giris"; return; }
   const form = h("form", { class: "kart" },
     h("h1", {}, "Şifre değiştir"),
-    oturum.sifreDegistirmeli
-      ? h("p", { class: "mesaj bilgi" }, "Varsayılan veya kısa bir şifreyle giriş yaptınız. Devam etmek için yeni bir şifre belirleyin.")
+    hesap.sifreDegistirmeli
+      ? h("p", { class: "mesaj bilgi" }, "Geçici, varsayılan veya kısa bir şifreyle giriş yaptınız. Devam etmek için kendi şifrenizi belirleyin.")
       : null,
     h("label", {}, "Mevcut şifre", h("input", { name: "mevcut", type: "password", required: true, autocomplete: "current-password" })),
     h("label", {}, "Yeni şifre (en az 8 karakter)", h("input", { name: "yeni", type: "password", required: true, minlength: 8, autocomplete: "new-password" })),
@@ -300,10 +374,12 @@ sayfalar.sifre = async (alan) => {
     h("button", { class: "dugme", type: "submit" }, "Şifreyi değiştir"));
   formIsle(form, async (veri) => {
     if (veri.get("yeni") !== veri.get("tekrar")) throw new Error("Yeni şifreler eşleşmiyor.");
-    oturum = await api("POST", "/api/oturum/sifre", { mevcutSifre: veri.get("mevcut"), yeniSifre: veri.get("yeni") });
+    const govde = { mevcutSifre: veri.get("mevcut"), yeniSifre: veri.get("yeni") };
+    if (oturum) oturum = await api("POST", "/api/oturum/sifre", govde);
+    else uyeOturumu = await api("POST", "/api/uye-oturum/sifre", govde);
     menuyuCiz();
     bildir("Şifreniz değiştirildi.");
-    location.hash = "#/pano";
+    location.hash = oturum ? "#/pano" : "#/hesabim";
   });
   doldur(alan, h("div", { class: "giris-kap" }, form));
 };
@@ -334,10 +410,10 @@ sayfalar.pano = async (alan) => {
       oduncTablosu(p.yaklasanIadeler, false)));
 };
 
-function oduncTablosu(oduncler, islemli, yenile) {
+function oduncTablosu(oduncler, islemli, yenile, uyeSutunu = true) {
   const satirlar = oduncler.map((o) => h("tr", {},
     h("td", {}, h("a", { href: `#/kitap/${o.kitapId}` }, o.kitapBaslik), o.nushaBarkod ? h("div", { class: "alt-baslik" }, o.nushaBarkod) : null),
-    h("td", {}, o.uyeAdSoyad ? h("a", { href: `#/uye/${o.uyeId}` }, o.uyeAdSoyad) : "—"),
+    uyeSutunu ? h("td", {}, o.uyeAdSoyad ? h("a", { href: `#/uye/${o.uyeId}` }, o.uyeAdSoyad) : "—") : null,
     h("td", {}, tarih(o.oduncTarihi)),
     h("td", {}, tarih(o.planlananIadeTarihi)),
     h("td", {}, oduncRozeti(o)),
@@ -349,7 +425,7 @@ function oduncTablosu(oduncler, islemli, yenile) {
               h("button", { class: "dugme kucuk", onclick: () => oduncIslemi(`/api/oduncler/${o.id}/iade`, { durum: "Iyi" }, yenile) }, "İade al"))
           : null)
       : null));
-  return tablo(["Kitap", "Üye", "Veriliş", "İade tarihi", "Durum", ...(islemli ? [">İşlem"] : [])], satirlar, "Ödünç kaydı yok.");
+  return tablo(["Kitap", ...(uyeSutunu ? ["Üye"] : []), "Veriliş", "İade tarihi", "Durum", ...(islemli ? [">İşlem"] : [])], satirlar, "Ödünç kaydı yok.");
 }
 
 async function oduncIslemi(yol, govde, yenile) {
@@ -472,6 +548,32 @@ sayfalar.uye = async (alan, id) => {
     h("td", {}, tarih(r.rezervasyonTarihi)),
     h("td", {}, rozet(ADLAR.rezervasyon[r.durumu] || r.durumu))));
 
+  // Öğrenci portalı hesabı: geçici şifre yalnızca bir kez gösterilir, üye ilk girişte kendi şifresini belirler.
+  const portalSonuc = h("div", {});
+  const portalBolumu = h("section", { class: "kart" },
+    h("h2", {}, "Öğrenci portalı hesabı"),
+    h("p", {}, u.portalHesabiVar
+      ? (u.portalSifreGecici ? rozet("Geçici şifre verildi, henüz değiştirilmedi", "uyari") : rozet("Aktif", "basari"))
+      : rozet("Hesap açılmamış")),
+    kutuphaneciMi() && !u.anonimMi
+      ? h("button", { class: "dugme ikincil", type: "button", onclick: async (olay) => {
+          if (u.portalHesabiVar && !confirm("Üyenin mevcut şifresi geçersiz olacak ve açık oturumları kapanacak. Devam edilsin mi?")) return;
+          olay.target.disabled = true;
+          try {
+            const s = await api("POST", `/api/uyeler/${u.id}/portal-sifresi`, {});
+            doldur(portalSonuc, h("div", { class: "mesaj basari gecici-sifre" },
+              h("div", {}, "Geçici şifreyi üyeye iletin; bu ekrandan ayrıldıktan sonra tekrar gösterilmez."),
+              h("div", {}, "Giriş: ", h("strong", {}, s.giris)),
+              h("div", {}, "Geçici şifre: ", h("code", {}, s.geciciSifre))));
+          } catch (hata) {
+            doldur(portalSonuc, h("p", { class: "mesaj hata" }, hata.message));
+          } finally {
+            olay.target.disabled = false;
+          }
+        } }, u.portalHesabiVar ? "Şifreyi sıfırla (geçici şifre ver)" : "Portal hesabı aç (geçici şifre ver)")
+      : null,
+    portalSonuc);
+
   doldur(alan,
     h("div", { class: "sayfa-baslik" },
       h("div", {}, h("h1", {}, `${u.ad} ${u.soyad}`.trim() || "Anonim üye"),
@@ -483,7 +585,9 @@ sayfalar.uye = async (alan, id) => {
         u.kisiselVeriMaskeli ? h("p", { class: "mesaj bilgi" }, "Kimlik ve telefon bilgileri rolünüz gereği maskelenmiştir (KVKK).") : null,
         h("dl", { class: "tanim" }, bilgiler.flatMap(([a, d]) => [h("dt", {}, a), h("dd", {}, d)])),
         cezaFormu),
-      h("section", { class: "kart" }, h("h2", {}, "Rezervasyonlar"), tablo(["Kitap", "Tarih", "Durum"], rezervasyonSatirlari, "Rezervasyon yok."))),
+      h("div", { class: "yigin" },
+        portalBolumu,
+        h("section", { class: "kart" }, h("h2", {}, "Rezervasyonlar"), tablo(["Kitap", "Tarih", "Durum"], rezervasyonSatirlari, "Rezervasyon yok.")))),
     h("section", { class: "kart" }, h("h2", {}, "Ödünç geçmişi (son 20)"), oduncTablosu(u.oduncler, false)));
 };
 
@@ -573,9 +677,85 @@ sayfalar["uye-ekle"] = async (alan) => {
   doldur(alan, h("div", { class: "sayfa-baslik" }, h("h1", {}, "Üye ekle")), form);
 };
 
+// ---------- Öğrenci portalı ----------
+
+sayfalar.hesabim = async (alan) => {
+  const [hesap, oduncler, rezervasyonlar, bildirimler] = await Promise.all([
+    api("GET", "/api/hesabim"),
+    api("GET", "/api/hesabim/oduncler"),
+    api("GET", "/api/hesabim/rezervasyonlar"),
+    api("GET", "/api/hesabim/bildirimler"),
+  ]);
+  const yenile = () => sayfalar.hesabim(alan);
+  const aktifler = oduncler.filter((o) => o.durumu === "Aktif");
+  const gecmis = oduncler.filter((o) => o.durumu !== "Aktif").slice(0, 20);
+  const sayi = (deger, etiket, tur) => h("div", { class: "kart sayi-kart " + (tur || "") },
+    h("div", { class: "deger" }, deger), h("div", { class: "etiket" }, etiket));
+
+  const aktifSatirlar = aktifler.map((o) => {
+    const kalanGun = Math.ceil((new Date(o.planlananIadeTarihi) - new Date()) / 86400000);
+    return h("tr", {},
+      h("td", {}, h("a", { href: `#/kitap/${o.kitapId}` }, o.kitapBaslik), o.nushaBarkod ? h("div", { class: "alt-baslik" }, o.nushaBarkod) : null),
+      h("td", {}, tarih(o.oduncTarihi)),
+      h("td", {}, tarih(o.planlananIadeTarihi), h("div", { class: "alt-baslik" }, o.gecikmisMi ? "" : `${kalanGun} gün kaldı`)),
+      h("td", {}, oduncRozeti(o)),
+      h("td", { class: "sag" }, h("button", {
+        class: "dugme ikincil kucuk",
+        disabled: o.gecikmisMi || o.uzatmaSayisi >= o.maxUzatmaSayisi,
+        title: `Uzatma hakkı: ${o.maxUzatmaSayisi - o.uzatmaSayisi}`,
+        onclick: () => oduncIslemi(`/api/hesabim/oduncler/${o.id}/uzat`, undefined, yenile),
+      }, `Uzat (${o.maxUzatmaSayisi - o.uzatmaSayisi})`)));
+  });
+
+  const rezervasyonSatirlari = rezervasyonlar.slice(0, 20).map((r) => h("tr", {},
+    h("td", {}, h("a", { href: `#/kitap/${r.kitapId}` }, r.kitapBaslik)),
+    h("td", {}, tarih(r.rezervasyonTarihi)),
+    h("td", {}, rozet(ADLAR.rezervasyon[r.durumu] || r.durumu, r.durumu === "Onaylandi" ? "basari" : null),
+      r.durumu === "Onaylandi" ? h("div", { class: "alt-baslik" }, `Bankodan ${tarih(r.gecerlilikTarihi)} tarihine kadar alın`) : null),
+    h("td", { class: "sag" }, (r.durumu === "Bekliyor" || r.durumu === "Onaylandi")
+      ? h("button", { class: "dugme ikincil kucuk", onclick: async () => {
+          try { await api("POST", `/api/hesabim/rezervasyonlar/${r.id}/iptal`, {}); bildir("Rezervasyon iptal edildi."); await yenile(); }
+          catch (hata) { bildir(hata.message, "hata"); }
+        } }, "İptal")
+      : null)));
+
+  const bildirimListesi = bildirimler.length
+    ? h("ul", { class: "bildirim-listesi" }, bildirimler.slice(0, 8).map((b) => h("li", { class: b.okundu ? "okundu" : null },
+        h("strong", {}, b.baslik), h("span", {}, b.mesaj), h("small", {}, tarih(b.olusturmaTarihi)),
+        b.okundu ? null : h("button", { class: "dugme ikincil kucuk", onclick: async () => {
+          try { await api("POST", `/api/hesabim/bildirimler/${b.id}/okundu`, {}); await yenile(); } catch (hata) { bildir(hata.message, "hata"); }
+        } }, "Okundu"))))
+    : h("p", { class: "bos" }, "Bildirim yok.");
+
+  doldur(alan,
+    h("div", { class: "sayfa-baslik" },
+      h("div", {}, h("h1", {}, `Merhaba, ${hesap.adSoyad}`),
+        h("p", { class: "alt-baslik" }, [hesap.ogrenciNo, hesap.bolum, ADLAR.uyeTipi[hesap.uyeTipi]].filter(Boolean).join(" · "))),
+      h("a", { class: "dugme", href: "#/katalog" }, "Kitap ara")),
+    hesap.kalanCeza > 0
+      ? h("p", { class: "mesaj hata" }, `${para(hesap.kalanCeza)} ödenmemiş borcunuz var. Borç ödenene kadar yeni kitap alamazsınız; ödeme kütüphane bankosunda yapılır.`)
+      : null,
+    hesap.gecikmisOduncSayisi > 0
+      ? h("p", { class: "mesaj hata" }, `${hesap.gecikmisOduncSayisi} kitabın iade tarihi geçti. Gecikme cezası her gün artar.`)
+      : null,
+    h("div", { class: "izgara izgara-sayi" },
+      sayi(`${hesap.aktifOduncSayisi}/${hesap.maxOduncAdet}`, "Ödünçteki kitap"),
+      sayi(hesap.gecikmisOduncSayisi, "Geciken", hesap.gecikmisOduncSayisi ? "hata" : ""),
+      sayi(para(hesap.kalanCeza), "Borç", hesap.kalanCeza > 0 ? "uyari" : ""),
+      sayi(`${hesap.maxOduncSuresi} gün`, "Ödünç süresi")),
+    h("section", { class: "kart" }, h("h2", {}, "Ödünçlerim"),
+      tablo(["Kitap", "Alış", "İade tarihi", "Durum", ">Süre uzatma"], aktifSatirlar, "Şu an ödünçte kitabınız yok.")),
+    h("div", { class: "izgara izgara-2" },
+      h("section", { class: "kart" }, h("h2", {}, "Rezervasyonlarım"),
+        tablo(["Kitap", "Tarih", "Durum", ">"], rezervasyonSatirlari, "Rezervasyonunuz yok.")),
+      h("section", { class: "kart" }, h("h2", {}, `Bildirimler${hesap.okunmamisBildirim ? ` (${hesap.okunmamisBildirim} yeni)` : ""}`), bildirimListesi)),
+    h("section", { class: "kart" }, h("h2", {}, "Geçmiş ödünçler"), oduncTablosu(gecmis, false, null, false)));
+};
+
 // ---------- Yönlendirme ----------
 
 const PERSONEL_SAYFALARI = new Set(["pano", "banko", "oduncler", "uyeler", "uye", "rezervasyonlar", "kitap-ekle", "uye-ekle"]);
+const UYE_SAYFALARI = new Set(["hesabim"]);
 
 async function yonlendir() {
   const alan = document.getElementById("icerik");
@@ -585,7 +765,11 @@ async function yonlendir() {
   menuyuCiz();
 
   if (PERSONEL_SAYFALARI.has(rota) && !personelMi()) {
-    location.hash = oturum ? "#/sifre" : "#/giris";
+    location.hash = oturum ? "#/sifre" : "#/giris/personel";
+    return;
+  }
+  if (UYE_SAYFALARI.has(rota) && !uyeMi()) {
+    location.hash = uyeOturumu ? "#/sifre" : "#/giris";
     return;
   }
   const sayfa = sayfalar[rota] || sayfalar.katalog;
@@ -604,11 +788,9 @@ async function basla() {
     const acik = document.getElementById("gezinti").classList.toggle("acik");
     menuDugme.setAttribute("aria-expanded", String(acik));
   });
-  try {
-    oturum = await api("GET", "/api/oturum/ben");
-  } catch {
-    oturum = null;
-  }
+  const [personel, uye] = await Promise.allSettled([api("GET", "/api/oturum/ben"), api("GET", "/api/uye-oturum/ben")]);
+  oturum = personel.status === "fulfilled" ? personel.value : null;
+  uyeOturumu = !oturum && uye.status === "fulfilled" ? uye.value : null;
   window.addEventListener("hashchange", yonlendir);
   await yonlendir();
 }
