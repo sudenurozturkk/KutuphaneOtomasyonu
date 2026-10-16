@@ -1,0 +1,75 @@
+---
+title: Nesne Diyagramı — Ayşe Yılmaz'ın ödünç aldığı "Temiz Kod" kitabı (16.10.2026 anı)
+---
+classDiagram
+    direction LR
+
+    class ayse["ayse : Uye"] {
+        Id = 41
+        Ad = "Ayşe"
+        Soyad = "Yılmaz"
+        OgrenciNo = "2023104582"
+        Bolum = "Bilgisayar Mühendisliği"
+        UyeTipi = Ogrenci
+        Durumu = Aktif
+        MaxOduncAdet = 3
+        MaxOduncSuresi = 14
+        ToplamCeza = 0.00
+    }
+
+    class odunc["odunc128 : Odunc"] {
+        Id = 128
+        UyeId = 41
+        KitapId = 2
+        NushaId = 3
+        KutuphanecId = 2
+        OduncTarihi = 10.10.2026
+        PlanlananIadeTarihi = 24.10.2026
+        GercekIadeTarihi = null
+        Durumu = Aktif
+        UzatmaSayisi = 0
+        MaxUzatmaSayisi = 2
+        CezaTutari = 0.00
+    }
+
+    class kitap["temizKod : Kitap"] {
+        Id = 2
+        Baslik = "Temiz Kod - Clean Code"
+        Yazar = "Robert C. Martin"
+        ISBN = "9780132350884"
+        ToplamAdet = 2
+        MevcutAdet = 1
+        RafKonumu = "B-01"
+        Aktif = true
+    }
+
+    class nusha1["n1 : KitapNushasi"] {
+        Id = 3
+        KitapId = 2
+        Barkod = "KB0000020001"
+        Durum = Oduncte
+        RafKonumu = "B-01"
+    }
+
+    class nusha2["n2 : KitapNushasi"] {
+        Id = 4
+        KitapId = 2
+        Barkod = "KB0000020002"
+        Durum = Rafta
+        RafKonumu = "B-01"
+    }
+
+    class fatma["fatma : Kullanici"] {
+        Id = 2
+        Ad = "Fatma"
+        Soyad = "Kaya"
+        KullaniciAdi = "fatma"
+        Rol = Kutuphaneci
+    }
+
+    ayse -- odunc : ödünç alır
+    odunc -- kitap : kaydı
+    odunc -- nusha1 : verilen nüsha
+    fatma -- odunc : işlemi yapan
+    kitap *-- nusha1
+    kitap *-- nusha2

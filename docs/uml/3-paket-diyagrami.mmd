@@ -1,0 +1,32 @@
+---
+title: Paket Diyagramı — KutuphaneOtomasyonu mantıksal paketleri
+---
+flowchart TB
+    subgraph Views["📁 «package» KutuphaneOtomasyonu.Views — Sunum Katmanı (WPF)"]
+        V["LoginWindow · MainWindow · SifreDegistirDialog"]
+        subgraph Pages["📁 «package» Views.Pages"]
+            P["OdunclerPage · KitaplarPage · UyelerPage<br/>BarkodBankoPage · OduncVerDialog · IadeDialog …"]
+        end
+    end
+
+    subgraph Services["📁 «package» KutuphaneOtomasyonu.Services — İş Mantığı Katmanı"]
+        S["OduncService · KitapService · UyeService<br/>RezervasyonService · AuthService · ServisKapsami …"]
+    end
+
+    subgraph Data["📁 «package» KutuphaneOtomasyonu.Data — Veri Erişim Katmanı"]
+        D["KutuphaneDbContext · VeritabaniSemasi · DatabaseSeeder"]
+        subgraph Migrations["📁 «package» Data.Migrations"]
+            M["TabanSema · UyePasaportNo · KitapNushalari …"]
+        end
+    end
+
+    subgraph Models["📁 «package» KutuphaneOtomasyonu.Models — Alan (Domain) Katmanı"]
+        E["Uye · Kitap · KitapNushasi · Odunc<br/>Rezervasyon · CezaKaydi · Kullanici"]
+    end
+
+    Views -. "«use»" .-> Services
+    Views -. "«use»" .-> Data
+    Services -. "«use»" .-> Data
+    Services -. "«use»" .-> Models
+    Data -. "«use»" .-> Models
+    Views -. "«use»" .-> Models

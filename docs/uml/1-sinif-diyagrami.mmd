@@ -1,0 +1,144 @@
+---
+title: Sınıf Diyagramı — Ödünç Alma Alanı (KutuphaneOtomasyonu.Models)
+---
+classDiagram
+    direction TB
+
+    class Uye {
+        +Id : int
+        +Ad : string
+        +Soyad : string
+        +OgrenciNo : string
+        +TCKimlikNo : string
+        +PasaportNo : string
+        +Bolum : string
+        +UyeTipi : UyeTipi
+        +Durumu : UyeDurumu
+        +MaxOduncAdet : int
+        +MaxOduncSuresi : int
+        +ToplamCeza : decimal
+        +OdenenCeza : decimal
+        +UyelikBitisTarihi : DateTime?
+        +/TamAd : string
+        +/KalanCeza : decimal
+        +/CezaliMi : bool
+    }
+
+    class Kitap {
+        +Id : int
+        +Baslik : string
+        +Yazar : string
+        +ISBN : string
+        +Kategori : string
+        +ToplamAdet : int
+        +MevcutAdet : int
+        +RafKonumu : string
+        +Aktif : bool
+        +/MevcutMu : bool
+    }
+
+    class KitapNushasi {
+        +Id : int
+        +KitapId : int
+        +Barkod : string
+        +Durum : NushaDurumu
+        +RafKonumu : string
+        +DurumTarihi : DateTime?
+        +/DolasimdaMi : bool
+    }
+
+    class Odunc {
+        +Id : int
+        +UyeId : int
+        +KitapId : int
+        +NushaId : int?
+        +KutuphanecId : int?
+        +OduncTarihi : DateTime
+        +PlanlananIadeTarihi : DateTime
+        +GercekIadeTarihi : DateTime?
+        +Durumu : OduncDurumu
+        +UzatmaSayisi : int
+        +MaxUzatmaSayisi : int
+        +CezaTutari : decimal
+        +/GecikmisMi : bool
+        +/GecikmeGunSayisi : int
+        +/UzatilabilirMi : bool
+    }
+
+    class Rezervasyon {
+        +Id : int
+        +UyeId : int
+        +KitapId : int
+        +RezervasyonTarihi : DateTime
+        +GecerlilikTarihi : DateTime
+        +Durumu : RezervasyonDurumu
+        +SiraNumarasi : int
+    }
+
+    class CezaKaydi {
+        +Id : int
+        +UyeId : int
+        +OduncId : int
+        +Tutar : decimal
+        +Tipi : CezaTipi
+        +Odendi : bool
+    }
+
+    class Kullanici {
+        +Id : int
+        +Ad : string
+        +Soyad : string
+        +KullaniciAdi : string
+        -SifreHash : string
+        +Rol : KullaniciRolu
+        +Aktif : bool
+    }
+
+    class OduncService {
+        <<service>>
+        +OduncVerAsync(kitapId, uyeId, kutuphanecId, nushaBarkodu) OduncSonuc
+        +IadeAlAsync(oduncId, kitapDurumu, notlar) OduncSonuc
+        +UzatAsync(oduncId) OduncSonuc
+        +GetUyeOdunclerAsync(uyeId) List~Odunc~
+    }
+
+    class UyeTipi {
+        <<enumeration>>
+        Ogrenci
+        Akademisyen
+        Personel
+        Misafir
+    }
+
+    class NushaDurumu {
+        <<enumeration>>
+        Rafta
+        Oduncte
+        Hasarli
+        Kayip
+        Cikarildi
+    }
+
+    class OduncDurumu {
+        <<enumeration>>
+        Aktif
+        Iade
+        Kayip
+        Hasarli
+    }
+
+    Kitap "1" *-- "1..*" KitapNushasi : nüshaları
+    Uye "1" -- "0..*" Odunc : ödünç alır
+    Kitap "1" -- "0..*" Odunc : ödünç kaydı
+    KitapNushasi "0..1" -- "0..*" Odunc : verilen nüsha
+    Kullanici "0..1" -- "0..*" Odunc : işlemi yapan
+    Uye "1" -- "0..*" Rezervasyon : sıraya girer
+    Kitap "1" -- "0..*" Rezervasyon : rezerve edilir
+    Odunc "1" -- "0..*" CezaKaydi : doğurur
+    Uye "1" -- "0..*" CezaKaydi : borçlanır
+
+    Uye ..> UyeTipi
+    KitapNushasi ..> NushaDurumu
+    Odunc ..> OduncDurumu
+    OduncService ..> Odunc : «create»
+    OduncService ..> KitapNushasi : «use»

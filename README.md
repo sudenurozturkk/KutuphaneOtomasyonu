@@ -122,6 +122,7 @@ KutuphaneOtomasyonu/
 ├── SmokeTester.cs                 # Otomatik Uçtan Uca Doğrulama Motoru
 ├── Tests/KutuphaneOtomasyonu.Tests/ # İzole SQLite servis testleri (xUnit)
 ├── docs/
+│   ├── uml/                       # Sınıf, nesne, paket ve dağıtım diyagramları
 │   ├── engineering-backlog.md     # Bulunan hatalar, kararlar ve doğrulama kanıtları
 │   └── kisisel-veri-notlari.md    # KVKK: işlenen veriler ve teknik tedbirler
 ├── ENGINEERING_LOG.md             # Tarihli geliştirme günlüğü
@@ -273,6 +274,7 @@ PBKDF2 parola özetleme ve eski özetlerin yükseltilmesi, hatalı giriş kilidi
 
 | Dosya | İçerik |
 |---|---|
+| [`docs/uml/`](docs/uml/README.md) | UML: sınıf, nesne, paket ve dağıtım diyagramları (açıklamalı) |
 | [`docs/kisisel-veri-notlari.md`](docs/kisisel-veri-notlari.md) | KVKK: hangi kişisel veri, hangi amaçla, hangi tedbirlerle işleniyor; kurumun karar vermesi gerekenler |
 | [`docs/engineering-backlog.md`](docs/engineering-backlog.md) | Bulunan hatalar (P0/P1/P2), verilen tasarım kararları (D-01…D-09) ve her birinin test kanıtı |
 | [`ENGINEERING_LOG.md`](ENGINEERING_LOG.md) | Tarih sırasıyla yapılan geliştirme çalışmaları ve doğrulama sonuçları |
