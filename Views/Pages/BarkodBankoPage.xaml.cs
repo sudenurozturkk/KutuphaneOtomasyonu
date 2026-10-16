@@ -145,7 +145,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
                 var oduncService = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
-                var sonuc = await oduncService.IadeAlAsync(aktifOdunc.Id, KitapDurumu.Iyi);
+                var sonuc = await oduncService.IadeAlAsync(aktifOdunc.Id, KitapDurumu.Iyi, null, AuthService.Instance.AktifKullanici?.Id);
 
                 if (sonuc.Basarili)
                 {

@@ -377,13 +377,15 @@ namespace KutuphaneOtomasyonu.Services
     }
 
     /// <summary>
-    /// Kimlik doğrulama servisi - Singleton Pattern.
+    /// Masaüstü uygulamasının oturumu - Singleton Pattern. Uygulamada tek bir oturum açık olduğu için
+    /// aktif kullanıcıyı tutar; kimlik doğrulamanın kendisini <see cref="KimlikDogrulamaService"/> yapar.
+    /// Web API bu sınıfı kullanmaz (her isteğin kullanıcısı kendi oturum çerezinden gelir).
     /// </summary>
     public class AuthService
     {
-        /// <summary>Art arda bu kadar hatalı denemeden sonra hesap geçici olarak kilitlenir.</summary>
-        public const int MaksimumHataliDeneme = 5;
-        public static readonly TimeSpan KilitSuresi = TimeSpan.FromMinutes(1);
+        public const int MaksimumHataliDeneme = KimlikDogrulamaService.MaksimumHataliDeneme;
+        public static readonly TimeSpan KilitSuresi = KimlikDogrulamaService.KilitSuresi;
+        public const int MinimumSifreUzunlugu = KimlikDogrulamaService.MinimumSifreUzunlugu;
 
         private static AuthService? _instance;
         private static readonly object _lock = new();
@@ -399,9 +401,7 @@ namespace KutuphaneOtomasyonu.Services
             }
         }
 
-        private readonly TimeProvider _zaman;
-        private readonly Dictionary<string, (int HataSayisi, DateTimeOffset? KilitBitis)> _denemeler =
-            new(StringComparer.OrdinalIgnoreCase);
+        private readonly KimlikDogrulamaService _dogrulayici;
 
         public Kullanici? AktifKullanici { get; private set; }
         public bool GirisYapilmis => AktifKullanici != null;
@@ -412,7 +412,7 @@ namespace KutuphaneOtomasyonu.Services
 
         internal AuthService(TimeProvider zaman)
         {
-            _zaman = zaman;
+            _dogrulayici = new KimlikDogrulamaService(zaman);
         }
 
         public async Task<bool> GirisAsync(string kullaniciAdi, string sifre, KutuphaneDbContext context) =>
@@ -420,95 +420,21 @@ namespace KutuphaneOtomasyonu.Services
 
         public async Task<GirisSonuc> GirisDetayliAsync(string kullaniciAdi, string sifre, KutuphaneDbContext context)
         {
-            kullaniciAdi = kullaniciAdi?.Trim() ?? string.Empty;
-            var simdi = _zaman.GetUtcNow();
-
-            lock (_denemeler)
-            {
-                if (_denemeler.TryGetValue(kullaniciAdi, out var durum) && durum.KilitBitis > simdi)
-                {
-                    var kalan = (int)Math.Ceiling((durum.KilitBitis.Value - simdi).TotalSeconds);
-                    return GirisSonuc.Hata($"Çok sayıda hatalı deneme. {kalan} saniye sonra tekrar deneyin.");
-                }
-            }
-
-            var kullanici = await context.Kullanicilar
-                .FirstOrDefaultAsync(k => k.KullaniciAdi == kullaniciAdi && k.Aktif);
-
-            // PBKDF2 kasıtlı olarak yavaştır; arayüz iş parçacığını bloklamamak için arka planda çalışır.
-            bool dogru;
-            if (kullanici == null)
-            {
-                await Task.Run(() => SifreHasher.SahteDogrulama(sifre));
-                dogru = false;
-            }
-            else
-            {
-                var ozet = kullanici.SifreHash;
-                dogru = await Task.Run(() => SifreHasher.Dogrula(sifre, ozet));
-            }
-
-            if (!dogru)
-            {
-                lock (_denemeler)
-                {
-                    var onceki = _denemeler.TryGetValue(kullaniciAdi, out var d) ? d.HataSayisi : 0;
-                    var yeni = onceki + 1;
-                    _denemeler[kullaniciAdi] = yeni >= MaksimumHataliDeneme
-                        ? (0, simdi + KilitSuresi)
-                        : (yeni, null);
-                }
-
-                // Bilinmeyen kullanıcı adları kaydedilmez: yanlış alana yazılmış bir parola olabilir.
-                await DenetimService.KaydetAsync(context, DenetimService.Islemler.GirisBasarisiz,
-                    kullanici != null ? $"Kullanici #{kullanici.Id}" : "Bilinmeyen kullanici adi",
-                    kullanici?.Id, LogSeviyesi.Uyari);
-                return GirisSonuc.Hata("Kullanıcı adı veya şifre hatalı.");
-            }
-
-            lock (_denemeler)
-                _denemeler.Remove(kullaniciAdi);
-
-            if (SifreHasher.YukseltmeGerekli(kullanici!.SifreHash))
-                kullanici.SifreHash = await Task.Run(() => SifreHasher.Hashle(sifre));
-
-            kullanici.SonGirisTarihi = DateTime.Now;
-            DenetimService.Ekle(context, DenetimService.Islemler.GirisBasarili, $"Kullanici #{kullanici.Id}", kullanici.Id);
-            await context.SaveChangesAsync();
+            var (sonuc, kullanici) = await _dogrulayici.DogrulaAsync(kullaniciAdi, sifre, context);
+            if (!sonuc.Basarili || kullanici == null) return sonuc;
 
             AktifKullanici = kullanici;
             GirisYapildi?.Invoke(kullanici);
-            return GirisSonuc.BasariliSonuc(SifreDegistirilmeli(sifre));
+            return sonuc;
         }
 
-        /// <summary>Demo kurulumla gelen veya politikadan kısa parolalar giriş sonrası değiştirilmelidir.</summary>
-        private static readonly string[] BilinenVarsayilanSifreler = { "admin123", "123456" };
-
-        public static bool SifreDegistirilmeli(string sifre) =>
-            sifre.Length < MinimumSifreUzunlugu || BilinenVarsayilanSifreler.Contains(sifre);
-
-        public const int MinimumSifreUzunlugu = 8;
+        public static bool SifreDegistirilmeli(string sifre) => KimlikDogrulamaService.SifreDegistirilmeli(sifre);
 
         /// <summary>Oturumdaki kullanıcının parolasını, mevcut parolayı doğruladıktan sonra değiştirir.</summary>
         public async Task<GirisSonuc> SifreDegistirAsync(KutuphaneDbContext context, string mevcutSifre, string yeniSifre)
         {
             if (AktifKullanici == null) return GirisSonuc.Hata("Oturum açık değil.");
-
-            var kullanici = await context.Kullanicilar.FirstOrDefaultAsync(k => k.Id == AktifKullanici.Id && k.Aktif);
-            if (kullanici == null) return GirisSonuc.Hata("Kullanıcı bulunamadı.");
-            var mevcutOzet = kullanici.SifreHash;
-            if (!await Task.Run(() => SifreHasher.Dogrula(mevcutSifre, mevcutOzet))) return GirisSonuc.Hata("Mevcut şifre hatalı.");
-            if (string.IsNullOrEmpty(yeniSifre) || yeniSifre.Length < MinimumSifreUzunlugu)
-                return GirisSonuc.Hata($"Yeni şifre en az {MinimumSifreUzunlugu} karakter olmalıdır.");
-            if (yeniSifre == mevcutSifre) return GirisSonuc.Hata("Yeni şifre mevcut şifreyle aynı olamaz.");
-            if (BilinenVarsayilanSifreler.Contains(yeniSifre)) return GirisSonuc.Hata("Bu şifre demo şifresidir; başka bir şifre seçin.");
-            if (string.Equals(yeniSifre, kullanici.KullaniciAdi, StringComparison.OrdinalIgnoreCase))
-                return GirisSonuc.Hata("Şifre kullanıcı adıyla aynı olamaz.");
-
-            kullanici.SifreHash = await Task.Run(() => SifreHasher.Hashle(yeniSifre));
-            DenetimService.Ekle(context, DenetimService.Islemler.SifreDegistirildi, $"Kullanici #{kullanici.Id}", kullanici.Id);
-            await context.SaveChangesAsync();
-            return GirisSonuc.BasariliSonuc();
+            return await _dogrulayici.SifreDegistirAsync(context, AktifKullanici.Id, mevcutSifre, yeniSifre);
         }
 
         public void Cikis()

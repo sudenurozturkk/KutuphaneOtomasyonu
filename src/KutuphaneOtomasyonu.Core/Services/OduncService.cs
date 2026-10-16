@@ -176,7 +176,7 @@ namespace KutuphaneOtomasyonu.Services
         /// <item>Diğer durumlarda kopya rafa döner ve rezervasyon sırasındaki ilk geçerli üyeye ayrılır.</item>
         /// </list>
         /// </summary>
-        public async Task<OduncSonuc> IadeAlAsync(int oduncId, KitapDurumu kitapDurumu, string? notlar = null)
+        public async Task<OduncSonuc> IadeAlAsync(int oduncId, KitapDurumu kitapDurumu, string? notlar = null, int? kullaniciId = null)
         {
             await using var islem = await VeritabaniIslemi.BaslatAsync(_context);
             var simdi = Simdi;
@@ -251,7 +251,7 @@ namespace KutuphaneOtomasyonu.Services
 
             DenetimService.Ekle(_context, DenetimService.Islemler.IadeAlindi,
                 $"Odunc #{odunc.Id}, Kitap #{kitap.Id}, Uye #{uye.Id}, Durum {kitapDurumu}, Ceza {ceza.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}",
-                AuthService.Instance.AktifKullanici?.Id);
+                kullaniciId);
 
             return await KaydetAsync(islem, () =>
                 OduncSonuc.BasariliSonuc(odunc, ceza > 0 ? $"İade başarılı. Toplam ceza: {ceza:C2}" : "İade başarılı."));
@@ -261,7 +261,7 @@ namespace KutuphaneOtomasyonu.Services
         /// Ödünç süresini sistem ayarındaki <see cref="SistemAyarlari.MaxOduncSuresi"/> kadar uzatır.
         /// Gecikmiş ödünçler, uzatma hakkı bitmiş ödünçler ve başka üyenin boş kopya beklediği kitaplar uzatılamaz.
         /// </summary>
-        public async Task<OduncSonuc> UzatAsync(int oduncId)
+        public async Task<OduncSonuc> UzatAsync(int oduncId, int? kullaniciId = null)
         {
             await using var islem = await VeritabaniIslemi.BaslatAsync(_context);
             var simdi = Simdi;
@@ -298,7 +298,7 @@ namespace KutuphaneOtomasyonu.Services
 
             DenetimService.Ekle(_context, DenetimService.Islemler.SureUzatildi,
                 $"Odunc #{odunc.Id}, yeni tarih {odunc.PlanlananIadeTarihi:yyyy-MM-dd}",
-                AuthService.Instance.AktifKullanici?.Id);
+                kullaniciId);
 
             return await KaydetAsync(islem, () => OduncSonuc.BasariliSonuc(odunc, "Süre uzatıldı."));
         }

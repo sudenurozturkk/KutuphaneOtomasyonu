@@ -129,7 +129,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
                     using var context = new KutuphaneDbContext();
                     var service = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
-                    var uzatSonuc = await service.UzatAsync(id);
+                    var uzatSonuc = await service.UzatAsync(id, AuthService.Instance.AktifKullanici?.Id);
                     MessageBox.Show(uzatSonuc.Mesaj, uzatSonuc.Basarili ? "Başarılı" : "Hata",
                         MessageBoxButton.OK, uzatSonuc.Basarili ? MessageBoxImage.Information : MessageBoxImage.Error);
 

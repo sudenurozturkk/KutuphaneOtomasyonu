@@ -63,7 +63,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 var secilenDurum = cbKitapDurumu.SelectedItem is KitapDurumu kd ? kd : KitapDurumu.Iyi;
                 var notlar = txtNotlar.Text.Trim();
 
-                var sonuc = await service.IadeAlAsync(_oduncId, secilenDurum, notlar);
+                var sonuc = await service.IadeAlAsync(_oduncId, secilenDurum, notlar, AuthService.Instance.AktifKullanici?.Id);
 
                 if (sonuc.Basarili)
                 {

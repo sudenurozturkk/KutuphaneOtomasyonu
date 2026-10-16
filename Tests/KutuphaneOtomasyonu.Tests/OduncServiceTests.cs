@@ -154,6 +154,29 @@ public sealed class OduncServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task IadeVeUzatma_DenetimKaydinaIslemiYapanPersoneliYazar()
+    {
+        using var context = _db.YeniContext();
+        var personel = await TestVeri.EkleAsync(context, new Kullanici
+        {
+            Ad = "Banko", Soyad = "Personel", KullaniciAdi = "banko", SifreHash = "x", Rol = KullaniciRolu.Kutuphaneci
+        });
+        var kitap = await TestVeri.EkleAsync(context, TestVeri.Kitap());
+        var uye = await TestVeri.EkleAsync(context, TestVeri.Uye());
+        var servis = Servis(context);
+        var odunc = (await servis.OduncVerAsync(kitap.Id, uye.Id, personel.Id)).Odunc!;
+
+        Assert.True((await servis.UzatAsync(odunc.Id, personel.Id)).Basarili);
+        Assert.True((await servis.IadeAlAsync(odunc.Id, KitapDurumu.Iyi, null, personel.Id)).Basarili);
+
+        var loglar = await context.AktiviteLoglar.AsNoTracking()
+            .Where(l => l.Islem == DenetimService.Islemler.SureUzatildi || l.Islem == DenetimService.Islemler.IadeAlindi)
+            .ToListAsync();
+        Assert.Equal(2, loglar.Count);
+        Assert.All(loglar, l => Assert.Equal(personel.Id, l.KullaniciId));
+    }
+
+    [Fact]
     public async Task IadeAl_IkinciKezIadeyiReddeder()
     {
         using var context = _db.YeniContext();

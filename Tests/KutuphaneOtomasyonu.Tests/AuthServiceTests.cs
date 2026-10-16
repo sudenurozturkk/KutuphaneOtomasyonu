@@ -99,6 +99,47 @@ public sealed class AuthServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task KimlikDogrulama_OturumTutmaz_AyniOrnekFarkliKullanicilariAyriAyriDogrular()
+    {
+        using var context = _db.YeniContext();
+        var kutuphaneci = await TestVeri.EkleAsync(context, new Kullanici
+        {
+            Ad = "A", Soyad = "A", KullaniciAdi = "kutuphaneci", SifreHash = SifreHasher.Hashle("parola-1", 1_000),
+            Rol = KullaniciRolu.Kutuphaneci
+        });
+        var yardimci = await TestVeri.EkleAsync(context, new Kullanici
+        {
+            Ad = "B", Soyad = "B", KullaniciAdi = "yardimci", SifreHash = SifreHasher.Hashle("parola-2", 1_000),
+            Rol = KullaniciRolu.YardimciPersonel
+        });
+        var dogrulayici = new KimlikDogrulamaService(_zaman);
+
+        var (sonuc1, k1) = await dogrulayici.DogrulaAsync("kutuphaneci", "parola-1", context);
+        var (sonuc2, k2) = await dogrulayici.DogrulaAsync("yardimci", "parola-2", context);
+        var (sonuc3, k3) = await dogrulayici.DogrulaAsync("yardimci", "parola-1", context);
+
+        Assert.True(sonuc1.Basarili);
+        Assert.Equal(kutuphaneci.Id, k1?.Id);
+        Assert.True(sonuc2.Basarili);
+        Assert.Equal(yardimci.Id, k2?.Id);
+        Assert.False(sonuc3.Basarili);
+        Assert.Null(k3);
+    }
+
+    [Fact]
+    public async Task KimlikDogrulama_SifreDegistir_KullaniciKimligiyleCalisir()
+    {
+        var kullanici = await KullaniciEkle(SifreHasher.Hashle("eski-sifre", 1_000));
+        var dogrulayici = new KimlikDogrulamaService(_zaman);
+        using var context = _db.YeniContext();
+
+        Assert.False((await dogrulayici.SifreDegistirAsync(context, kullanici.Id + 99, "eski-sifre", "yeni-sifre-1")).Basarili);
+        Assert.Contains("demo", (await dogrulayici.SifreDegistirAsync(context, kullanici.Id, "eski-sifre", "admin123")).Mesaj);
+        Assert.True((await dogrulayici.SifreDegistirAsync(context, kullanici.Id, "eski-sifre", "yeni-sifre-1")).Basarili);
+        Assert.True((await dogrulayici.DogrulaAsync("personel", "yeni-sifre-1", context)).Sonuc.Basarili);
+    }
+
+    [Fact]
     public async Task YetkiGerektir_RolHiyerarsisineUyar()
     {
         await KullaniciEkle(SifreHasher.Hashle("dogru", 1_000), KullaniciRolu.Kutuphaneci);
