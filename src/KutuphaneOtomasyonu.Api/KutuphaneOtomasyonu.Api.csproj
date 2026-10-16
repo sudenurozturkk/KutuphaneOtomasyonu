@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!-- Çevrimiçi kütüphane sistemi: REST Web API + tarayıcı arayüzü (wwwroot).
+       İş kuralları KutuphaneOtomasyonu.Core'dan gelir; WPF masaüstü uygulamasıyla aynıdır. -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>KutuphaneOtomasyonu.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KutuphaneOtomasyonu.Core\KutuphaneOtomasyonu.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="KutuphaneOtomasyonu.Api.Tests" />
+  </ItemGroup>
+
+</Project>

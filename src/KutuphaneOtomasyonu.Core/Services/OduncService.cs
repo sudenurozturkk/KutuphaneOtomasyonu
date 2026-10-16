@@ -45,6 +45,7 @@ namespace KutuphaneOtomasyonu.Services
             return await _context.Oduncler
                 .Include(o => o.Kitap)
                 .Include(o => o.Uye)
+                .Include(o => o.Nusha)
                 .Where(o => o.Durumu == OduncDurumu.Aktif)
                 .OrderBy(o => o.PlanlananIadeTarihi)
                 .ToListAsync();
@@ -57,6 +58,7 @@ namespace KutuphaneOtomasyonu.Services
             return await _context.Oduncler
                 .Include(o => o.Kitap)
                 .Include(o => o.Uye)
+                .Include(o => o.Nusha)
                 .Where(o => o.Durumu == OduncDurumu.Aktif && o.PlanlananIadeTarihi < simdi)
                 .OrderBy(o => o.PlanlananIadeTarihi)
                 .ToListAsync();
@@ -67,6 +69,7 @@ namespace KutuphaneOtomasyonu.Services
         {
             return await _context.Oduncler
                 .Include(o => o.Kitap)
+                .Include(o => o.Nusha)
                 .Where(o => o.UyeId == uyeId)
                 .OrderByDescending(o => o.OduncTarihi)
                 .ToListAsync();

@@ -9,8 +9,9 @@ namespace KutuphaneOtomasyonu.Services
     /// </summary>
     public static class KisiselVeri
     {
-        public static bool TamGorebilirMi(Kullanici? kullanici) =>
-            kullanici != null && kullanici.Rol >= KullaniciRolu.Kutuphaneci;
+        public static bool TamGorebilirMi(Kullanici? kullanici) => TamGorebilirMi(kullanici?.Rol);
+
+        public static bool TamGorebilirMi(KullaniciRolu? rol) => rol >= KullaniciRolu.Kutuphaneci;
 
         public static string Maskele(string? deger, int gorunenSon = 4)
         {
@@ -20,6 +21,9 @@ namespace KutuphaneOtomasyonu.Services
         }
 
         public static string Goster(string? deger, Kullanici? kullanici, int gorunenSon = 4) =>
-            TamGorebilirMi(kullanici) ? deger ?? string.Empty : Maskele(deger, gorunenSon);
+            Goster(deger, kullanici?.Rol, gorunenSon);
+
+        public static string Goster(string? deger, KullaniciRolu? rol, int gorunenSon = 4) =>
+            TamGorebilirMi(rol) ? deger ?? string.Empty : Maskele(deger, gorunenSon);
     }
 }
