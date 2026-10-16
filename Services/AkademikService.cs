@@ -68,15 +68,63 @@ namespace KutuphaneOtomasyonu.Services
 
         public async Task<List<MateryalTransfer>> GetTransferlerAsync()
         {
-            return await _context.MateryalTransferler
+            var transferler = await _context.MateryalTransferler
                 .Include(t => t.Kitap)
                 .Include(t => t.TalepEdenUye)
                 .OrderByDescending(t => t.TalepTarihi)
                 .ToListAsync();
+
+            var yayinIdleri = transferler.Where(t => t.AkademikYayinId.HasValue).Select(t => t.AkademikYayinId!.Value).Distinct().ToList();
+            var yayinBasliklari = await _context.AkademikYayinlar
+                .Where(y => yayinIdleri.Contains(y.Id))
+                .ToDictionaryAsync(y => y.Id, y => y.Baslik);
+
+            foreach (var transfer in transferler)
+            {
+                transfer.MateryalBasligi = transfer.Kitap?.Baslik
+                    ?? (transfer.AkademikYayinId is int yid && yayinBasliklari.TryGetValue(yid, out var baslik) ? $"🎓 {baslik}" : "—");
+            }
+
+            return transferler;
+        }
+
+        /// <summary>Akademik yayının basılı kopyası için kampüsler arası transfer talebi oluşturur.</summary>
+        public async Task<MateryalTransfer> YayinTransferTalepEtAsync(int yayinId, int uyeId, KampusLokasyonu kaynak, KampusLokasyonu hedef)
+        {
+            if (!await _context.AkademikYayinlar.AnyAsync(y => y.Id == yayinId))
+                throw new InvalidOperationException("Akademik yayın bulunamadı.");
+            if (!await _context.Uyeler.AnyAsync(u => u.Id == uyeId && u.Durumu == UyeDurumu.Aktif))
+                throw new InvalidOperationException("Talep eden üye bulunamadı veya aktif değil.");
+            if (kaynak == hedef)
+                throw new InvalidOperationException("Kaynak ve hedef kampüs aynı olamaz.");
+
+            var transfer = new MateryalTransfer
+            {
+                KitapId = null,
+                AkademikYayinId = yayinId,
+                TalepEdenUyeId = uyeId,
+                KaynakKampus = kaynak,
+                HedefKampus = hedef,
+                TalepTarihi = DateTime.Now,
+                TahminiVarisTarihi = DateTime.Now.AddHours(24),
+                Durum = TransferDurumu.TalepEdildi,
+                KuryeTakipKodu = $"ILL-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}"
+            };
+
+            _context.MateryalTransferler.Add(transfer);
+            await _context.SaveChangesAsync();
+            return transfer;
         }
 
         public async Task<MateryalTransfer> TransferTalepEtAsync(int kitapId, int uyeId, KampusLokasyonu kaynak, KampusLokasyonu hedef)
         {
+            if (!await _context.Kitaplar.AnyAsync(k => k.Id == kitapId && k.Aktif))
+                throw new InvalidOperationException("Kitap bulunamadı veya arşivlenmiş.");
+            if (!await _context.Uyeler.AnyAsync(u => u.Id == uyeId && u.Durumu == UyeDurumu.Aktif))
+                throw new InvalidOperationException("Talep eden üye bulunamadı veya aktif değil.");
+            if (kaynak == hedef)
+                throw new InvalidOperationException("Kaynak ve hedef kampüs aynı olamaz.");
+
             var transfer = new MateryalTransfer
             {
                 KitapId = kitapId,

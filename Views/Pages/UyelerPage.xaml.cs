@@ -28,11 +28,19 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async System.Threading.Tasks.Task VeriYukle()
         {
-            using var context = new KutuphaneDbContext();
-            var service = new UyeService(context);
-            _tumUyeler = await service.GetAllAsync();
-            Filtrele();
-            txtUyeSayisi.Text = $"{_tumUyeler.Count} üye";
+            try
+            {
+                using var context = new KutuphaneDbContext();
+                var service = new UyeService(context);
+                _tumUyeler = await service.GetAllAsync();
+                Filtrele();
+                txtUyeSayisi.Text = $"{_tumUyeler.Count} üye";
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Uyeler yukleme", ex);
+                MessageBox.Show($"Veriler yüklenemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Filtrele()
@@ -111,6 +119,17 @@ namespace KutuphaneOtomasyonu.Views.Pages
             {
                 var uye = _tumUyeler.FirstOrDefault(u => u.Id == id);
                 if (uye == null) return;
+                if (!KisiselVeri.TamGorebilirMi(AuthService.Instance.AktifKullanici))
+                {
+                    MessageBox.Show("Üye kimlik bilgilerini düzenleme yetkiniz yok (Kütüphaneci veya Yönetici gerekir).", "Yetki",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                if (uye.AnonimMi)
+                {
+                    MessageBox.Show("Anonimleştirilmiş üye düzenlenemez.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
                 var dlg = new UyeEkleDialog(uye);
                 dlg.Owner = Window.GetWindow(this);
                 if (dlg.ShowDialog() == true) _ = VeriYukle();

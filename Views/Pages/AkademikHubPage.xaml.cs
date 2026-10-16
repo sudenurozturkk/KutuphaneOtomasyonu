@@ -1,6 +1,7 @@
 using KutuphaneOtomasyonu.Data;
 using KutuphaneOtomasyonu.Models;
 using KutuphaneOtomasyonu.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -176,12 +177,29 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
             if (onay == MessageBoxResult.Yes)
             {
+                if (yayin.MevcutKampus == KampusLokasyonu.MerkezKutuphane)
+                {
+                    MessageBox.Show("Bu eser zaten Merkez Kütüphane'de bulunuyor; transfer gerekmiyor.", "Bilgi",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
                 try
                 {
                     using var context = new KutuphaneDbContext();
+                    var uyeler = await context.Uyeler.AsNoTracking()
+                        .Where(u => u.Durumu == UyeDurumu.Aktif)
+                        .OrderBy(u => u.Ad).ThenBy(u => u.Soyad)
+                        .ToListAsync();
+
+                    var secim = new SecimDialog("Talep Eden Üye", "Transfer talebi hangi üye adına oluşturulacak?", "Talep Oluştur",
+                        new SecimAlani("Üye *", uyeler, nameof(Uye.TamAd)))
+                    { Owner = Window.GetWindow(this) };
+                    if (secim.ShowDialog() != true || secim.Secilenler[0] is not Uye uye)
+                        return;
+
                     var service = new AkademikService(context);
-                    var uye = AuthService.Instance.AktifKullanici?.Id ?? 1;
-                    var transfer = await service.TransferTalepEtAsync(1, uye, yayin.MevcutKampus, KampusLokasyonu.MerkezKutuphane);
+                    var transfer = await service.YayinTransferTalepEtAsync(yayin.Id, uye.Id, yayin.MevcutKampus, KampusLokasyonu.MerkezKutuphane);
 
                     MessageBox.Show($"✅ ILL Kütüphaneler arası transfer talebi oluşturuldu!\nTakip Kodu: {transfer.KuryeTakipKodu}\nTahmini Varış: 24 Saat İçinde",
                         "Transfer Başlatıldı", MessageBoxButton.OK, MessageBoxImage.Information);

@@ -21,6 +21,9 @@ namespace KutuphaneOtomasyonu.Models
 
         public int? KutuphanecId { get; set; }
 
+        /// <summary>Ödünç verilen fiziksel nüsha. Nüsha modelinden önceki iade edilmiş kayıtlarda boştur.</summary>
+        public int? NushaId { get; set; }
+
         public DateTime OduncTarihi { get; set; } = DateTime.Now;
 
         public DateTime PlanlananIadeTarihi { get; set; }
@@ -54,6 +57,9 @@ namespace KutuphaneOtomasyonu.Models
 
         [ForeignKey("KutuphanecId")]
         public virtual Kullanici? Kutuphaneci { get; set; }
+
+        [ForeignKey(nameof(NushaId))]
+        public virtual KitapNushasi? Nusha { get; set; }
 
         // Hesaplanan özellikler
         [NotMapped]

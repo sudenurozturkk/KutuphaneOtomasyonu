@@ -25,6 +25,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 txtAd.Text = _mevcutUye.Ad;
                 txtSoyad.Text = _mevcutUye.Soyad;
                 txtTC.Text = _mevcutUye.TCKimlikNo;
+                txtPasaport.Text = _mevcutUye.PasaportNo;
                 txtEmail.Text = _mevcutUye.Email;
                 txtTelefon.Text = _mevcutUye.Telefon;
                 cbUyeTipi.SelectedItem = _mevcutUye.UyeTipi;
@@ -50,10 +51,10 @@ namespace KutuphaneOtomasyonu.Views.Pages
         {
             if (string.IsNullOrWhiteSpace(txtAd.Text) ||
                 string.IsNullOrWhiteSpace(txtSoyad.Text) ||
-                string.IsNullOrWhiteSpace(txtTC.Text) ||
+                (string.IsNullOrWhiteSpace(txtTC.Text) && string.IsNullOrWhiteSpace(txtPasaport.Text)) ||
                 string.IsNullOrWhiteSpace(txtEmail.Text))
             {
-                MessageBox.Show("Ad, Soyad, TC Kimlik No ve E-Posta alanları zorunludur.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Ad, Soyad, E-Posta ve kimlik/pasaport numarasından biri zorunludur.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -63,42 +64,31 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 var service = new UyeService(context);
 
                 var tip = cbUyeTipi.SelectedItem is UyeTipi ut ? ut : UyeTipi.Ogrenci;
-
-                if (_mevcutUye == null)
+                var bilgi = new Uye
                 {
-                    var yeni = new Uye
-                    {
-                        Ad = txtAd.Text.Trim(),
-                        Soyad = txtSoyad.Text.Trim(),
-                        TCKimlikNo = txtTC.Text.Trim(),
-                        Email = txtEmail.Text.Trim(),
-                        Telefon = txtTelefon.Text.Trim(),
-                        UyeTipi = tip,
-                        OgrenciNo = txtOgrenciNo.Text.Trim(),
-                        Bolum = txtBolum.Text.Trim(),
-                        Fakulte = txtFakulte.Text.Trim(),
-                        Durumu = UyeDurumu.Aktif
-                    };
+                    Id = _mevcutUye?.Id ?? 0,
+                    Ad = txtAd.Text,
+                    Soyad = txtSoyad.Text,
+                    TCKimlikNo = txtTC.Text,
+                    PasaportNo = txtPasaport.Text,
+                    Email = txtEmail.Text,
+                    Telefon = txtTelefon.Text,
+                    UyeTipi = tip,
+                    OgrenciNo = txtOgrenciNo.Text,
+                    Bolum = txtBolum.Text,
+                    Fakulte = txtFakulte.Text,
+                    Durumu = UyeDurumu.Aktif
+                };
 
-                    await service.AddAsync(yeni);
-                }
-                else
+                var kullaniciId = AuthService.Instance.AktifKullanici?.Id;
+                var sonuc = _mevcutUye == null
+                    ? await service.EkleAsync(bilgi, kullaniciId)
+                    : await service.GuncelleAsync(bilgi, kullaniciId);
+
+                if (!sonuc.BasariliMi)
                 {
-                    var guncel = await service.GetByIdAsync(_mevcutUye.Id);
-                    if (guncel != null)
-                    {
-                        guncel.Ad = txtAd.Text.Trim();
-                        guncel.Soyad = txtSoyad.Text.Trim();
-                        guncel.TCKimlikNo = txtTC.Text.Trim();
-                        guncel.Email = txtEmail.Text.Trim();
-                        guncel.Telefon = txtTelefon.Text.Trim();
-                        guncel.UyeTipi = tip;
-                        guncel.OgrenciNo = txtOgrenciNo.Text.Trim();
-                        guncel.Bolum = txtBolum.Text.Trim();
-                        guncel.Fakulte = txtFakulte.Text.Trim();
-
-                        await service.UpdateAsync(guncel);
-                    }
+                    MessageBox.Show(sonuc.Mesaj, "Doğrulama", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
 
                 DialogResult = true;

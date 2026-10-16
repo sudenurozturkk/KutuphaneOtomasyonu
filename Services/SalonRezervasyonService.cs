@@ -10,6 +10,9 @@ namespace KutuphaneOtomasyonu.Services
 {
     public class SalonRezervasyonService
     {
+        /// <summary>Salon haritasındaki masa sayısı (Sessiz 8, Bireysel 8, Grup 4, Premium 4).</summary>
+        public const int ToplamMasaSayisi = 24;
+
         private readonly KutuphaneDbContext _context;
 
         public SalonRezervasyonService(KutuphaneDbContext context)
@@ -28,6 +31,18 @@ namespace KutuphaneOtomasyonu.Services
                             r.Durum == "Aktif")
                 .OrderBy(r => r.OlusturulmaTarihi)
                 .ToListAsync();
+        }
+
+        /// <summary>Gün içindeki aktif rezervasyon sayısı ve en az bir rezervasyonu olan masa sayısı.</summary>
+        public async Task<(int RezervasyonSayisi, int RezerveMasaSayisi)> GunlukOzetAsync(DateTime tarih)
+        {
+            var gun = tarih.Date;
+            var masalar = await _context.SalonRezervasyonlari
+                .AsNoTracking()
+                .Where(r => r.Tarih >= gun && r.Tarih < gun.AddDays(1) && r.Durum == "Aktif")
+                .Select(r => r.MasaKodu)
+                .ToListAsync();
+            return (masalar.Count, masalar.Distinct().Count());
         }
 
         public async Task<SalonRezervasyonSonuc> OlusturAsync(

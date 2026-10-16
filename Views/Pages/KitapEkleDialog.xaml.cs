@@ -55,59 +55,41 @@ namespace KutuphaneOtomasyonu.Views.Pages
                 return;
             }
 
+            if (!SayiOku(txtYayinYili.Text, "Yayın yılı", _mevcutKitap?.YayinYili ?? 0, out var yayinYili) ||
+                !SayiOku(txtSayfaSayisi.Text, "Sayfa sayısı", _mevcutKitap?.SayfaSayisi ?? 0, out var sayfaSayisi) ||
+                !SayiOku(txtToplamAdet.Text, "Toplam adet", _mevcutKitap?.ToplamAdet ?? 1, out var toplamAdet))
+                return;
+
             try
             {
                 using var context = new KutuphaneDbContext();
                 var service = new KitapService(context);
+                var kullaniciId = AuthService.Instance.AktifKullanici?.Id;
 
-                if (_mevcutKitap == null)
+                var bilgi = new Kitap
                 {
-                    var yeni = new Kitap
-                    {
-                        Baslik = txtBaslik.Text.Trim(),
-                        Yazar = txtYazar.Text.Trim(),
-                        ISBN = txtISBN.Text.Trim(),
-                        Kategori = txtKategori.Text.Trim(),
-                        Yayinevi = txtYayinevi.Text.Trim(),
-                        RafKonumu = txtRafKonumu.Text.Trim(),
-                        Aciklama = txtAciklama.Text.Trim(),
-                        Dil = "Türkçe"
-                    };
+                    Id = _mevcutKitap?.Id ?? 0,
+                    Baslik = txtBaslik.Text.Trim(),
+                    Yazar = txtYazar.Text.Trim(),
+                    ISBN = txtISBN.Text.Trim(),
+                    Kategori = txtKategori.Text.Trim(),
+                    Yayinevi = txtYayinevi.Text.Trim(),
+                    RafKonumu = txtRafKonumu.Text.Trim(),
+                    Aciklama = txtAciklama.Text.Trim(),
+                    YayinYili = yayinYili,
+                    SayfaSayisi = sayfaSayisi,
+                    ToplamAdet = toplamAdet,
+                    Dil = "Türkçe"
+                };
 
-                    if (int.TryParse(txtYayinYili.Text, out int yy)) yeni.YayinYili = yy;
-                    if (int.TryParse(txtSayfaSayisi.Text, out int ss)) yeni.SayfaSayisi = ss;
-                    if (int.TryParse(txtToplamAdet.Text, out int ta))
-                    {
-                        yeni.ToplamAdet = ta;
-                        yeni.MevcutAdet = ta;
-                    }
+                var sonuc = _mevcutKitap == null
+                    ? await service.EkleAsync(bilgi, kullaniciId)
+                    : await service.GuncelleAsync(bilgi, kullaniciId);
 
-                    await service.AddAsync(yeni);
-                }
-                else
+                if (!sonuc.BasariliMi)
                 {
-                    var guncel = await service.GetByIdAsync(_mevcutKitap.Id);
-                    if (guncel != null)
-                    {
-                        guncel.Baslik = txtBaslik.Text.Trim();
-                        guncel.Yazar = txtYazar.Text.Trim();
-                        guncel.ISBN = txtISBN.Text.Trim();
-                        guncel.Kategori = txtKategori.Text.Trim();
-                        guncel.Yayinevi = txtYayinevi.Text.Trim();
-                        guncel.RafKonumu = txtRafKonumu.Text.Trim();
-                        guncel.Aciklama = txtAciklama.Text.Trim();
-
-                        if (int.TryParse(txtYayinYili.Text, out int yy)) guncel.YayinYili = yy;
-                        if (int.TryParse(txtSayfaSayisi.Text, out int ss)) guncel.SayfaSayisi = ss;
-                        if (int.TryParse(txtToplamAdet.Text, out int ta))
-                        {
-                            var fark = ta - guncel.ToplamAdet;
-                            guncel.ToplamAdet = ta;
-                            guncel.MevcutAdet = Math.Max(0, guncel.MevcutAdet + fark);
-                        }
-
-                        await service.UpdateAsync(guncel);
-                    }
+                    MessageBox.Show(sonuc.Mesaj, "Doğrulama", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 }
 
                 DialogResult = true;
@@ -115,8 +97,25 @@ namespace KutuphaneOtomasyonu.Views.Pages
             }
             catch (Exception ex)
             {
+                UygulamaLog.Hata("KitapEkleDialog kayit", ex);
                 MessageBox.Show($"Kayıt işlemi başarısız: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>Boş alan için varsayılanı kullanır; sayı olmayan girişte uyarır.</summary>
+        private static bool SayiOku(string metin, string alanAdi, int varsayilan, out int deger)
+        {
+            if (string.IsNullOrWhiteSpace(metin))
+            {
+                deger = varsayilan;
+                return true;
+            }
+
+            if (int.TryParse(metin.Trim(), out deger))
+                return true;
+
+            MessageBox.Show($"{alanAdi} sayısal olmalıdır.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
         }
     }
 }

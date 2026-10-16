@@ -1,5 +1,10 @@
+using KutuphaneOtomasyonu.Data;
+using KutuphaneOtomasyonu.Models;
+using KutuphaneOtomasyonu.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,71 +18,152 @@ namespace KutuphaneOtomasyonu.Views.Pages
         public string Durum { get; set; } = "";
     }
 
+    /// <summary>
+    /// Üye cüzdanı: bakiye ve hareketler <see cref="CuzdanService"/> üzerinden kalıcı olarak tutulur.
+    /// </summary>
     public partial class CuzdanPage : Page
     {
-        private decimal _bakiye = 150.00m;
-        private decimal _borc = 15.00m;
-        private List<FinansKaydi> _islemler = new();
-
         public CuzdanPage()
         {
             InitializeComponent();
-            _islemler.Add(new FinansKaydi { Tarih = DateTime.Now.AddDays(-5).ToString("dd.MM.yyyy HH:mm"), Islem = "Kredi Kartı ile Bakiye Yükleme", Tutar = "+ ₺100,00", Durum = "Başarılı" });
-            _islemler.Add(new FinansKaydi { Tarih = DateTime.Now.AddDays(-10).ToString("dd.MM.yyyy HH:mm"), Islem = "Gecikme Cezası Tahsilatı ('Clean Code')", Tutar = "- ₺8,00", Durum = "Ödendi" });
-            _islemler.Add(new FinansKaydi { Tarih = DateTime.Now.AddDays(-20).ToString("dd.MM.yyyy HH:mm"), Islem = "Fotokopi / Çıktı Hizmeti", Tutar = "- ₺12,00", Durum = "Ödendi" });
-
-            Guncelle();
+            Loaded += CuzdanPage_Loaded;
+            ButonlariAyarla(false, 0);
         }
 
-        private void Guncelle()
+        private Uye? SeciliUye => cbUye.SelectedItem as Uye;
+
+        private async void CuzdanPage_Loaded(object sender, RoutedEventArgs e)
         {
-            txtKartBakiyeGoster.Text = $"Bakiye: ₺{_bakiye:F2}";
-            txtToplamBorc.Text = $"₺{_borc:F2}";
-            btnCezaOde.Content = $"Cüzdandan Öde (₺{_borc:F2})";
-            btnCezaOde.IsEnabled = (_borc > 0);
-
-            dgFinans.ItemsSource = null;
-            dgFinans.ItemsSource = _islemler;
-        }
-
-        private void BtnYukle20_Click(object sender, RoutedEventArgs e) => BakiyeEkle(20);
-        private void BtnYukle50_Click(object sender, RoutedEventArgs e) => BakiyeEkle(50);
-        private void BtnYukle100_Click(object sender, RoutedEventArgs e) => BakiyeEkle(100);
-
-        private void BakiyeEkle(decimal miktar)
-        {
-            _bakiye += miktar;
-            _islemler.Insert(0, new FinansKaydi
+            try
             {
-                Tarih = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
-                Islem = "Online Bakiye Yükleme",
-                Tutar = $"+ ₺{miktar:F2}",
-                Durum = "Başarılı"
-            });
-            MessageBox.Show($"Cüzdanınıza ₺{miktar:F2} başarıyla yüklendi! Yeni bakiye: ₺{_bakiye:F2}", "Bakiye Yüklendi", MessageBoxButton.OK, MessageBoxImage.Information);
-            Guncelle();
+                using var context = new KutuphaneDbContext();
+                cbUye.ItemsSource = await context.Uyeler.AsNoTracking()
+                    .Where(u => u.AnonimlestirmeTarihi == null)
+                    .OrderBy(u => u.Ad).ThenBy(u => u.Soyad)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Cuzdan uye listesi", ex);
+                MessageBox.Show($"Üyeler yüklenemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
-        private void BtnCezaOde_Click(object sender, RoutedEventArgs e)
+        private async void CbUye_SelectionChanged(object sender, SelectionChangedEventArgs e) => await GuncelleAsync();
+
+        private async Task GuncelleAsync()
         {
-            if (_bakiye < _borc)
+            if (SeciliUye is not Uye secili)
             {
-                MessageBox.Show("Cüzdan bakiyeniz yetersiz! Lütfen önce bakiye yükleyin.", "Yetersiz Bakiye", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ButonlariAyarla(false, 0);
                 return;
             }
 
-            _bakiye -= _borc;
-            _islemler.Insert(0, new FinansKaydi
+            try
             {
-                Tarih = DateTime.Now.ToString("dd.MM.yyyy HH:mm"),
-                Islem = "Gecikme Cezası Ödemesi",
-                Tutar = $"- ₺{_borc:F2}",
-                Durum = "Ödendi"
-            });
+                using var context = new KutuphaneDbContext();
+                var uye = await context.Uyeler.AsNoTracking().SingleAsync(u => u.Id == secili.Id);
+                var servis = new CuzdanService(context);
+                var bakiye = await servis.BakiyeAsync(uye.Id);
+                var hareketler = await servis.HareketlerAsync(uye.Id);
+                var cezalar = await context.CezaKayitlari.AsNoTracking()
+                    .Where(c => c.UyeId == uye.Id && !c.Odendi)
+                    .OrderBy(c => c.OlusmaTarihi)
+                    .ToListAsync();
 
-            _borc = 0.00m;
-            MessageBox.Show("Gecikme cezası cüzdan bakiyenizden başarıyla tahsil edildi. Borcunuz kalmamıştır!", "Ödeme Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
-            Guncelle();
+                txtKartUyeAdi.Text = uye.TamAd;
+                txtKartUyeTip.Text = $"{uye.Bolum} • {uye.UyeTipiMetni}".Trim(' ', '•');
+                txtKartOgrenciNo.Text = string.IsNullOrEmpty(uye.OgrenciNo) ? $"Üye No: {uye.Id}" : $"Öğrenci No: {uye.OgrenciNo}";
+                txtKartBakiyeGoster.Text = $"Bakiye: ₺{bakiye:N2}";
+                txtToplamBorc.Text = $"₺{uye.KalanCeza:N2}";
+                txtBorcDetay.Text = uye.KalanCeza <= 0
+                    ? "Bekleyen borç yok."
+                    : cezalar.Count > 0
+                        ? string.Join("\n", cezalar.Take(3).Select(c => $"• {c.Aciklama} (₺{c.Tutar:N2})"))
+                        : "Önceki kayıtlardan devreden borç.";
+                btnCezaOde.Content = uye.KalanCeza > 0 ? $"Cüzdandan Öde (₺{uye.KalanCeza:N2})" : "Borç Yok";
+
+                dgFinans.ItemsSource = hareketler.Select(h => new FinansKaydi
+                {
+                    Tarih = h.Tarih.ToString("dd.MM.yyyy HH:mm"),
+                    Islem = h.Aciklama,
+                    Tutar = h.Tutar >= 0 ? $"+ ₺{h.Tutar:N2}" : $"- ₺{-h.Tutar:N2}",
+                    Durum = h.Tip == CuzdanHareketTipi.Yukleme ? "Yüklendi" : "Ödendi"
+                }).ToList();
+
+                ButonlariAyarla(true, uye.KalanCeza);
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Cuzdan guncelleme", ex);
+                MessageBox.Show($"Cüzdan bilgileri yüklenemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ButonlariAyarla(bool uyeSecili, decimal borc)
+        {
+            btnCezaOde.IsEnabled = uyeSecili && borc > 0;
+            if (!uyeSecili) dgFinans.ItemsSource = null;
+        }
+
+        private async void BtnYukle20_Click(object sender, RoutedEventArgs e) => await BakiyeEkle(20);
+        private async void BtnYukle50_Click(object sender, RoutedEventArgs e) => await BakiyeEkle(50);
+        private async void BtnYukle100_Click(object sender, RoutedEventArgs e) => await BakiyeEkle(100);
+
+        private async Task BakiyeEkle(decimal miktar)
+        {
+            if (SeciliUye is not Uye uye)
+            {
+                MessageBox.Show("Önce bir üye seçin.", "Üye Seçilmedi", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var onay = MessageBox.Show($"{uye.TamAd} adına bankoda ₺{miktar:N2} tahsil edildi ve cüzdana yüklenecek. Onaylıyor musunuz?",
+                "Bakiye Yükleme", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (onay != MessageBoxResult.Yes) return;
+
+            try
+            {
+                using var context = new KutuphaneDbContext();
+                var sonuc = await new CuzdanService(context).YukleAsync(uye.Id, miktar, AuthService.Instance.AktifKullanici?.Id);
+                if (!sonuc.BasariliMi)
+                {
+                    MessageBox.Show(sonuc.Mesaj, "Yüklenemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                MessageBox.Show($"₺{miktar:N2} yüklendi. Yeni bakiye: ₺{sonuc.YeniBakiye:N2}", "Bakiye Yüklendi",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                await GuncelleAsync();
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Cuzdan yukleme", ex);
+                MessageBox.Show($"Yükleme başarısız: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void BtnCezaOde_Click(object sender, RoutedEventArgs e)
+        {
+            if (SeciliUye is not Uye uye) return;
+
+            try
+            {
+                using var context = new KutuphaneDbContext();
+                var sonuc = await new CuzdanService(context).CezaOdeAsync(uye.Id, AuthService.Instance.AktifKullanici?.Id);
+                if (!sonuc.BasariliMi)
+                {
+                    MessageBox.Show(sonuc.Mesaj, "Ödeme Yapılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                MessageBox.Show($"Ceza borcu cüzdandan tahsil edildi. Kalan bakiye: ₺{sonuc.YeniBakiye:N2}", "Ödeme Başarılı",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                await GuncelleAsync();
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Cuzdan ceza odeme", ex);
+                MessageBox.Show($"Ödeme başarısız: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

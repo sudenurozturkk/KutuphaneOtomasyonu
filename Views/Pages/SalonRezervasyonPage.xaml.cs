@@ -66,81 +66,48 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         // ── Veri Başlangıcı ──────────────────────────────────────────────────
 
+        /// <summary>
+        /// Fiziksel masa tanımlarını oluşturur. Tüm masalar boş başlar; doluluk yalnızca
+        /// veritabanındaki aktif salon rezervasyonlarından gelir (bkz. <see cref="SalonRezervasyonlariniYukleAsync"/>).
+        /// </summary>
         private void MasalariOlustur()
         {
             _masalar.Clear();
 
-            // 🤫 Sessiz Çalışma (D-101 … D-108)
-            var sessizDurumlar = new[] { "Boş","Dolu","Boş","Boş","Rezerve","Boş","Boş","Boş" };
-            var sessizKisiler   = new[] { null,"Zeynep Kaya",null,null,"Canan Demir",null,null,null };
-            for (int i = 1; i <= 8; i++)
+            void Ekle(string onek, int baslangic, int adet, string bolge, string kapasite, string ozellikler, string kat)
             {
-                _masalar.Add(new MasaModel
+                for (int i = 1; i <= adet; i++)
                 {
-                    Kod = $"D-{100 + i}",
-                    Bolge = "Sessiz",
-                    Durum = sessizDurumlar[i - 1],
-                    Kapasite = "1 Kişilik",
-                    Ozellikler = "⚡ 220V Priz  •  📶 5GHz Wi-Fi  •  🪟 Pencere Kenarı  •  💡 LED Masa Lambası",
-                    Kat = "Kat 1 · Kuzey Kanat",
-                    RezerveEden = sessizKisiler[i - 1],
-                    RezerveZamanAraligi = sessizDurumlar[i - 1] != "Boş" ? _aktifSlot : null
-                });
+                    _masalar.Add(new MasaModel
+                    {
+                        Kod = $"{onek}-{baslangic + i}",
+                        Bolge = bolge,
+                        Durum = "Boş",
+                        Kapasite = kapasite,
+                        Ozellikler = ozellikler,
+                        Kat = kat
+                    });
+                }
             }
+
+            // 🤫 Sessiz Çalışma (D-101 … D-108)
+            Ekle("D", 100, 8, "Sessiz", "1 Kişilik",
+                "⚡ 220V Priz  •  📶 5GHz Wi-Fi  •  🪟 Pencere Kenarı  •  💡 LED Masa Lambası", "Kat 1 · Kuzey Kanat");
 
             // 💻 Bireysel PC Masaları (B-201 … B-208)
-            var bireyselDurumlar = new[] { "Dolu","Boş","Dolu","Boş","Boş","Boş","Rezerve","Boş" };
-            var bireyselKisiler  = new[] { "Emre Şahin",null,"Fatma Arslan",null,null,null,"Mert Öztürk",null };
-            for (int i = 1; i <= 8; i++)
-            {
-                _masalar.Add(new MasaModel
-                {
-                    Kod = $"B-{200 + i}",
-                    Bolge = "Bireysel",
-                    Durum = bireyselDurumlar[i - 1],
-                    Kapasite = "1 Kişilik",
-                    Ozellikler = "⚡ 220V  •  🖥️ 24\" Harici Monitör  •  🔌 Gigabit Ethernet  •  🎧 Kulaklık Soketi",
-                    Kat = "Kat 1 · Güney Kanat",
-                    RezerveEden = bireyselKisiler[i - 1],
-                    RezerveZamanAraligi = bireyselDurumlar[i - 1] != "Boş" ? _aktifSlot : null
-                });
-            }
+            Ekle("B", 200, 8, "Bireysel", "1 Kişilik",
+                "⚡ 220V  •  🖥️ 24\" Harici Monitör  •  🔌 Gigabit Ethernet  •  🎧 Kulaklık Soketi", "Kat 1 · Güney Kanat");
 
             // 👥 Grup Odaları (G-301 … G-304)
-            var grupDurumlar = new[] { "Boş","Dolu","Boş","Boş" };
-            var grupKisiler  = new[] { null,"Yazılım Tasarım Grubu (6 kişi)",null,null };
-            for (int i = 1; i <= 4; i++)
-            {
-                _masalar.Add(new MasaModel
-                {
-                    Kod = $"G-{300 + i}",
-                    Bolge = "Grup",
-                    Durum = grupDurumlar[i - 1],
-                    Kapasite = "6 Kişilik",
-                    Ozellikler = "📽️ 4K Projeksiyon  •  📋 Manyetik Akıllı Tahta  •  🔊 Ses Yalıtımı  •  🌐 Konferans Ağı",
-                    Kat = "Kat 2 · Batı Kanat",
-                    RezerveEden = grupKisiler[i - 1],
-                    RezerveZamanAraligi = grupDurumlar[i - 1] != "Boş" ? _aktifSlot : null
-                });
-            }
+            Ekle("G", 300, 4, "Grup", "6 Kişilik",
+                "📽️ 4K Projeksiyon  •  📋 Manyetik Akıllı Tahta  •  🔊 Ses Yalıtımı  •  🌐 Konferans Ağı", "Kat 2 · Batı Kanat");
 
             // 🏆 Premium Araştırma Kabinleri (P-401 … P-404)
-            var premiumDurumlar = new[] { "Dolu","Boş","Rezerve","Boş" };
-            var premiumKisiler  = new[] { "Prof. Dr. Ayşe Şener","", "Arş. Gör. Burak Candan","" };
-            for (int i = 1; i <= 4; i++)
-            {
-                _masalar.Add(new MasaModel
-                {
-                    Kod = $"P-{400 + i}",
-                    Bolge = "Premium",
-                    Durum = premiumDurumlar[i - 1],
-                    Kapasite = "1 Kişilik (Kabin)",
-                    Ozellikler = "🔇 Fonoabsorban Panel  •  ⚡ 220V + USB-C 140W  •  🖥️ 27\" 4K Ekran  •  📶 Özel 6GHz Wi-Fi 6E",
-                    Kat = "Kat 2 · Doğu Kanat",
-                    RezerveEden = premiumDurumlar[i - 1] != "Boş" ? premiumKisiler[i - 1] : null,
-                    RezerveZamanAraligi = premiumDurumlar[i - 1] != "Boş" ? _aktifSlot : null
-                });
-            }
+            Ekle("P", 400, 4, "Premium", "1 Kişilik (Kabin)",
+                "🔇 Fonoabsorban Panel  •  ⚡ 220V + USB-C 140W  •  🖥️ 27\" 4K Ekran  •  📶 Özel 6GHz Wi-Fi 6E", "Kat 2 · Doğu Kanat");
+
+            System.Diagnostics.Debug.Assert(_masalar.Count == SalonRezervasyonService.ToplamMasaSayisi,
+                "Panodaki masa sayısı sabiti salon haritasıyla uyumlu olmalı.");
         }
 
         // ── Kat Planı Çizimi ─────────────────────────────────────────────────

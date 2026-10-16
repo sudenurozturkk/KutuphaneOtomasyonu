@@ -297,6 +297,17 @@
                                            HorizontalAlignment="Right" VerticalAlignment="Center"/>
                             </Grid>
 
+                            <!-- Şifre Değiştir -->
+                            <Button x:Name="btnSifreDegistir" Height="32" Margin="0,0,0,8"
+                                    Style="{StaticResource MaterialDesignFlatButton}" Foreground="#94A3B8"
+                                    materialDesign:ButtonAssist.CornerRadius="8"
+                                    Click="BtnSifreDegistir_Click">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="KeyChange" Width="15" Height="15" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock Text="Şifre Değiştir" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
                             <!-- Güvenli Çıkış Butonu -->
                             <Button Tag="Cikis" Height="36" Style="{StaticResource MaterialDesignOutlinedButton}"
                                     BorderBrush="#EF4444" Foreground="#EF4444"

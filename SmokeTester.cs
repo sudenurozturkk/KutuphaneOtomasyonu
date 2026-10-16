@@ -67,11 +67,22 @@ namespace KutuphaneOtomasyonu
                 results.AppendLine($"[PASS] Uye listeleme: {uyeler.Count} uye bulundu.");
 
                 // 4. OduncService & Veriler
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var oduncService = new OduncService(context, bildirimService, ayarlar);
+                var oduncService = (await ServisKapsami.OlusturAsync(context)).Odunc;
                 var oIstat = await oduncService.GetIstatistikAsync();
                 results.AppendLine($"[PASS] Odunc istatistik: {oIstat.AktifOduncSayisi} aktif odunc.");
+
+                // Smoke test geçici veritabanında çalıştığı için gerçek bir ödünç/iade turu güvenle denenebilir.
+                var uygunKitap = kitaplar.First(k => k.MevcutAdet > 0);
+                var uygunUye = uyeler.First(u => u.Durumu == UyeDurumu.Aktif && !u.CezaliMi);
+                var stokOnce = uygunKitap.MevcutAdet;
+                var odunc = await oduncService.OduncVerAsync(uygunKitap.Id, uygunUye.Id, AuthService.Instance.AktifKullanici?.Id ?? 0);
+                if (!odunc.Basarili || odunc.Odunc == null)
+                    throw new Exception($"Odunc verilemedi: {odunc.Mesaj}");
+                var iade = await oduncService.IadeAlAsync(odunc.Odunc.Id, KitapDurumu.Iyi);
+                var stokSonra = (await context.Kitaplar.AsNoTracking().SingleAsync(k => k.Id == uygunKitap.Id)).MevcutAdet;
+                if (!iade.Basarili || stokSonra != stokOnce)
+                    throw new Exception($"Iade sonrasi stok tutarsiz: once {stokOnce}, sonra {stokSonra}. {iade.Mesaj}");
+                results.AppendLine("[PASS] Odunc verme ve iade turu stok degismezini koruyor.");
 
                 // 5. 12 Sayfanın Bireysel Olarak Olusturulmasi
                 results.AppendLine("--- 12 SAYFANIN TESTI ---");
@@ -140,6 +151,12 @@ namespace KutuphaneOtomasyonu
 
                 var d6 = new Views.Pages.UyeDetayDialog(uye.Id);
                 results.AppendLine("[PASS] 6. UyeDetayDialog basariyla olusturuldu.");
+
+                var d7 = new Views.Pages.SecimDialog("Smoke", "Smoke test", "Tamam", new Views.Pages.SecimAlani("Uye", uyeler, nameof(Uye.TamAd)));
+                var d8 = new Views.Pages.RezervasyonEkleDialog();
+                var d9 = new Views.Pages.AkademikYayinEkleDialog();
+                var d10 = new Views.SifreDegistirDialog();
+                results.AppendLine("[PASS] 7-10. SecimDialog, RezervasyonEkleDialog, AkademikYayinEkleDialog, SifreDegistirDialog basariyla olusturuldu.");
 
                 // 7. MainWindow ve 14 Navigasyonun Calismasi
                 results.AppendLine("--- MAINWINDOW VE MENÜ NAVİGASYONLARI TESTI ---");

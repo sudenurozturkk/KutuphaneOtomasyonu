@@ -116,7 +116,7 @@
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
 
-                    <DataGridTextColumn Header="MATERYAL / KİTAP" Binding="{Binding Kitap.Baslik}" Width="*">
+                    <DataGridTextColumn Header="MATERYAL / KİTAP" Binding="{Binding MateryalBasligi}" Width="*">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="FontWeight" Value="SemiBold"/>

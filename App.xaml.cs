@@ -1,63 +1,97 @@
 using KutuphaneOtomasyonu.Data;
+using KutuphaneOtomasyonu.Services;
+using Microsoft.Data.Sqlite;
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 
 namespace KutuphaneOtomasyonu
 {
     public partial class App : Application
     {
-        private static string LogPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "startup.log");
-
         public App()
         {
             AppDomain.CurrentDomain.UnhandledException += (s, args) =>
-            {
-                File.AppendAllText(LogPath, $"[AppDomain Crash] {args.ExceptionObject}\n");
-            };
+                UygulamaLog.Yaz($"[AppDomain Crash] {args.ExceptionObject}");
 
             DispatcherUnhandledException += (s, args) =>
             {
-                File.AppendAllText(LogPath, $"[Dispatcher Crash] {args.Exception}\n");
+                UygulamaLog.Hata("Dispatcher Crash", args.Exception);
                 args.Handled = false;
             };
 
-            File.AppendAllText(LogPath, "[App Ctor] Baslatildi\n");
+            UygulamaLog.Yaz("[App Ctor] Baslatildi");
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            File.AppendAllText(LogPath, "[OnStartup] Basladi\n");
+            UygulamaLog.Yaz("[OnStartup] Basladi");
 
             try
             {
                 base.OnStartup(e);
 
-                File.AppendAllText(LogPath, "[OnStartup] Veritabani seed ediliyor...\n");
-                using var context = new KutuphaneDbContext();
-                DatabaseSeeder.Seed(context);
-                File.AppendAllText(LogPath, "[OnStartup] Seed tamamlandi\n");
-
-                if (e.Args.Length > 0 && e.Args[0] == "--test")
+                if (e.Args.Contains("--test"))
                 {
-                    var testResult = SmokeTester.RunSmokeTestAsync().GetAwaiter().GetResult();
-                    var testFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_result.txt");
-                    File.WriteAllText(testFile, testResult);
-                    Environment.Exit(0);
+                    CalistirSmokeTest();
                     return;
                 }
 
-                File.AppendAllText(LogPath, "[OnStartup] LoginWindow aciliyor...\n");
+                UygulamaLog.Yaz("[OnStartup] Veritabani seed ediliyor...");
+                using (var context = new KutuphaneDbContext())
+                    DatabaseSeeder.Seed(context);
+                UygulamaLog.Yaz("[OnStartup] Seed tamamlandi");
+
                 ShutdownMode = ShutdownMode.OnExplicitShutdown;
                 var login = new Views.LoginWindow();
                 login.Show();
-                File.AppendAllText(LogPath, "[OnStartup] LoginWindow gosterildi\n");
+                UygulamaLog.Yaz("[OnStartup] LoginWindow gosterildi");
             }
             catch (Exception ex)
             {
-                File.AppendAllText(LogPath, $"[OnStartup Hata] {ex}\n");
-                MessageBox.Show(ex.ToString(), "Başlangıç Hatası");
+                UygulamaLog.Hata("OnStartup", ex);
+                MessageBox.Show(
+                    $"Uygulama başlatılamadı: {ex.Message}\n\nAyrıntılar günlük dosyasına yazıldı:\n{UygulamaLog.LogYolu}",
+                    "Başlangıç Hatası");
             }
+        }
+
+        /// <summary>
+        /// Smoke testi kullanıcının gerçek veritabanına dokunmadan, geçici bir veritabanında çalıştırır.
+        /// </summary>
+        private static void CalistirSmokeTest()
+        {
+            var geciciDb = Path.Combine(Path.GetTempPath(), $"kutuphane_smoke_{Guid.NewGuid():N}.db");
+            Environment.SetEnvironmentVariable(KutuphaneDbContext.VeritabaniYoluOrtamDegiskeni, geciciDb);
+
+            var exitCode = 1;
+            try
+            {
+                // UI iş parçacığı bloklanmaz: await devamları dispatcher üzerinde çalışabilsin diye mesaj döngüsü pompalanır.
+                var gorev = SmokeTester.RunSmokeTestAsync();
+                var cerceve = new System.Windows.Threading.DispatcherFrame();
+                gorev.ContinueWith(_ => cerceve.Continue = false, TaskScheduler.Default);
+                System.Windows.Threading.Dispatcher.PushFrame(cerceve);
+                var testResult = gorev.GetAwaiter().GetResult();
+                var testFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test_result.txt");
+                File.WriteAllText(testFile, testResult);
+                exitCode = testResult.Contains("[FAIL]") ? 1 : 0;
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("SmokeTest", ex);
+            }
+            finally
+            {
+                SqliteConnection.ClearAllPools();
+                foreach (var dosya in new[] { geciciDb, geciciDb + "-wal", geciciDb + "-shm" })
+                {
+                    try { File.Delete(dosya); } catch { }
+                }
+            }
+
+            Environment.Exit(exitCode);
         }
     }
 }

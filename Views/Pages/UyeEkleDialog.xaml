@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="Üye Ekle / Düzenle" Height="620" Width="520"
+        Title="Üye Ekle / Düzenle" Height="660" Width="520"
         WindowStartupLocation="CenterOwner" WindowStyle="None"
         AllowsTransparency="True" Background="Transparent"
         MouseLeftButtonDown="Window_MouseDown">
@@ -36,9 +36,24 @@
                     </StackPanel>
                 </Grid>
 
-                <TextBlock Text="T.C. Kimlik No *" Foreground="#94A3B8" Margin="0,0,0,4"/>
-                <TextBox x:Name="txtTC" MaxLength="11" Foreground="White"
-                         Style="{StaticResource ModernTextBox}" Margin="0,0,0,12"/>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBlock Text="T.C. / Yabancı Kimlik No" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtTC" MaxLength="11" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                        <TextBlock Text="Pasaport No" Foreground="#94A3B8" Margin="0,0,0,4"/>
+                        <TextBox x:Name="txtPasaport" MaxLength="20" Foreground="White"
+                                 Style="{StaticResource ModernTextBox}"/>
+                    </StackPanel>
+                </Grid>
+                <TextBlock Text="* Kimlik numarası veya pasaport numarasından en az biri zorunludur." FontSize="11"
+                           Foreground="#64748B" Margin="0,-6,0,12"/>
 
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>

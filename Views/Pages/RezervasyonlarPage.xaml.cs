@@ -26,11 +26,9 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                _tumRezervasyonlar = await context.Rezervasyonlar
-                    .Include(r => r.Kitap)
-                    .Include(r => r.Uye)
-                    .OrderByDescending(r => r.RezervasyonTarihi)
-                    .ToListAsync();
+                var servis = await ServisOlusturAsync(context);
+                await servis.SuresiDolanlariIsleAsync();
+                _tumRezervasyonlar = await servis.GetTumuAsync();
 
                 Filtrele();
             }
@@ -91,9 +89,10 @@ namespace KutuphaneOtomasyonu.Views.Pages
         }
 
         private static bool DonusturulebilirMi(Rezervasyon rezervasyon) =>
-            (rezervasyon.Durumu == RezervasyonDurumu.Bekliyor ||
-             rezervasyon.Durumu == RezervasyonDurumu.Onaylandi) &&
-            rezervasyon.GecerlilikTarihi >= DateTime.Now;
+            RezervasyonService.OdunceDonusturulebilirMi(rezervasyon, DateTime.Now);
+
+        private static async Task<RezervasyonService> ServisOlusturAsync(KutuphaneDbContext context) =>
+            (await ServisKapsami.OlusturAsync(context)).Rezervasyon;
 
         private async void BtnYeniRezervasyon_Click(object sender, RoutedEventArgs e)
         {
@@ -117,37 +116,17 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                var dbRez = await context.Rezervasyonlar
-                    .Include(r => r.Kitap)
-                    .Include(r => r.Uye)
-                    .FirstOrDefaultAsync(r => r.Id == rez.Id);
-
-                if (dbRez == null || !DonusturulebilirMi(dbRez))
-                {
-                    MessageBox.Show("Bu rezervasyon artık geçerli değil veya başka bir işlem tarafından kullanıldı.",
-                        "İşlem Yapılamadı", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    await VeriYukle();
-                    return;
-                }
-
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var oduncService = new OduncService(context, bildirimService, ayarlar);
-
-                var sonuc = await oduncService.OduncVerAsync(dbRez.KitapId, dbRez.UyeId, AuthService.Instance.AktifKullanici?.Id ?? 1);
+                var servis = await ServisOlusturAsync(context);
+                var sonuc = await servis.OdunceDonusturAsync(rez.Id, AuthService.Instance.AktifKullanici?.Id ?? 0);
                 if (sonuc.Basarili)
                 {
-                    // Rezervasyonu tamamlandı yap
-                    dbRez.Durumu = RezervasyonDurumu.Tamamlandi;
-                    await context.SaveChangesAsync();
-
-                    MessageBox.Show($"Rezervasyon başarıyla ödünce dönüştürüldü!\nKitap: {dbRez.Kitap?.Baslik}\nÜye: {dbRez.Uye?.TamAd}", "İşlem Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
-                    await VeriYukle();
+                    MessageBox.Show($"Rezervasyon başarıyla ödünce dönüştürüldü!\nKitap: {rez.Kitap?.Baslik}\nÜye: {rez.Uye?.TamAd}", "İşlem Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
                     MessageBox.Show($"Ödünç verilemedi: {sonuc.Mesaj}", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
+                await VeriYukle();
             }
             catch (Exception ex)
             {
@@ -170,14 +149,11 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                var dbRez = await context.Rezervasyonlar.FindAsync(rez.Id);
-                if (dbRez != null)
-                {
-                    dbRez.Durumu = RezervasyonDurumu.Iptal;
-                    await context.SaveChangesAsync();
-                }
+                var sonuc = await (await ServisOlusturAsync(context))
+                    .IptalEtAsync(rez.Id, AuthService.Instance.AktifKullanici?.Id);
 
-                MessageBox.Show("Rezervasyon iptal edildi.", "Bilgi", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(sonuc.BasariliMi ? "Rezervasyon iptal edildi." : sonuc.Mesaj, "Bilgi",
+                    MessageBoxButton.OK, sonuc.BasariliMi ? MessageBoxImage.Information : MessageBoxImage.Warning);
                 await VeriYukle();
             }
             catch (Exception ex)

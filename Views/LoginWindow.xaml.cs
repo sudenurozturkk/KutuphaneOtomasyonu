@@ -11,16 +11,19 @@ namespace KutuphaneOtomasyonu.Views
         {
             InitializeComponent();
 
-            var logPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "startup.log");
-            Loaded += (s, e) => System.IO.File.AppendAllText(logPath, "[LoginWindow] Loaded event\n");
-            Closing += (s, e) => System.IO.File.AppendAllText(logPath, $"[LoginWindow] Closing event (Cancel={e.Cancel})\n");
-            Closed += (s, e) => System.IO.File.AppendAllText(logPath, "[LoginWindow] Closed event\n");
+            Loaded += (s, e) => UygulamaLog.Yaz("[LoginWindow] Loaded event");
+            Closed += (s, e) => UygulamaLog.Yaz("[LoginWindow] Closed event");
 
             // Sürükleme için
             MouseLeftButtonDown += (s, e) => DragMove();
 
+#if DEBUG
+            // Demo kimlik bilgileri yalnızca geliştirme derlemelerinde doldurulur.
             txtKullaniciAdi.Text = "admin";
             txtSifre.Password = "admin123";
+#else
+            pnlDemoHesaplar.Visibility = Visibility.Collapsed;
+#endif
         }
 
         private async void BtnGiris_Click(object sender, RoutedEventArgs e)
@@ -53,33 +56,39 @@ namespace KutuphaneOtomasyonu.Views
             try
             {
                 using var context = new KutuphaneDbContext();
-                var basarili = await AuthService.Instance.GirisAsync(
+                var sonuc = await AuthService.Instance.GirisDetayliAsync(
                     txtKullaniciAdi.Text.Trim(),
                     txtSifre.Password,
                     context);
 
-                if (basarili)
+                if (sonuc.Basarili)
                 {
-                    var logPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "startup.log");
-                    System.IO.File.AppendAllText(logPath, "[Login] Basarili! MainWindow olusturuluyor...\n");
+#if !DEBUG
+                    // Varsayılan/kısa parolalarla üretim kullanımına izin verilmez (Debug demo derlemesinde atlanır).
+                    if (sonuc.SifreDegistirmeGerekli &&
+                        new SifreDegistirDialog(zorunlu: true) { Owner = this }.ShowDialog() != true)
+                    {
+                        AuthService.Instance.Cikis();
+                        GosterHata("Devam etmek için şifrenizi değiştirmeniz gerekir.");
+                        return;
+                    }
+#endif
+                    UygulamaLog.Yaz("[Login] Basarili, MainWindow aciliyor");
 
                     var mainWindow = new MainWindow();
                     Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
-
-                    System.IO.File.AppendAllText(logPath, "[Login] MainWindow gosterildi, LoginWindow kapatiliyor...\n");
                     Close();
                 }
                 else
                 {
-                    GosterHata("Kullanıcı adı veya şifre hatalı.");
+                    GosterHata(sonuc.Mesaj);
                 }
             }
             catch (System.Exception ex)
             {
-                var logPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "startup.log");
-                System.IO.File.AppendAllText(logPath, $"[Login Hata Detayi] {ex}\n");
-                GosterHata($"Hata: {ex.InnerException?.Message ?? ex.Message}");
+                UygulamaLog.Hata("Login", ex);
+                GosterHata("Giriş sırasında beklenmeyen bir hata oluştu. Ayrıntılar günlük dosyasına yazıldı.");
             }
             finally
             {
@@ -96,16 +105,20 @@ namespace KutuphaneOtomasyonu.Views
 
         private void FillAdmin_Click(object sender, MouseButtonEventArgs e)
         {
+#if DEBUG
             txtKullaniciAdi.Text = "admin";
             txtSifre.Password = "admin123";
             pnlHata.Visibility = Visibility.Collapsed;
+#endif
         }
 
         private void FillFatma_Click(object sender, MouseButtonEventArgs e)
         {
+#if DEBUG
             txtKullaniciAdi.Text = "fatmak";
             txtSifre.Password = "123456";
             pnlHata.Visibility = Visibility.Collapsed;
+#endif
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)

@@ -52,37 +52,42 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
+                var arama = new BankoAramaService(context);
 
-                // Kitap bul (ISBN, Id veya Başlık)
-                var kitap = await context.Kitaplar.FirstOrDefaultAsync(k =>
-                    k.ISBN == barkod || k.Id.ToString() == barkod || k.Baslik.Contains(barkod));
-
-                if (kitap == null)
+                // Önce nüsha barkodu (kesin kopya), sonra ISBN / Id / tekil başlık
+                var nusha = await arama.NushaBulAsync(barkod);
+                Kitap kitap;
+                if (nusha?.Kitap != null)
                 {
-                    LogTerminal($"HATA: '{barkod}' barkodlu kitap sistemde bulunamadı!");
+                    kitap = nusha.Kitap;
+                }
+                else
+                {
+                    var kitapArama = await arama.KitapBulAsync(barkod);
+                    if (kitapArama.Kayit is not Kitap bulunan)
+                    {
+                        LogTerminal($"HATA: {kitapArama.Mesaj}");
+                        return;
+                    }
+                    kitap = bulunan;
+                }
+
+                // Üye bul (TC, öğrenci no, Id; ad yalnızca tek eşleşmede)
+                var uyeArama = await arama.UyeBulAsync(uyeNo);
+                if (uyeArama.Kayit is not Uye uye)
+                {
+                    LogTerminal($"HATA: {uyeArama.Mesaj}");
                     return;
                 }
 
-                // Üye bul (TC, OgrenciNo, Id veya Ad)
-                var uye = await context.Uyeler.FirstOrDefaultAsync(u =>
-                    u.TCKimlikNo == uyeNo || u.OgrenciNo == uyeNo || u.Id.ToString() == uyeNo || u.Ad.Contains(uyeNo));
+                var oduncService = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
-                if (uye == null)
-                {
-                    LogTerminal($"HATA: '{uyeNo}' numaralı üye sistemde bulunamadı!");
-                    return;
-                }
-
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var oduncService = new OduncService(context, bildirimService, ayarlar);
-
-                var sonuc = await oduncService.OduncVerAsync(kitap.Id, uye.Id, AuthService.Instance.AktifKullanici?.Id ?? 1);
+                var sonuc = await oduncService.OduncVerAsync(kitap.Id, uye.Id, AuthService.Instance.AktifKullanici?.Id ?? 0, nusha?.Barkod);
 
                 if (sonuc.Basarili)
                 {
                     LogTerminal($"BAŞARILI: '{kitap.Baslik}' kitabı -> '{uye.TamAd}' adlı üyeye ödünç verildi.");
-                    LogTerminal($"FİŞ: İade Tarihi: {sonuc.Odunc?.PlanlananIadeTarihi:dd.MM.yyyy} | Kalan Stok: {kitap.MevcutAdet}");
+                    LogTerminal($"FİŞ: Nüsha {sonuc.Odunc?.Nusha?.Barkod} | İade Tarihi: {sonuc.Odunc?.PlanlananIadeTarihi:dd.MM.yyyy} | Kalan Stok: {kitap.MevcutAdet}");
                     txtBarkod.Clear();
                     txtBarkod.Focus();
                 }
@@ -109,28 +114,36 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                var kitap = await context.Kitaplar.FirstOrDefaultAsync(k =>
-                    k.ISBN == barkod || k.Id.ToString() == barkod || k.Baslik.Contains(barkod));
+                var arama = new BankoAramaService(context);
 
-                if (kitap == null)
+                // Nüsha barkodu ödüncü kesin belirler; ISBN/başlık ile birden çok kopya ödünçteyse üye bilgisi gerekir.
+                var nusha = await arama.NushaBulAsync(barkod);
+                Kitap kitap;
+                AramaSonuc<Odunc> oduncArama;
+                if (nusha?.Kitap != null)
                 {
-                    LogTerminal($"HATA: '{barkod}' barkodlu kitap bulunamadı!");
+                    kitap = nusha.Kitap;
+                    oduncArama = await arama.NushaninAktifOduncuAsync(nusha.Id);
+                }
+                else
+                {
+                    var kitapArama = await arama.KitapBulAsync(barkod);
+                    if (kitapArama.Kayit is not Kitap bulunan)
+                    {
+                        LogTerminal($"HATA: {kitapArama.Mesaj}");
+                        return;
+                    }
+                    kitap = bulunan;
+                    oduncArama = await arama.AktifOduncBulAsync(kitap.Id, txtUyeNo.Text);
+                }
+
+                if (oduncArama.Kayit is not Odunc aktifOdunc)
+                {
+                    LogTerminal($"BİLGİ: '{kitap.Baslik}': {oduncArama.Mesaj}");
                     return;
                 }
 
-                var aktifOdunc = await context.Oduncler
-                    .Include(o => o.Uye)
-                    .FirstOrDefaultAsync(o => o.KitapId == kitap.Id && o.Durumu == OduncDurumu.Aktif);
-
-                if (aktifOdunc == null)
-                {
-                    LogTerminal($"BİLGİ: '{kitap.Baslik}' kitabı için aktif bir ödünç kaydı yok (zaten kütüphanede).");
-                    return;
-                }
-
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var oduncService = new OduncService(context, bildirimService, ayarlar);
+                var oduncService = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
                 var sonuc = await oduncService.IadeAlAsync(aktifOdunc.Id, KitapDurumu.Iyi);
 

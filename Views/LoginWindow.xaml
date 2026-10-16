@@ -278,7 +278,7 @@
                                      Style="{StaticResource MaterialDesignLinearProgressBar}"/>
 
                         <!-- Demo Hesaplar Kartı -->
-                        <Border CornerRadius="12" Padding="14,12" Margin="0,24,0,0" BorderThickness="1" BorderBrush="#1E293B" Background="#0F172A">
+                        <Border x:Name="pnlDemoHesaplar" CornerRadius="12" Padding="14,12" Margin="0,24,0,0" BorderThickness="1" BorderBrush="#1E293B" Background="#0F172A">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                     <materialDesign:PackIcon Kind="AccountKey" Width="14" Height="14" Foreground="#94A3B8"

@@ -58,9 +58,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var service = new OduncService(context, bildirimService, ayarlar);
+                var service = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
                 var secilenDurum = cbKitapDurumu.SelectedItem is KitapDurumu kd ? kd : KitapDurumu.Iyi;
                 var notlar = txtNotlar.Text.Trim();

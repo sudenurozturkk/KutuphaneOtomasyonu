@@ -1,5 +1,5 @@
 using KutuphaneOtomasyonu.Models;
-using Microsoft.EntityFrameworkCore;
+using KutuphaneOtomasyonu.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,18 +8,25 @@ namespace KutuphaneOtomasyonu.Data
 {
     /// <summary>
     /// Veritabanını başlangıç verilerle dolduran seeder sınıfı.
-    /// Factory Method Pattern kullanır.
+    /// Şema işlemleri <see cref="VeritabaniSemasi"/> içindedir.
     /// </summary>
     public static class DatabaseSeeder
     {
         private static readonly Random _random = new Random(42);
 
+        /// <summary>Şemayı hazırlar (migration'lar) ve veritabanı boşsa demo verisini yükler.</summary>
         public static void Seed(KutuphaneDbContext context)
         {
-            context.Database.EnsureCreated();
-            EnsureSalonRezervasyonSchema(context);
+            VeritabaniSemasi.Hazirla(context);
+            DemoVerisiYukle(context);
+        }
 
-            // Sırayla seed et
+        /// <summary>
+        /// Eksik demo verisini yükler; şemaya dokunmaz. Her tablo yalnızca boşsa doldurulur,
+        /// bu yüzden açık bir transaction içinde güvenle çağrılabilir.
+        /// </summary>
+        public static void DemoVerisiYukle(KutuphaneDbContext context)
+        {
             SeedSistemAyarlari(context);
             SeedKullanicilar(context);
             SeedKitaplar(context);
@@ -28,28 +35,6 @@ namespace KutuphaneOtomasyonu.Data
             SeedRezervasyonlar(context);
             SeedAkademikYayinlar(context);
             SeedMateryalTransferler(context);
-        }
-
-        private static void EnsureSalonRezervasyonSchema(KutuphaneDbContext context)
-        {
-            context.Database.ExecuteSqlRaw("""
-                CREATE TABLE IF NOT EXISTS "SalonRezervasyonlari" (
-                    "Id" INTEGER NOT NULL CONSTRAINT "PK_SalonRezervasyonlari" PRIMARY KEY AUTOINCREMENT,
-                    "MasaKodu" TEXT NOT NULL,
-                    "Bolge" TEXT NOT NULL,
-                    "Kullanici" TEXT NOT NULL,
-                    "ZamanAraligi" TEXT NOT NULL,
-                    "Sure" TEXT NOT NULL,
-                    "Amac" TEXT NOT NULL,
-                    "Tarih" TEXT NOT NULL,
-                    "OlusturulmaTarihi" TEXT NOT NULL,
-                    "Durum" TEXT NOT NULL
-                );
-                DROP INDEX IF EXISTS "IX_SalonRezervasyonlari_MasaKodu_Tarih_ZamanAraligi";
-                CREATE UNIQUE INDEX IF NOT EXISTS "IX_SalonRezervasyonlari_MasaKodu_Tarih_ZamanAraligi"
-                    ON "SalonRezervasyonlari" ("MasaKodu", "Tarih", "ZamanAraligi")
-                    WHERE "Durum" = 'Aktif';
-                """);
         }
 
         private static void SeedSistemAyarlari(KutuphaneDbContext context)
@@ -82,7 +67,7 @@ namespace KutuphaneOtomasyonu.Data
                 {
                     Ad = "Ahmet", Soyad = "Yıldız",
                     KullaniciAdi = "admin",
-                    SifreHash = BCryptHash("admin123"),
+                    SifreHash = SifreHasher.Hashle("admin123"),
                     Email = "admin@kutuphane.edu.tr",
                     Rol = KullaniciRolu.Admin,
                     Telefon = "0532 111 0001"
@@ -91,7 +76,7 @@ namespace KutuphaneOtomasyonu.Data
                 {
                     Ad = "Fatma", Soyad = "Kaya",
                     KullaniciAdi = "fatmak",
-                    SifreHash = BCryptHash("123456"),
+                    SifreHash = SifreHasher.Hashle("123456"),
                     Email = "fatma@kutuphane.edu.tr",
                     Rol = KullaniciRolu.Kutuphaneci,
                     Telefon = "0532 111 0002"
@@ -100,7 +85,7 @@ namespace KutuphaneOtomasyonu.Data
                 {
                     Ad = "Mehmet", Soyad = "Demir",
                     KullaniciAdi = "mehmetd",
-                    SifreHash = BCryptHash("123456"),
+                    SifreHash = SifreHasher.Hashle("123456"),
                     Email = "mehmet@kutuphane.edu.tr",
                     Rol = KullaniciRolu.Kutuphaneci,
                     Telefon = "0532 111 0003"
@@ -201,6 +186,22 @@ namespace KutuphaneOtomasyonu.Data
 
             context.Kitaplar.AddRange(kitaplar);
             context.SaveChanges();
+
+            // Her kopya için barkodlu nüsha kaydı (barkod kitap numarasını içerdiğinden kayıttan sonra).
+            foreach (var kitap in kitaplar)
+            {
+                for (var sira = 1; sira <= kitap.ToplamAdet; sira++)
+                {
+                    context.KitapNushalari.Add(new KitapNushasi
+                    {
+                        KitapId = kitap.Id,
+                        Barkod = NushaIslemleri.BarkodUret(kitap.Id, sira),
+                        RafKonumu = kitap.RafKonumu,
+                        EklenmeTarihi = kitap.EklenmeTarihi
+                    });
+                }
+            }
+            context.SaveChanges();
         }
 
         private static void SeedUyeler(KutuphaneDbContext context)
@@ -246,7 +247,15 @@ namespace KutuphaneOtomasyonu.Data
             if (context.Oduncler.Any()) return;
 
             var kitaplar = context.Kitaplar.ToList();
+            var raftakiNushalar = context.KitapNushalari
+                .Where(n => n.Durum == NushaDurumu.Rafta)
+                .OrderBy(n => n.Id)
+                .ToList()
+                .GroupBy(n => n.KitapId)
+                .ToDictionary(g => g.Key, g => new Queue<KitapNushasi>(g));
             var uyeler = context.Uyeler.Where(u => u.Durumu == UyeDurumu.Aktif).ToList();
+            var kutuphaneciId = context.Kullanicilar.OrderBy(k => k.Id).Select(k => (int?)k.Id).FirstOrDefault();
+            var maxUzatma = context.SistemAyarlari.Select(a => a.MaxUzatmaSayisi).FirstOrDefault();
 
             var oduncler = new List<Odunc>();
 
@@ -263,7 +272,7 @@ namespace KutuphaneOtomasyonu.Data
                 {
                     KitapId = kitap.Id,
                     UyeId = uye.Id,
-                    KutuphanecId = 1,
+                    KutuphanecId = kutuphaneciId,
                     OduncTarihi = oduncTarihi,
                     PlanlananIadeTarihi = planlanmis,
                     GercekIadeTarihi = gercekIade,
@@ -279,16 +288,24 @@ namespace KutuphaneOtomasyonu.Data
                 if (kitap.MevcutAdet <= 0) continue;
 
                 var uye = uyeler[_random.Next(uyeler.Count)];
+                // Aynı üyeye aynı kitabın ikinci aktif ödüncü verilmez (benzersiz indeks).
+                if (oduncler.Any(o => o.Durumu == OduncDurumu.Aktif && o.KitapId == kitap.Id && o.UyeId == uye.Id)) continue;
+                if (!raftakiNushalar.TryGetValue(kitap.Id, out var kuyruk) || kuyruk.Count == 0) continue;
+                var nusha = kuyruk.Dequeue();
                 var oduncTarihi = DateTime.Now.AddDays(-_random.Next(1, 20));
 
+                nusha.Durum = NushaDurumu.Oduncte;
+                nusha.DurumTarihi = oduncTarihi;
                 oduncler.Add(new Odunc
                 {
                     KitapId = kitap.Id,
                     UyeId = uye.Id,
-                    KutuphanecId = 1,
+                    KutuphanecId = kutuphaneciId,
                     OduncTarihi = oduncTarihi,
                     PlanlananIadeTarihi = oduncTarihi.AddDays(14),
-                    Durumu = OduncDurumu.Aktif
+                    Durumu = OduncDurumu.Aktif,
+                    MaxUzatmaSayisi = maxUzatma,
+                    Nusha = nusha
                 });
 
                 kitap.MevcutAdet--;
@@ -452,20 +469,6 @@ namespace KutuphaneOtomasyonu.Data
             });
 
             context.SaveChanges();
-        }
-
-        private static string BCryptHash(string password)
-        {
-            return Convert.ToBase64String(
-                System.Security.Cryptography.SHA256.HashData(
-                    System.Text.Encoding.UTF8.GetBytes(password + "KutuphaneOtomasyonu_Salt_2024")
-                )
-            );
-        }
-
-        public static bool VerifyPassword(string password, string hash)
-        {
-            return BCryptHash(password) == hash;
         }
     }
 }

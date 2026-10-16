@@ -58,7 +58,7 @@
 
                         <Button Grid.Column="0" Height="48" Margin="0,0,6,0"
                                 FontWeight="Bold" FontSize="14" Foreground="White"
-                                materialDesign:ButtonAssist.CornerRadius="12" Click="BtnHizliOdunc_Click">
+                                materialDesign:ButtonAssist.CornerRadius="12" x:Name="btnHizliOdunc" AutomationProperties.Name="Ödünç Ver" Click="BtnHizliOdunc_Click">
                             <Button.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                     <GradientStop Color="#2563EB" Offset="0"/>
@@ -73,7 +73,7 @@
 
                         <Button Grid.Column="1" Height="48" Margin="6,0,0,0"
                                 FontWeight="Bold" FontSize="14" Foreground="White"
-                                materialDesign:ButtonAssist.CornerRadius="12" Click="BtnHizliIade_Click">
+                                materialDesign:ButtonAssist.CornerRadius="12" x:Name="btnHizliIade" AutomationProperties.Name="İade Al" Click="BtnHizliIade_Click">
                             <Button.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                     <GradientStop Color="#059669" Offset="0"/>

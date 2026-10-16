@@ -21,7 +21,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
             {
                 using var context = new KutuphaneDbContext();
                 var kitaplar = await context.Kitaplar
-                    .Where(k => k.MevcutAdet > 0)
+                    .Where(k => k.Aktif && k.MevcutAdet > 0)
                     .OrderBy(k => k.Baslik)
                     .ToListAsync();
                 cbKitaplar.ItemsSource = kitaplar;
@@ -61,11 +61,9 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var service = new OduncService(context, bildirimService, ayarlar);
+                var service = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
-                var kutuphaneciId = AuthService.Instance.AktifKullanici?.Id ?? 1;
+                var kutuphaneciId = AuthService.Instance.AktifKullanici?.Id ?? 0;
                 var sonuc = await service.OduncVerAsync(kitapId, uyeId, kutuphaneciId);
 
                 if (sonuc.Basarili)

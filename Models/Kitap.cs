@@ -67,6 +67,7 @@ namespace KutuphaneOtomasyonu.Models
 
         // Navigation Properties
         public virtual ICollection<Odunc> Oduncler { get; set; } = new List<Odunc>();
+        public virtual ICollection<KitapNushasi> Nushalar { get; set; } = new List<KitapNushasi>();
         public virtual ICollection<Rezervasyon> Rezervasyonlar { get; set; } = new List<Rezervasyon>();
         public virtual ICollection<KitapYorum> Yorumlar { get; set; } = new List<KitapYorum>();
         public virtual ICollection<Favori> Favoriler { get; set; } = new List<Favori>();

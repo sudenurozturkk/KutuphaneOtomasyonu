@@ -27,31 +27,37 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async System.Threading.Tasks.Task VeriYukle()
         {
-            using var context = new KutuphaneDbContext();
-            var bildirimService = new BildirimService(context);
-            var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-            var service = new OduncService(context, bildirimService, ayarlar);
-
-            switch (tabOdunc.SelectedIndex)
+            try
             {
-                case 0: // Aktif
-                    _tumOduncler = await service.GetAktifOdunclerAsync();
-                    break;
-                case 1: // Gecikmiş
-                    _tumOduncler = await service.GetGecikmisTeslerAsync();
-                    break;
-                case 2: // Tüm geçmiş
-                    _tumOduncler = await context.Oduncler
-                        .Include(o => o.Kitap).Include(o => o.Uye)
-                        .OrderByDescending(o => o.OduncTarihi)
-                        .Take(500).ToListAsync();
-                    break;
+                using var context = new KutuphaneDbContext();
+                var service = (await ServisKapsami.OlusturAsync(context)).Odunc;
+
+                switch (tabOdunc.SelectedIndex)
+                {
+                    case 0: // Aktif
+                        _tumOduncler = await service.GetAktifOdunclerAsync();
+                        break;
+                    case 1: // Gecikmiş
+                        _tumOduncler = await service.GetGecikmisTeslerAsync();
+                        break;
+                    case 2: // Tüm geçmiş
+                        _tumOduncler = await context.Oduncler
+                            .Include(o => o.Kitap).Include(o => o.Uye)
+                            .OrderByDescending(o => o.OduncTarihi)
+                            .Take(500).ToListAsync();
+                        break;
+                }
+
+                Filtrele();
+
+                var istat = await service.GetIstatistikAsync();
+                txtDurumBilgi.Text = $"Aktif: {istat.AktifOduncSayisi} | Gecikmiş: {istat.GecikmisSayisi} | Bugün İade: {istat.BugunIadeSayisi} | Toplam Ceza: ₺{istat.ToplamCeza:N2}";
             }
-
-            Filtrele();
-
-            var istat = await service.GetIstatistikAsync();
-            txtDurumBilgi.Text = $"Aktif: {istat.AktifOduncSayisi} | Gecikmiş: {istat.GecikmisSayisi} | Bugün İade: {istat.BugunIadeSayisi} | Toplam Ceza: ₺{istat.ToplamCeza:N2}";
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Oduncler yukleme", ex);
+                MessageBox.Show($"Veriler yüklenemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void Filtrele()
@@ -111,23 +117,29 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void BtnUzat_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.Tag is int id)
+            try
             {
-                var sonuc = MessageBox.Show("Ödünç süresini uzatmak istiyor musunuz?",
-                    "Süre Uzat", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (sender is Button btn && btn.Tag is int id)
+                {
+                    var sonuc = MessageBox.Show("Ödünç süresini uzatmak istiyor musunuz?",
+                        "Süre Uzat", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
-                if (sonuc != MessageBoxResult.Yes) return;
+                    if (sonuc != MessageBoxResult.Yes) return;
 
-                using var context = new KutuphaneDbContext();
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var service = new OduncService(context, bildirimService, ayarlar);
+                    using var context = new KutuphaneDbContext();
+                    var service = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
-                var uzatSonuc = await service.UzatAsync(id);
-                MessageBox.Show(uzatSonuc.Mesaj, uzatSonuc.Basarili ? "Başarılı" : "Hata",
-                    MessageBoxButton.OK, uzatSonuc.Basarili ? MessageBoxImage.Information : MessageBoxImage.Error);
+                    var uzatSonuc = await service.UzatAsync(id);
+                    MessageBox.Show(uzatSonuc.Mesaj, uzatSonuc.Basarili ? "Başarılı" : "Hata",
+                        MessageBoxButton.OK, uzatSonuc.Basarili ? MessageBoxImage.Information : MessageBoxImage.Error);
 
-                if (uzatSonuc.Basarili) await VeriYukle();
+                    if (uzatSonuc.Basarili) await VeriYukle();
+                }
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Odunc uzatma", ex);
+                MessageBox.Show($"Süre uzatılamadı: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

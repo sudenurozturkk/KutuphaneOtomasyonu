@@ -26,30 +26,49 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
         private async void KitaplarPage_Loaded(object sender, RoutedEventArgs e)
         {
-            // Kategori listesini doldur
-            using var context = new KutuphaneDbContext();
-            _kitapService = new KitapService(context);
-            var kategoriler = await _kitapService.GetKategorilerAsync();
+            try
+            {
+                // Kategori listesini doldur
+                using var context = new KutuphaneDbContext();
+                _kitapService = new KitapService(context);
+                var kategoriler = await _kitapService.GetKategorilerAsync();
 
-            cbKategori.Items.Clear();
-            cbKategori.Items.Add(new ComboBoxItem { Content = "Tüm Kategoriler" });
-            foreach (var kat in kategoriler)
-                cbKategori.Items.Add(new ComboBoxItem { Content = kat });
-            cbKategori.SelectedIndex = 0;
-            cbDil.SelectedIndex = 0;
-            cbDurum.SelectedIndex = 0;
+                cbKategori.Items.Clear();
+                cbKategori.Items.Add(new ComboBoxItem { Content = "Tüm Kategoriler" });
+                foreach (var kat in kategoriler)
+                    cbKategori.Items.Add(new ComboBoxItem { Content = kat });
+                cbKategori.SelectedIndex = 0;
+                cbDil.SelectedIndex = 0;
+                cbDurum.SelectedIndex = 0;
 
-            await VeriYukle();
+                await VeriYukle();
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Kitaplar kategori yukleme", ex);
+                MessageBox.Show($"Veriler yüklenemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async System.Threading.Tasks.Task VeriYukle()
         {
-            pbKitaplar.Visibility = Visibility.Visible;
-            using var context = new KutuphaneDbContext();
-            var service = new KitapService(context);
-            _tumKitaplar = await service.GetAllAsync();
-            Filtrele();
-            pbKitaplar.Visibility = Visibility.Collapsed;
+            try
+            {
+                pbKitaplar.Visibility = Visibility.Visible;
+                using var context = new KutuphaneDbContext();
+                var service = new KitapService(context);
+                _tumKitaplar = await service.GetAllAsync();
+                Filtrele();
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Kitaplar yukleme", ex);
+                MessageBox.Show($"Veriler yüklenemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                pbKitaplar.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void Filtrele()
@@ -155,24 +174,43 @@ namespace KutuphaneOtomasyonu.Views.Pages
 
                 if (sonuc == MessageBoxResult.Yes)
                 {
-                    using var context = new KutuphaneDbContext();
-                    var service = new KitapService(context);
-                    await service.DeleteAsync(id);
-                    await VeriYukle();
+                    try
+                    {
+                        using var context = new KutuphaneDbContext();
+                        var service = new KitapService(context);
+                        var arsiv = await service.DeleteAsync(id, AuthService.Instance.AktifKullanici?.Id);
+                        if (!arsiv.BasariliMi)
+                            MessageBox.Show(arsiv.Mesaj, "Kitap Silinemedi", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        await VeriYukle();
+                    }
+                    catch (Exception ex)
+                    {
+                        UygulamaLog.Hata("Kitap arsivleme", ex);
+                        MessageBox.Show($"Kitap silinemedi: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
 
         private void BtnExport_Click(object sender, RoutedEventArgs e)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("ID,Başlık,Yazar,ISBN,Kategori,Yıl,Mevcut/Toplam,Puan");
-            foreach (var k in _tumKitaplar)
-                sb.AppendLine($"{k.Id},\"{k.Baslik}\",\"{k.Yazar}\",{k.ISBN},{k.Kategori},{k.YayinYili},{k.MevcutAdet}/{k.ToplamAdet},{k.Puan:F1}");
+            try
+            {
+                var sb = new StringBuilder();
+                sb.AppendLine(CsvYazici.Satir("ID", "Başlık", "Yazar", "ISBN", "Kategori", "Yıl", "Mevcut/Toplam", "Puan"));
+                foreach (var k in _tumKitaplar)
+                    sb.AppendLine(CsvYazici.Satir(k.Id, k.Baslik, k.Yazar, k.ISBN, k.Kategori, k.YayinYili,
+                        $"{k.MevcutAdet}/{k.ToplamAdet}", k.Puan.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)));
 
-            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "kitaplar.csv");
-            File.WriteAllText(path, sb.ToString(), Encoding.UTF8);
-            MessageBox.Show($"Dışa aktarıldı: {path}", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "kitaplar.csv");
+                File.WriteAllText(path, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+                MessageBox.Show($"Dışa aktarıldı: {path}", "Başarılı", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                UygulamaLog.Hata("Kitap CSV disa aktarma", ex);
+                MessageBox.Show($"Dışa aktarılamadı: {ex.Message}", "Hata", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

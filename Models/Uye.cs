@@ -29,8 +29,13 @@ namespace KutuphaneOtomasyonu.Models
         [MaxLength(500)]
         public string Adres { get; set; } = string.Empty;
 
-        [Required, MaxLength(11)]
+        /// <summary>T.C. Kimlik No veya Yabancı Kimlik No (YKN). Pasaport No girilmişse boş olabilir.</summary>
+        [MaxLength(11)]
         public string TCKimlikNo { get; set; } = string.Empty;
+
+        /// <summary>Türk kimlik numarası olmayan üyeler için pasaport numarası.</summary>
+        [MaxLength(20)]
+        public string PasaportNo { get; set; } = string.Empty;
 
         [MaxLength(50)]
         public string OgrenciNo { get; set; } = string.Empty;
@@ -65,6 +70,9 @@ namespace KutuphaneOtomasyonu.Models
         [MaxLength(1000)]
         public string Notlar { get; set; } = string.Empty;
 
+        /// <summary>KVKK kapsamında kişisel verileri silinmiş üyeler için anonimleştirme zamanı.</summary>
+        public DateTime? AnonimlestirmeTarihi { get; set; }
+
         // Navigation Properties
         public virtual ICollection<Odunc> Oduncler { get; set; } = new List<Odunc>();
         public virtual ICollection<Rezervasyon> Rezervasyonlar { get; set; } = new List<Rezervasyon>();
@@ -81,6 +89,9 @@ namespace KutuphaneOtomasyonu.Models
 
         [NotMapped]
         public bool CezaliMi => KalanCeza > 0;
+
+        [NotMapped]
+        public bool AnonimMi => AnonimlestirmeTarihi.HasValue;
 
         [NotMapped]
         public string UyeTipiMetni => UyeTipi switch

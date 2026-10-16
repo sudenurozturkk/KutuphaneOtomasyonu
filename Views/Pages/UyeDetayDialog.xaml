@@ -33,6 +33,7 @@
                     <Border Background="#1E293B" CornerRadius="12" Padding="16" Margin="0,0,0,16">
                         <StackPanel>
                             <TextBlock x:Name="txtTC" Text="TC: -" Foreground="#94A3B8" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="txtPasaport" Text="Pasaport: -" Foreground="#94A3B8" Margin="0,0,0,6"/>
                             <TextBlock x:Name="txtEmail" Text="E-Posta: -" Foreground="#94A3B8" Margin="0,0,0,6"/>
                             <TextBlock x:Name="txtTelefon" Text="Telefon: -" Foreground="#94A3B8" Margin="0,0,0,6"/>
                             <TextBlock x:Name="txtOgrenciNo" Text="Öğrenci No: -" Foreground="#94A3B8" Margin="0,0,0,6"/>
@@ -40,12 +41,18 @@
                             <TextBlock x:Name="txtDurum" Text="Durum: Aktif" Foreground="#10B981" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
+                    <TextBlock x:Name="txtMaskeBilgi" Visibility="Collapsed" FontSize="11" Foreground="#64748B" TextWrapping="Wrap"
+                               Text="Kişisel veriler rolünüz gereği kısmen gizlenmiştir (KVKK veri minimizasyonu)."/>
                 </StackPanel>
             </ScrollViewer>
 
-            <Button Grid.Row="2" Content="Kapat" Width="100" Height="38" Margin="0,16,0,0"
-                    HorizontalAlignment="Right" Foreground="#94A3B8"
-                    Style="{StaticResource MaterialDesignOutlinedButton}" Click="BtnKapat_Click"/>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button x:Name="btnAnonimlestir" Content="KVKK: Anonimleştir" Height="38" Padding="14,0" Margin="0,0,12,0"
+                        Visibility="Collapsed" Foreground="#F87171" BorderBrush="#F87171"
+                        Style="{StaticResource MaterialDesignOutlinedButton}" Click="BtnAnonimlestir_Click"/>
+                <Button Content="Kapat" Width="100" Height="38" Foreground="#94A3B8"
+                        Style="{StaticResource MaterialDesignOutlinedButton}" Click="BtnKapat_Click"/>
+            </StackPanel>
         </Grid>
     </Border>
 </Window>

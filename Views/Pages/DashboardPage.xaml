@@ -409,14 +409,14 @@
                             <TextBlock Text="Salon Durumu" FontSize="14" FontWeight="SemiBold"
                                        Foreground="White" FontFamily="Segoe UI" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Text="🪑 Müsait Masalar" FontSize="12" Foreground="#475569" Margin="0,0,0,6"/>
+                        <TextBlock Text="🪑 Bugün Rezervasyonsuz Masalar" FontSize="12" Foreground="#475569" Margin="0,0,0,6"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <TextBlock Text="16" FontSize="28" FontWeight="Bold" Foreground="#06B6D4" FontFamily="Segoe UI"/>
-                            <TextBlock Text="/24" FontSize="16" Foreground="#334155" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
+                            <TextBlock x:Name="txtSalonBos" Text="-" FontSize="28" FontWeight="Bold" Foreground="#06B6D4" FontFamily="Segoe UI"/>
+                            <TextBlock x:Name="txtSalonToplam" Text="/-" FontSize="16" Foreground="#334155" VerticalAlignment="Bottom" Margin="4,0,0,4"/>
                         </StackPanel>
-                        <ProgressBar Value="67" Maximum="100" Height="6"
+                        <ProgressBar x:Name="pbSalon" Value="0" Maximum="100" Height="6"
                                      Foreground="#06B6D4" Background="#1E293B" BorderThickness="0" Margin="0,0,0,8"/>
-                        <TextBlock Text="Bugün 47 masa rezervasyonu yapıldı" FontSize="11" Foreground="#334155" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="txtSalonAlt" Text="" FontSize="11" Foreground="#334155" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 

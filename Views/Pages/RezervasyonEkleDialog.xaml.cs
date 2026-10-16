@@ -1,5 +1,6 @@
 using KutuphaneOtomasyonu.Data;
 using KutuphaneOtomasyonu.Models;
+using KutuphaneOtomasyonu.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                cbKitaplar.ItemsSource = await context.Kitaplar.OrderBy(k => k.Baslik).ToListAsync();
+                cbKitaplar.ItemsSource = await context.Kitaplar.Where(k => k.Aktif).OrderBy(k => k.Baslik).ToListAsync();
                 cbUyeler.ItemsSource = await context.Uyeler
                     .Where(u => u.Durumu == UyeDurumu.Aktif)
                     .OrderBy(u => u.Ad).ToListAsync();
@@ -57,32 +58,17 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                var ayniRezervasyon = await context.Rezervasyonlar.AnyAsync(r =>
-                    r.KitapId == kitapId &&
-                    r.UyeId == uyeId &&
-                    (r.Durumu == RezervasyonDurumu.Bekliyor || r.Durumu == RezervasyonDurumu.Onaylandi) &&
-                    r.GecerlilikTarihi >= DateTime.Now);
+                var servis = (await ServisKapsami.OlusturAsync(context)).Rezervasyon;
+                var sonuc = await servis.OlusturAsync(kitapId, uyeId, txtNotlar.Text,
+                    AuthService.Instance.AktifKullanici?.Id);
 
-                if (ayniRezervasyon)
+                if (!sonuc.BasariliMi)
                 {
-                    MessageBox.Show("Bu üyenin aynı kitap için zaten aktif bir rezervasyonu var.",
-                        "Rezervasyon Zaten Var", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(sonuc.Mesaj, "Rezervasyon Oluşturulamadı",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
-                var sira = await context.Rezervasyonlar.CountAsync(r =>
-                    r.KitapId == kitapId && r.Durumu == RezervasyonDurumu.Bekliyor) + 1;
-                context.Rezervasyonlar.Add(new Rezervasyon
-                {
-                    KitapId = kitapId,
-                    UyeId = uyeId,
-                    RezervasyonTarihi = DateTime.Now,
-                    GecerlilikTarihi = DateTime.Now.AddDays(7),
-                    Durumu = RezervasyonDurumu.Bekliyor,
-                    SiraNumarasi = sira,
-                    Notlar = txtNotlar.Text.Trim()
-                });
-                await context.SaveChangesAsync();
                 DialogResult = true;
                 Close();
             }

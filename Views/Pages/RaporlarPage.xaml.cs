@@ -70,9 +70,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
             {
                 using var context = new KutuphaneDbContext();
                 var kitapService = new KitapService(context);
-                var bildirimService = new BildirimService(context);
-                var ayarlar = await context.SistemAyarlari.FindAsync(1) ?? new SistemAyarlari();
-                var oduncService = new OduncService(context, bildirimService, ayarlar);
+                var oduncService = (await ServisKapsami.OlusturAsync(context)).Odunc;
 
                 var kIstat = await kitapService.GetIstatistikAsync();
                 var oIstat = await oduncService.GetIstatistikAsync();

@@ -121,5 +121,9 @@ namespace KutuphaneOtomasyonu.Models
 
         [ForeignKey("TalepEdenUyeId")]
         public virtual Uye? TalepEdenUye { get; set; }
+
+        /// <summary>Kitap veya akademik yayın başlığı; listeleme sırasında servis tarafından doldurulur.</summary>
+        [NotMapped]
+        public string MateryalBasligi { get; set; } = string.Empty;
     }
 }

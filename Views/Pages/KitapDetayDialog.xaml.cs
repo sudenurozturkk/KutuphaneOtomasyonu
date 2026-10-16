@@ -32,6 +32,7 @@ namespace KutuphaneOtomasyonu.Views.Pages
                     txtYayinevi.Text = $"Yayınevi: {k.Yayinevi} ({k.YayinYili})";
                     txtRaf.Text = $"Raf Konumu: {k.RafKonumu}";
                     txtStok.Text = $"Mevcut Stok: {k.MevcutAdet} / Toplam: {k.ToplamAdet}";
+                    icNushalar.ItemsSource = k.Nushalar.OrderBy(n => n.Id).ToList();
                     if (!string.IsNullOrWhiteSpace(k.Aciklama))
                         txtAciklama.Text = k.Aciklama;
                 }

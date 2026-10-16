@@ -35,18 +35,39 @@ namespace KutuphaneOtomasyonu.Data
         public DbSet<AkademikYayin> AkademikYayinlar { get; set; }
         public DbSet<MateryalTransfer> MateryalTransferler { get; set; }
         public DbSet<SalonRezervasyonu> SalonRezervasyonlari { get; set; }
+        public DbSet<KitapNushasi> KitapNushalari { get; set; }
+        public DbSet<CuzdanHareketi> CuzdanHareketleri { get; set; }
+
+        /// <summary>
+        /// Ortam değişkeni ile veritabanı dosyası değiştirilebilir (test ve taşınabilir kurulumlar için).
+        /// </summary>
+        public const string VeritabaniYoluOrtamDegiskeni = "KUTUPHANE_DB_PATH";
+
+        public const string StokTetikleyiciEkleme = "TR_Kitaplar_Stok_Ekleme";
+        public const string StokTetikleyiciGuncelleme = "TR_Kitaplar_Stok_Guncelleme";
+
+        /// <summary>Uygulamanın kullandığı SQLite dosyasının tam yolu.</summary>
+        public static string VeritabaniYolu
+        {
+            get
+            {
+                var ozel = Environment.GetEnvironmentVariable(VeritabaniYoluOrtamDegiskeni);
+                if (!string.IsNullOrWhiteSpace(ozel))
+                    return Path.GetFullPath(ozel);
+
+                return Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "KutuphaneOtomasyonu",
+                    "kutuphane.db");
+            }
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured)
                 return;
 
-            var dbPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "KutuphaneOtomasyonu",
-                "kutuphane.db"
-            );
-
+            var dbPath = VeritabaniYolu;
             Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
             optionsBuilder.UseSqlite($"Data Source={dbPath}");
             optionsBuilder.EnableSensitiveDataLogging(false);
@@ -62,6 +83,14 @@ namespace KutuphaneOtomasyonu.Data
                 .IsUnique()
                 .HasFilter("[ISBN] != ''");
 
+            // Stok tetikleyicileri taban migration içinde oluşturulur; EF'e bildirilmesi
+            // tetikleyicili tablolarda güvenli SQL (RETURNING'siz) üretilmesini sağlar.
+            modelBuilder.Entity<Kitap>().ToTable(tb =>
+            {
+                tb.HasTrigger(StokTetikleyiciEkleme);
+                tb.HasTrigger(StokTetikleyiciGuncelleme);
+            });
+
             modelBuilder.Entity<Kitap>()
                 .HasIndex(k => k.Baslik);
 
@@ -76,9 +105,16 @@ namespace KutuphaneOtomasyonu.Data
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
+            // Kimlik numaraları yalnızca girildiklerinde benzersiz olmalıdır.
             modelBuilder.Entity<Uye>()
                 .HasIndex(u => u.TCKimlikNo)
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("[TCKimlikNo] != ''");
+
+            modelBuilder.Entity<Uye>()
+                .HasIndex(u => u.PasaportNo)
+                .IsUnique()
+                .HasFilter("[PasaportNo] != ''");
 
             modelBuilder.Entity<Uye>()
                 .HasIndex(u => u.OgrenciNo)
@@ -93,6 +129,37 @@ namespace KutuphaneOtomasyonu.Data
             modelBuilder.Entity<Favori>()
                 .HasIndex(f => new { f.UyeId, f.KitapId })
                 .IsUnique();
+
+            // Bir üye aynı kitabı aynı anda yalnızca bir kez ödünç alabilir.
+            modelBuilder.Entity<Odunc>()
+                .HasIndex(o => new { o.UyeId, o.KitapId })
+                .IsUnique()
+                .HasFilter("[Durumu] = 0");
+
+            // Nüsha barkodları benzersizdir; bir nüsha aynı anda yalnızca bir aktif ödünçte olabilir.
+            modelBuilder.Entity<KitapNushasi>()
+                .HasIndex(n => n.Barkod)
+                .IsUnique();
+
+            modelBuilder.Entity<KitapNushasi>()
+                .HasIndex(n => new { n.KitapId, n.Durum });
+
+            modelBuilder.Entity<KitapNushasi>()
+                .HasOne(n => n.Kitap)
+                .WithMany(k => k.Nushalar)
+                .HasForeignKey(n => n.KitapId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Odunc>()
+                .HasOne(o => o.Nusha)
+                .WithMany()
+                .HasForeignKey(o => o.NushaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Odunc>()
+                .HasIndex(o => o.NushaId)
+                .IsUnique()
+                .HasFilter("[Durumu] = 0 AND [NushaId] IS NOT NULL");
 
             // Soft delete / cascade için konfigürasyonlar
             modelBuilder.Entity<Odunc>()
@@ -139,6 +206,19 @@ namespace KutuphaneOtomasyonu.Data
             modelBuilder.Entity<CezaKaydi>()
                 .Property(c => c.Tutar)
                 .HasColumnType("decimal(10,2)");
+
+            modelBuilder.Entity<CuzdanHareketi>()
+                .Property(c => c.Tutar)
+                .HasColumnType("decimal(10,2)");
+
+            modelBuilder.Entity<CuzdanHareketi>()
+                .HasIndex(c => new { c.UyeId, c.Tarih });
+
+            modelBuilder.Entity<CuzdanHareketi>()
+                .HasOne(c => c.Uye)
+                .WithMany()
+                .HasForeignKey(c => c.UyeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SalonRezervasyonu>()
                 .HasIndex(r => new { r.MasaKodu, r.Tarih, r.ZamanAraligi })

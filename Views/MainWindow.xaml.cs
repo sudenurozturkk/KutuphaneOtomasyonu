@@ -37,6 +37,10 @@ namespace KutuphaneOtomasyonu.Views
                     txtAvatarHarf.Text = kullanici.Ad[0].ToString().ToUpper();
             }
 
+            // Sistem ayarları ve bakım işlemleri yalnızca yöneticilere açıktır.
+            if (!AuthService.Instance.YetkiVarMi(Models.KullaniciRolu.Admin))
+                btnAyarlar.Visibility = Visibility.Collapsed;
+
             // Saat timer
             _saatTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _saatTimer.Tick += (s, e) =>
@@ -86,6 +90,11 @@ namespace KutuphaneOtomasyonu.Views
                 if (tag != "Cikis")
                     SetActiveNavButton(btn);
             }
+        }
+
+        private void BtnSifreDegistir_Click(object sender, RoutedEventArgs e)
+        {
+            new SifreDegistirDialog { Owner = this }.ShowDialog();
         }
 
         private void BtnDilDegistir_Click(object sender, RoutedEventArgs e)
@@ -158,6 +167,10 @@ namespace KutuphaneOtomasyonu.Views
                     iconKind = "ChartBar";
                     MainFrame.Navigate(new RaporlarPage());
                     break;
+                case "Ayarlar" when !AuthService.Instance.YetkiVarMi(Models.KullaniciRolu.Admin):
+                    MessageBox.Show("Sistem ayarları yalnızca sistem yöneticisi tarafından görüntülenebilir.", "Yetki",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
                 case "Ayarlar":
                     baslik = "Sistem Ayarları";
                     iconKind = "Cog";

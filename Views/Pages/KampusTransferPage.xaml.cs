@@ -41,19 +41,40 @@ namespace KutuphaneOtomasyonu.Views.Pages
             try
             {
                 using var context = new KutuphaneDbContext();
-                var kitap = await context.Kitaplar.FirstOrDefaultAsync();
-                var uye = await context.Uyeler.FirstOrDefaultAsync();
+                var kitaplar = await context.Kitaplar.AsNoTracking().Where(k => k.Aktif).OrderBy(k => k.Baslik).ToListAsync();
+                var uyeler = await context.Uyeler.AsNoTracking().Where(u => u.Durumu == UyeDurumu.Aktif)
+                    .OrderBy(u => u.Ad).ThenBy(u => u.Soyad).ToListAsync();
 
-                if (kitap == null || uye == null)
+                if (kitaplar.Count == 0 || uyeler.Count == 0)
                 {
-                    MessageBox.Show("Transfer başlatabilmek için sistemde kitap ve üye bulunmalıdır.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Transfer başlatabilmek için sistemde aktif kitap ve üye bulunmalıdır.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var kampusler = Enum.GetValues<KampusLokasyonu>();
+                var secim = new SecimDialog("Yeni ILL Transferi", "Transfer edilecek kitabı, talep eden üyeyi ve güzergahı seçin.", "Transferi Başlat",
+                    new SecimAlani("Kitap *", kitaplar, nameof(Kitap.Baslik)),
+                    new SecimAlani("Talep Eden Üye *", uyeler, nameof(Uye.TamAd)),
+                    new SecimAlani("Kaynak Kampüs *", kampusler, string.Empty),
+                    new SecimAlani("Hedef Kampüs *", kampusler, string.Empty))
+                { Owner = Window.GetWindow(this) };
+                if (secim.ShowDialog() != true)
+                    return;
+
+                var kitap = (Kitap)secim.Secilenler[0];
+                var uye = (Uye)secim.Secilenler[1];
+                var kaynak = (KampusLokasyonu)secim.Secilenler[2];
+                var hedef = (KampusLokasyonu)secim.Secilenler[3];
+                if (kaynak == hedef)
+                {
+                    MessageBox.Show("Kaynak ve hedef kampüs aynı olamaz.", "Uyarı", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 var service = new AkademikService(context);
-                var yeni = await service.TransferTalepEtAsync(kitap.Id, uye.Id, KampusLokasyonu.TipSaglikKutuphanesi, KampusLokasyonu.MerkezKutuphane);
+                var yeni = await service.TransferTalepEtAsync(kitap.Id, uye.Id, kaynak, hedef);
 
-                MessageBox.Show($"🚚 Yeni Kampüsler Arası Kurye Transfer Talebi Oluşturuldu!\n\nKitap: {kitap.Baslik}\nTakip Kodu: {yeni.KuryeTakipKodu}\nGüzergah: Tıp Kütüphanesi ➔ Merkez Kütüphane",
+                MessageBox.Show($"🚚 Yeni Kampüsler Arası Kurye Transfer Talebi Oluşturuldu!\n\nKitap: {kitap.Baslik}\nTakip Kodu: {yeni.KuryeTakipKodu}\nGüzergah: {kaynak} ➔ {hedef}",
                     "ILL Transfer Başlatıldı", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 await VeriYukle();
