@@ -7,7 +7,7 @@ Her diyagramın kaynağı bir Mermaid dosyasıdır (`.mmd`); `.png` ve `.svg` do
 |---|---|---|
 | 1 | En az dört sınıflı sınıf diyagramı, ilişkiler ve çokluklar | [1-sinif-diyagrami](1-sinif-diyagrami.png) |
 | 2 | Bir öğrencinin ödünç aldığı kitaba ait nesne diyagramı | [2-nesne-diyagrami](2-nesne-diyagrami.png) |
-| 3 | En az 3 mantıksal paket | [3-paket-diyagrami](3-paket-diyagrami.png) |
+| 3 | En az 3 mantıksal paket (5 paket) | [3-paket-diyagrami](3-paket-diyagrami.png) |
 | 4 | Web API ve veritabanı içeren dağıtım diyagramı | [4-dagitim-diyagrami](4-dagitim-diyagrami.png) |
 
 ---
@@ -47,33 +47,37 @@ Bilgisayar Mühendisliği öğrencisi **Ayşe Yılmaz**'ın, kütüphaneci **Fat
 
 ![Paket diyagramı](3-paket-diyagrami.png)
 
-Kod, C# isim alanlarına (namespace) karşılık gelen 4 mantıksal pakete ve 2 alt pakete ayrılmıştır:
+Kod, C# isim alanlarına (namespace) karşılık gelen 5 mantıksal pakete ve 4 alt pakete ayrılmıştır. `Services`, `Data` ve
+`Models` arayüzden bağımsız **KutuphaneOtomasyonu.Core** kütüphanesindedir; iki sunum paketi bu çekirdeği paylaşır:
 
 | Paket | Sorumluluk |
 |---|---|
-| `KutuphaneOtomasyonu.Views` (+ `Views.Pages`) | Sunum katmanı: WPF pencereleri, sayfalar ve diyaloglar |
-| `KutuphaneOtomasyonu.Services` | İş mantığı: ödünç/iade kuralları, rezervasyon kuyruğu, yetkilendirme |
+| `KutuphaneOtomasyonu.Api` (+ `Api.Endpoints`, `Api.Dto`) | Web API: HTTP uç noktaları, oturum ve yetki, API veri modelleri, tarayıcı arayüzü |
+| `KutuphaneOtomasyonu.Views` (+ `Views.Pages`) | Masaüstü (WPF) arayüzü: pencereler, sayfalar ve diyaloglar |
+| `KutuphaneOtomasyonu.Services` | İş mantığı: ödünç/iade kuralları, rezervasyon kuyruğu, kimlik doğrulama |
 | `KutuphaneOtomasyonu.Data` (+ `Data.Migrations`) | Veri erişimi: EF Core `DbContext`, şema migration'ları, demo verisi |
 | `KutuphaneOtomasyonu.Models` | Alan (domain) sınıfları: `Uye`, `Kitap`, `Odunc` … |
 
-Bağımlılıklar yukarıdan aşağıya doğrudur; `Models` hiçbir pakete bağımlı değildir, alt katmanlar üst katmanları bilmez.
+Bağımlılıklar yukarıdan aşağıya doğrudur: `Models` hiçbir pakete bağımlı değildir, çekirdek paketler `Api` veya `Views`'i
+bilmez. Bu sayede aynı iş kuralları hem web'de hem masaüstünde birebir aynı çalışır.
 
 ## 4. Dağıtım Diyagramı
 
 ![Dağıtım diyagramı](4-dagitim-diyagrami.png)
 
-Üç katmanlı dağıtım gösterilmiştir:
+Sistem çevrimiçi çalışır; istemciler yalnızca bir web tarayıcısıdır:
 
-- **Kütüphane bankosu PC:** WPF masaüstü istemcisi (`KutuphaneOtomasyonu.exe`) ve USB barkod okuyucu.
-- **Öğrenci cihazı:** tarayıcı veya mobilden katalog arama (OPAC).
-- **Uygulama sunucusu:** ASP.NET Core Web API; istemciler HTTPS üzerinden REST/JSON ile bağlanır. API, projedeki
-  `Services`, `Models` ve `Data` paketlerini kullanır.
-- **Veritabanı sunucusu:** ilişkisel veritabanı; API'ye EF Core üzerinden TCP/IP ile bağlanır.
+- **Kütüphane bankosu PC:** tarayıcıda personel paneli (giriş, banko, ödünçler, üyeler, rezervasyonlar). USB barkod
+  okuyucu klavye gibi çalışır ve barkodu doğrudan forma yazar.
+- **Öğrenci cihazı (PC veya mobil):** tarayıcıdan katalog araması ve kitabın rafta olup olmadığı (giriş gerekmez).
+- **Uygulama sunucusu:** .NET 9 / ASP.NET Core (Kestrel) üzerinde `KutuphaneOtomasyonu.Api.dll` çalışır; REST/JSON uç
+  noktalarını ve tarayıcı arayüzü dosyalarını (`wwwroot`) HTTPS üzerinden sunar. İş kuralları `KutuphaneOtomasyonu.Core.dll`
+  içindedir.
+- **Veritabanı:** `kutuphane.db`, EF Core ve Microsoft.Data.Sqlite ile erişilen SQLite veritabanıdır. SQLite gömülü bir
+  VTYS olduğundan ayrı bir sunucu süreci yoktur; veritabanı dosyası uygulama sunucusunda durur.
 
-> **Not:** Projenin şu anki sürümü tek makinede çalışır: WPF istemcisi, EF Core ile yerel bir SQLite dosyasına
-> (`%APPDATA%\KutuphaneOtomasyonu\kutuphane.db`) doğrudan bağlanır ve depoda bir Web API projesi yoktur. Bu diyagram,
-> ödevde istenen Web API'li çok kullanıcılı **hedef dağıtımı** gösterir. Katmanlı yapı sayesinde `Services`/`Models`/`Data`
-> paketleri değişmeden bir Web API projesine taşınabilir; EF Core sağlayıcısı SQLite'tan PostgreSQL'e değiştirilir.
+İsteğe bağlı olarak WPF masaüstü uygulaması da sunucu makinesinde aynı veritabanı dosyasıyla çalışabilir (diyagramda
+gösterilmemiştir). Ayrıntılar ve çalıştırma komutları: ana [README](../../README.md) → "Çevrimiçi Kullanım".
 
 ---
 

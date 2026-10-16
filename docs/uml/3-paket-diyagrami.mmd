@@ -2,31 +2,44 @@
 title: Paket Diyagramı — KutuphaneOtomasyonu mantıksal paketleri
 ---
 flowchart TB
-    subgraph Views["📁 «package» KutuphaneOtomasyonu.Views — Sunum Katmanı (WPF)"]
-        V["LoginWindow · MainWindow · SifreDegistirDialog"]
-        subgraph Pages["📁 «package» Views.Pages"]
-            P["OdunclerPage · KitaplarPage · UyelerPage<br/>BarkodBankoPage · OduncVerDialog · IadeDialog …"]
+    subgraph Sunum[" "]
+        direction LR
+        subgraph Api["📁 «package» KutuphaneOtomasyonu.Api — Web API (ASP.NET Core)"]
+            A1["Program · Altyapi.Oturum · Altyapi.Yanit"]
+            subgraph Endpoints["📁 «package» Api.Endpoints"]
+                A2["KatalogEndpoints · OturumEndpoints · UyeEndpoints<br/>OduncEndpoints · RezervasyonVePanoEndpoints"]
+            end
+            subgraph Dto["📁 «package» Api.Dto"]
+                A3["KitapDto · UyeDetayDto · OduncDto<br/>RezervasyonDto · OduncVerIstegi …"]
+            end
+        end
+        subgraph Views["📁 «package» KutuphaneOtomasyonu.Views — Masaüstü (WPF)"]
+            V["LoginWindow · MainWindow"]
+            subgraph Pages["📁 «package» Views.Pages"]
+                P["OdunclerPage · KitaplarPage · UyelerPage<br/>BarkodBankoPage · IadeDialog …"]
+            end
         end
     end
 
-    subgraph Services["📁 «package» KutuphaneOtomasyonu.Services — İş Mantığı Katmanı"]
-        S["OduncService · KitapService · UyeService<br/>RezervasyonService · AuthService · ServisKapsami …"]
-    end
-
-    subgraph Data["📁 «package» KutuphaneOtomasyonu.Data — Veri Erişim Katmanı"]
-        D["KutuphaneDbContext · VeritabaniSemasi · DatabaseSeeder"]
-        subgraph Migrations["📁 «package» Data.Migrations"]
-            M["TabanSema · UyePasaportNo · KitapNushalari …"]
+    subgraph Core["📦 KutuphaneOtomasyonu.Core (ortak çekirdek)"]
+        subgraph Services["📁 «package» KutuphaneOtomasyonu.Services — İş Mantığı"]
+            S["OduncService · KitapService · UyeService · RezervasyonService<br/>KimlikDogrulamaService · BankoAramaService · ServisKapsami …"]
+        end
+        subgraph Data["📁 «package» KutuphaneOtomasyonu.Data — Veri Erişimi"]
+            D["KutuphaneDbContext · VeritabaniSemasi · DatabaseSeeder"]
+            subgraph Migrations["📁 «package» Data.Migrations"]
+                M["TabanSema · KitapNushalari · CuzdanHareketleri …"]
+            end
+        end
+        subgraph Models["📁 «package» KutuphaneOtomasyonu.Models — Alan (Domain)"]
+            E["Uye · Kitap · KitapNushasi · Odunc<br/>Rezervasyon · CezaKaydi · Kullanici"]
         end
     end
 
-    subgraph Models["📁 «package» KutuphaneOtomasyonu.Models — Alan (Domain) Katmanı"]
-        E["Uye · Kitap · KitapNushasi · Odunc<br/>Rezervasyon · CezaKaydi · Kullanici"]
-    end
-
+    Api -. "«use»" .-> Services
     Views -. "«use»" .-> Services
+    Api -. "«use»" .-> Data
     Views -. "«use»" .-> Data
     Services -. "«use»" .-> Data
     Services -. "«use»" .-> Models
     Data -. "«use»" .-> Models
-    Views -. "«use»" .-> Models

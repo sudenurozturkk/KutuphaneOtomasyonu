@@ -1,5 +1,40 @@
 # Engineering Log
 
+## 2026-10-16 cycle, part 3 — online system: Web API + browser UI
+
+Course requirement: "online library management system" with a deployment diagram containing a Web API and a database.
+
+### Completed
+
+- `src/KutuphaneOtomasyonu.Core` (net9.0): `Models`, `Data`, `Services` moved out of the WPF project with `git mv`
+  (namespaces unchanged). WPF app and tests reference Core; the test project no longer needs WPF.
+- `KimlikDogrulamaService`: stateless credential check, lockout, hash upgrade and password change. `AuthService` keeps only
+  the desktop session. `OduncService.IadeAlAsync/UzatAsync` take the acting user explicitly (no global session lookup).
+- `src/KutuphaneOtomasyonu.Api` (ASP.NET Core 9 minimal APIs): public catalogue; cookie session (HttpOnly, SameSite=Strict,
+  Secure outside Development) re-validated against the database on every request; role policies; per-IP login rate limit;
+  forced password change (configurable); DTOs instead of entities; role-based masking; Problem Details; CSP and other
+  security headers; OpenAPI + Swagger UI in Development; `wwwroot` dependency-free single-page UI.
+- `Tests/KutuphaneOtomasyonu.Api.Tests`: 18 integration tests via `WebApplicationFactory` on a temp SQLite file.
+- UML: package and deployment diagrams redrawn for the real architecture; README "Çevrimiçi Kullanım" section.
+
+### Verification
+
+- Build WPF + API: 0 warnings, 0 errors. `has-pending-model-changes` (Core): none.
+- `KutuphaneOtomasyonu.Tests`: 140 passed. `KutuphaneOtomasyonu.Api.Tests`: 18 passed.
+  Mutation check: removing authorization from the loan endpoints makes 2 tests fail.
+- WPF smoke (`--test`): exit 0, 44 PASS, 0 FAIL.
+- Headless Chrome on a temp demo DB: catalogue search, redirect to login, admin login, lend by copy barcode + student number,
+  duplicate lend rejected with message, return by barcode, logout (session 401), no horizontal scroll at 390 px,
+  light and dark themes; no script errors or CSP violations. Found and fixed: `replaceChildren(null)` rendered "null".
+- Live `%APPDATA%` database timestamp unchanged.
+
+### Notes
+
+- With `Veritabani:Yol` empty the API uses the same database file as the desktop app. SQLite is an embedded engine, so the
+  database lives on the application server; moving to a separate DB server would need a provider change (migrations
+  contain SQLite-specific trigger SQL).
+- Member self-service login is not implemented (members have no credentials); the public catalogue needs no login.
+
 ## 2026-10-16 cycle, part 2 — resolving all open decisions
 
 Decisions and evidence per item: `docs/engineering-backlog.md` ("Owner decisions — resolved").

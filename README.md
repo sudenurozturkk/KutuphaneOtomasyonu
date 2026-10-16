@@ -1,13 +1,15 @@
 # 🏛️ Kütüphane Yönetim & Akademik Araştırma Sistemi (IRIS Enterprise Suite v3.5)
 
-[![.NET 9.0](https://img.shields.io/badge/.NET-9.0%20Windows%20WPF-512BD4?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com/)
+[![.NET 9.0](https://img.shields.io/badge/.NET-9.0%20WPF%20%2B%20ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com/)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%26%204--Tier%20Layered-10B981?style=for-the-badge)](https://en.wikipedia.org/wiki/Multitier_architecture)
 [![Database](https://img.shields.io/badge/Database-SQLite%20%2B%20EF%20Core-003B57?style=for-the-badge&logo=sqlite)](https://www.sqlite.org/)
 [![Design Patterns](https://img.shields.io/badge/Patterns-Singleton%20%7C%20Observer%20%7C%20Unit%20of%20Work-7C3AED?style=for-the-badge)](https://en.wikipedia.org/wiki/Design_Patterns)
 [![i18n](https://img.shields.io/badge/i18n-Turkish%20%2F%20English-F59E0B?style=for-the-badge)](https://github.com/sudenurozturkk/KutuphaneOtomasyonu)
 [![Tests](https://img.shields.io/badge/Tests-xUnit%20services%20%2B%20UI%20smoke-22C55E?style=for-the-badge)]()
 
-**IRIS (Integrated Research & Information System)**, dünya çapındaki araştırma üniversiteleri, enstitüler ve konsorsiyumlar (*Ex Libris Alma / FOLIO standardı*) seviyesinde tasarlanmış, ultra-modernist ve kurumsal masaüstü kütüphane otomasyon sistemidir.
+**IRIS (Integrated Research & Information System)**, dünya çapındaki araştırma üniversiteleri, enstitüler ve konsorsiyumlar (*Ex Libris Alma / FOLIO standardı*) seviyesinde tasarlanmış, ultra-modernist ve kurumsal **çevrimiçi kütüphane yönetim sistemidir**: personel ve öğrenciler
+tarayıcıdan **ASP.NET Core Web API** üzerinden, banko personeli ise isterse WPF masaüstü uygulamasıyla çalışır. İki istemci
+de aynı iş kuralları kütüphanesini (`KutuphaneOtomasyonu.Core`) ve aynı veritabanını kullanır.
 
 Yazılım Tasarım Mimarisi (Software Architecture) ilkeleri, **Gang of Four (GoF)** desenleri ve temiz kod prensipleri temel alınarak geliştirilmiştir.
 
@@ -32,11 +34,14 @@ Yazılım Tasarım Mimarisi (Software Architecture) ilkeleri, **Gang of Four (Go
 
 ## 🏛️ Mimari Yapı & GoF Tasarım Desenleri
 
-Proje katı **Separation of Concerns (SoC)** ve **Clean Architecture** prensiplerine sadık kalınarak 4 ana katmana ayrılmıştır:
+Proje katı **Separation of Concerns (SoC)** prensibiyle katmanlara ayrılmıştır. İş mantığı, veri erişimi ve alan modelleri
+arayüzden bağımsız `KutuphaneOtomasyonu.Core` kütüphanesindedir; Web API ve WPF bu kütüphanenin iki ayrı istemcisidir:
 
 ```mermaid
 graph TD
-    UI["🎨 Sunum Katmanı (Presentation - WPF/XAML)"] --> Service["⚙️ İş Mantığı (Business / Application Services)"]
+    Web["🌐 Tarayıcı Arayüzü (HTML/JS)"] -->|HTTPS · REST/JSON| Api["🔌 Web API (ASP.NET Core)"]
+    Api --> Service
+    UI["🎨 Masaüstü Sunum Katmanı (WPF/XAML)"] --> Service["⚙️ İş Mantığı (Business / Application Services)"]
     Service --> Data["💾 Veri Erişim Katmanı (Data Access - EF Core SQLite)"]
     Data --> Domain["📦 Alan Modelleri & Varlıklar (Domain Entities)"]
 
@@ -52,7 +57,7 @@ graph TD
 2. **Observer (`BildirimService.YeniBildirim`):** Bildirim oluşturulduğunda abonelere olay yayını.
 3. **Unit of Work (`KutuphaneDbContext` + `VeritabaniIslemi`):** Ödünç, iade, uzatma ve rezervasyon işlemleri; bildirim ve denetim kaydıyla birlikte tek transaction içinde kalıcı olur.
 
-> Not: `KutuphaneOtomasyonuApp/Patterns/` altındaki Factory/Strategy örnekleri ayrı (derlenmeyen) eski WinForms prototipine aittir;
+> Not: `legacy/WinFormsPrototype/Patterns/` altındaki Factory/Strategy örnekleri ayrı (derlenmeyen) eski WinForms prototipine aittir;
 > WPF uygulamasında üye kotaları `UyeService.VarsayilanKota`, ceza hesabı `OduncService.IadeAlAsync` içindedir.
 
 ---
@@ -82,51 +87,30 @@ graph TD
 
 ```
 KutuphaneOtomasyonu/
-├── Data/                          # Veritabanı ve Tohumlama
-│   ├── KutuphaneDbContext.cs      # EF Core SQLite Bağlantısı & Indexler
-│   ├── VeritabaniIslemi.cs        # İç içe çağrılabilen transaction yardımcısı
-│   ├── VeritabaniSemasi.cs        # Migration'ları uygular; eski (EnsureCreated) kurulumları tabanlar
-│   ├── Migrations/                # EF Core migration'ları (taban, pasaport, KVKK, nüsha, cüzdan)
-│   └── DatabaseSeeder.cs          # Demo verisi: 30 Kitap (+ nüshalar), 50 Üye, 5 Akademik Tez
-├── Models/                        # Domain Varlıkları
-│   ├── Kitap.cs                   # Kitap entity & durum enumları
-│   ├── Uye.cs                     # Üye, rol ve borç modelleri
-│   ├── Odunc.cs                   # Ödünç hareketleri ve ceza takibi
-│   ├── AkademikVeKampus.cs        # Tez, Makale, DOI, Citation, ILL modelleri
-│   ├── DigerModeller.cs           # Rezervasyon, Favori, Bildirim modelleri
-│   └── KullaniciVeAyarlar.cs      # Admin, Kütüphaneci ve Parametreler
-├── Services/                      # İş Mantığı
-│   ├── LocalizationService.cs     # [Singleton] Çoklu dil (TR/EN) servisi
-│   ├── KitapService.cs            # Katalog: doğrulama, stok güncelleme, arşivleme
-│   ├── OduncService.cs            # Ödünç, iade, süre uzatma ve ceza hesabı (transaction içinde)
-│   ├── RezervasyonService.cs      # Rezervasyon kuyruğu, ayırma, ödünce dönüştürme
-│   ├── BankoAramaService.cs       # Barkod bankosu için belirsizliğe dayanıklı eşleştirme
-│   ├── VeritabaniBakimService.cs  # Yedekleme, demo sıfırlama, sistem ayarları (yalnızca Admin)
-│   ├── SifreHasher.cs             # PBKDF2-SHA256 parola özetleme
-│   ├── DenetimService.cs          # AktiviteLog denetim kayıtları
-│   ├── AkademikService.cs         # Tez, DOI, Citation ve ILL lojistiği
-│   ├── SalonRezervasyonService.cs # Salon rezervasyon iş kuralları
-│   ├── CuzdanService.cs           # Cüzdan hareketleri (yükleme, ceza ödeme)
-│   ├── ServisKapsami.cs           # Sayfalar için ortak DbContext + servis kapsamı
-│   └── DigerServisler.cs          # AuthService [Singleton], UyeService, BildirimService [Observer]
-├── Views/                         # Modernist XAML Arayüzleri
-│   ├── LoginWindow.xaml           # Ultra-modern giriş ekranı & Demo butonları
-│   ├── MainWindow.xaml            # 260px ferah sidebar menü, TR/EN dil toggle
-│   └── Pages/                     # 14 Bağımsız Modül Sayfası & 6 Modal Dialog
-│       ├── DashboardPage.xaml     # Yönetici paneli & KPI kartları
-│       ├── KitaplarPage.xaml      # Zengin envanter tablosu & filtreler
-│       ├── AkademikHubPage.xaml   # Tez arşivi & APA/MLA/BibTeX Citation
-│       ├── KampusTransferPage.xaml# ILL Kütüphaneler arası kurye takibi
-│       ├── SalonRezervasyonPage.xaml # 2D interaktif masa haritası
-│       └── ...                    # Diğer 9 modül ve modal diyaloglar
-├── SmokeTester.cs                 # Otomatik Uçtan Uca Doğrulama Motoru
-├── Tests/KutuphaneOtomasyonu.Tests/ # İzole SQLite servis testleri (xUnit)
+├── src/
+│   ├── KutuphaneOtomasyonu.Core/      # Arayüzden bağımsız çekirdek (net9.0 sınıf kütüphanesi)
+│   │   ├── Models/                    # Alan varlıkları: Kitap, KitapNushasi, Uye, Odunc, Rezervasyon, Kullanici …
+│   │   ├── Data/                      # KutuphaneDbContext, Migrations/, VeritabaniSemasi, DatabaseSeeder (demo verisi)
+│   │   └── Services/                  # İş kuralları: OduncService, KitapService, UyeService, RezervasyonService,
+│   │                                  #   KimlikDogrulamaService, BankoAramaService, DenetimService, SifreHasher …
+│   └── KutuphaneOtomasyonu.Api/       # ASP.NET Core Web API (çevrimiçi sistem)
+│       ├── Program.cs                 # Veritabanı, oturum, hız sınırı, OpenAPI, statik dosyalar
+│       ├── Altyapi/                   # Çerez oturumu ve rol politikaları, hata yanıtları, güvenlik başlıkları
+│       ├── Endpoints/                 # Katalog, Oturum, Üyeler, Ödünç, Rezervasyon + Pano uç noktaları
+│       ├── Dto/                       # API'nin döndürdüğü/aldığı veri modelleri
+│       └── wwwroot/                   # Tarayıcı arayüzü (index.html, app.js, app.css)
+├── Views/                             # WPF masaüstü arayüzü (pencereler, 14 sayfa, diyaloglar)
+├── App.xaml(.cs), SmokeTester.cs      # Masaüstü uygulaması girişi ve --test duman testi
+├── KutuphaneOtomasyonu.csproj         # WPF masaüstü uygulaması (Core'a referans verir)
+├── Tests/
+│   ├── KutuphaneOtomasyonu.Tests/     # Servis katmanı testleri (izole SQLite, xUnit)
+│   └── KutuphaneOtomasyonu.Api.Tests/ # Web API entegrasyon testleri (WebApplicationFactory)
 ├── docs/
-│   ├── uml/                       # Sınıf, nesne, paket ve dağıtım diyagramları
-│   ├── engineering-backlog.md     # Bulunan hatalar, kararlar ve doğrulama kanıtları
-│   └── kisisel-veri-notlari.md    # KVKK: işlenen veriler ve teknik tedbirler
-├── ENGINEERING_LOG.md             # Tarihli geliştirme günlüğü
-└── legacy/                        # Derlenmeyen eski WinForms ve web prototipleri (bkz. legacy/README.md)
+│   ├── uml/                           # Sınıf, nesne, paket ve dağıtım diyagramları
+│   ├── engineering-backlog.md         # Bulunan hatalar, kararlar ve doğrulama kanıtları
+│   └── kisisel-veri-notlari.md        # KVKK: işlenen veriler ve teknik tedbirler
+├── ENGINEERING_LOG.md                 # Tarihli geliştirme günlüğü
+└── legacy/                            # Derlenmeyen eski WinForms ve web prototipleri (bkz. legacy/README.md)
 ```
 
 ---
@@ -135,7 +119,7 @@ KutuphaneOtomasyonu/
 
 ### Gereksinimler
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-- Windows 10 / 11 (x64)
+- Web API: Windows, Linux veya macOS · WPF masaüstü uygulaması: Windows 10 / 11 (x64)
 
 ### Başlatma Adımları
 ```bash
@@ -145,7 +129,10 @@ git clone https://github.com/sudenurozturkk/KutuphaneOtomasyonu.git
 # 2. Dizin içine girin
 cd KutuphaneOtomasyonu
 
-# 3. Bağımlılıkları derleyin ve uygulamayı başlatın
+# 3a. Çevrimiçi sistem: Web API + tarayıcı arayüzü → https://localhost:7215
+dotnet run --project src/KutuphaneOtomasyonu.Api --launch-profile https
+
+# 3b. Masaüstü (WPF) uygulaması (yalnızca Windows)
 dotnet run
 ```
 
@@ -158,7 +145,8 @@ migration'a bağlanır ve yükseltilir (mevcut kitap adetlerinden barkodlu nüsh
 Geliştiriciler için (araç sürümü `.config/dotnet-tools.json` içinde sabitlenmiştir):
 ```bash
 dotnet tool restore
-dotnet ef migrations add <Ad> --output-dir Data/Migrations --namespace KutuphaneOtomasyonu.Data.Migrations
+dotnet ef migrations add <Ad> --project src/KutuphaneOtomasyonu.Core --startup-project src/KutuphaneOtomasyonu.Core \
+  --output-dir Data/Migrations --namespace KutuphaneOtomasyonu.Data.Migrations
 ```
 Yeni migration eklendiğinde `Tests` içindeki şema yükseltme testleri de çalıştırılmalıdır.
 
@@ -218,6 +206,64 @@ Yeni migration eklendiğinde `Tests` içindeki şema yükseltme testleri de çal
 
 ---
 
+## 🌐 Çevrimiçi Kullanım: Web API ve Tarayıcı Arayüzü
+
+Sistem yalnızca masaüstünde değil, **ağ üzerinden de** çalışır. `src/KutuphaneOtomasyonu.Api` projesi aynı iş kurallarını
+(`KutuphaneOtomasyonu.Core`) bir **ASP.NET Core Web API** olarak sunar ve tarayıcı arayüzünü (`wwwroot`) barındırır:
+
+- **Herkes (giriş gerekmez):** katalogda arama, kategori süzme, kitabın nüshalarının rafta/ödünçte durumu.
+- **Personel (giriş ile):** pano, barkod bankosu (nüsha barkodu + üye ile ödünç, barkodla iade), ödünç listesi
+  (uzatma/iade), üyeler, rezervasyonlar, kitap ve üye ekleme.
+
+```bash
+# Web API + tarayıcı arayüzünü başlatın (geliştirme ortamı, demo verisi ile)
+dotnet run --project src/KutuphaneOtomasyonu.Api --launch-profile https
+```
+
+| Adres | İçerik |
+|---|---|
+| `https://localhost:7215/` | Tarayıcı arayüzü (katalog ve personel paneli) |
+| `https://localhost:7215/swagger` | Swagger: tüm uç noktaları deneme arayüzü (yalnızca geliştirme ortamında) |
+| `https://localhost:7215/openapi/v1.json` | OpenAPI belgesi |
+
+Aynı ağdaki başka cihazlardan erişmek için sunucuyu `--urls "https://0.0.0.0:7215"` ile başlatıp güvenlik duvarında
+portu açın. Personel girişinde masaüstü uygulamasıyla aynı hesaplar kullanılır (`admin` / `admin123`, `fatmak` / `123456`).
+
+### Uç noktalar
+
+| Yöntem ve yol | Yetki | Açıklama |
+|---|---|---|
+| `GET /api/katalog`, `GET /api/katalog/{id}`, `GET /api/katalog/kategoriler` | Herkes | Arama (sayfalı), kitap ve nüsha durumu |
+| `POST /api/oturum/giris`, `POST /api/oturum/cikis`, `GET /api/oturum/ben`, `POST /api/oturum/sifre` | — / Oturum | Giriş, çıkış, oturum bilgisi, parola değişimi |
+| `GET /api/pano` | Personel | Özet sayılar ve iade tarihi yaklaşan ödünçler |
+| `GET /api/oduncler` · `POST /api/oduncler` | Personel | Aktif/gecikmiş/üye geçmişi · nüsha barkodu veya kitap + üye ile ödünç |
+| `POST /api/oduncler/{id}/iade` · `POST /api/oduncler/iade-barkod` · `POST /api/oduncler/{id}/uzat` | Personel | İade (durum: İyi/Hasarlı/Kayıp…) ve süre uzatma |
+| `GET /api/uyeler`, `GET /api/uyeler/{id}` | Personel | Arama ve detay (Yardımcı Personel'e kimlik/telefon maskeli) |
+| `POST /api/uyeler`, `PUT /api/uyeler/{id}`, `POST /api/uyeler/{id}/ceza-ode` | Kütüphaneci | Üye kaydı, güncelleme, ceza tahsilatı |
+| `POST /api/kitaplar`, `PUT /api/kitaplar/{id}`, `DELETE /api/kitaplar/{id}` | Kütüphaneci | Kitap ekleme, güncelleme, arşivleme |
+| `GET/POST /api/rezervasyonlar`, `POST …/{id}/iptal`, `POST …/{id}/odunce-donustur` | Personel | Bekleme sırası |
+
+Hatalar [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457) biçiminde döner; kullanıcıya gösterilecek
+mesaj `detail` alanındadır. Enum değerleri metin olarak gelir (`"Aktif"`, `"Rafta"` …).
+
+### Ayarlar (`appsettings.json` veya ortam değişkenleri)
+
+| Anahtar | Varsayılan | Açıklama |
+|---|---|---|
+| `Veritabani:Yol` | boş → `%APPDATA%\KutuphaneOtomasyonu\kutuphane.db` | Boş bırakılırsa masaüstü uygulamasıyla **aynı veritabanı** kullanılır. Ortam değişkeni: `Veritabani__Yol` |
+| `Veritabani:DemoVerisi` | `false` (geliştirmede `true`) | Boş veritabanına demo verisi yükler |
+| `Guvenlik:VarsayilanSifreDegisimiZorunlu` | `true` (geliştirmede `false`) | Varsayılan/kısa parolayla giren personel, parolasını değiştirene kadar işlem yapamaz |
+
+### Web güvenliği
+- Oturum çerezi `HttpOnly`, `SameSite=Strict` ve üretimde `Secure`; 8 saat, kayan süre. Her istekte personelin hâlâ
+  aktif olduğu ve rolünün değişmediği veritabanından denetlenir.
+- Giriş: hesap başına 5 hatalı denemede 1 dakika kilit + IP başına dakikada 10 deneme sınırı (`429`).
+- Yanıtlar veritabanı varlıklarını değil, ayrı veri modellerini (DTO) döndürür; parola özeti veya gereksiz kişisel veri dışarı çıkmaz.
+- Tarayıcı arayüzünde kullanıcı verisi yalnızca metin olarak yazılır; `Content-Security-Policy` satır içi betiğe izin vermez,
+  `X-Frame-Options: DENY`, `nosniff`, üretimde HSTS ve HTTPS yönlendirmesi açıktır.
+
+---
+
 ## 🧪 Otomatik Test ve Sağlamlık Doğrulaması
 
 Proje, 14 modülün, 6 modal pencerenin ve tüm menü geçişlerinin UI seviyesinde hatasız çalıştığını test eden yerleşik bir test motoruna sahiptir:
@@ -235,6 +281,17 @@ Servis katmanını WPF başlatmadan, izole SQLite veritabanlarında test etmek i
 ```bash
 dotnet test .\Tests\KutuphaneOtomasyonu.Tests\KutuphaneOtomasyonu.Tests.csproj
 ```
+
+Web API'yi gerçek HTTP istekleriyle (geçici veritabanı, üretim ayarları) test etmek için:
+
+```bash
+dotnet test .\Tests\KutuphaneOtomasyonu.Api.Tests\KutuphaneOtomasyonu.Api.Tests.csproj
+```
+
+API testleri; anonim katalog erişimini, oturumsuz isteklerin `401` almasını, çerez güvenlik özelliklerini, hesap kilidini,
+pasifleştirilen personelin oturumunun düşmesini, barkodla ödünç/iade turunu ve denetim kaydını, **eşzamanlı isteklerde son
+nüshanın yalnızca bir kez verilmesini**, rol bazlı maskeleme ve `403` yanıtlarını, zorunlu parola değişimini ve güvenlik
+başlıklarını doğrular.
 
 Testler uygulamanın gerçek şema hazırlığını (tetikleyiciler ve indeksler dahil) kullanır ve şunları kapsar:
 ödünç/iade/uzatma kuralları ve stok değişmezi, gecikme/hasar/kayıp cezaları, rezervasyon kuyruğu ve ayırma,
